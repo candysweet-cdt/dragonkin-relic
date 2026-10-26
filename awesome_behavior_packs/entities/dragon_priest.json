@@ -149,28 +149,6 @@
                         "deals_damage": true
                     }
                 ]
-            },
-            "minecraft:behavior.summon_entity": {
-                "priority": 2,
-                "summon_choices": [
-                    {
-                        "min_activation_range": 0.0,
-                        "max_activation_range": 10.0,
-                        "weight": 1,
-                        "cooldown_time": 16.0,
-                        "cast_duration": 1.2,
-                        "sequence": [
-                            {
-                                "shape": "circle",
-                                "target": "self",
-                                "base_delay": 1.2,
-                                "num_entities_spawned": 1,
-                                "entity_type": "fycq:dragon_whelp",
-                                "size": 0.0
-                            }
-                        ]
-                    }
-                ]
             }
         },
         "events": {

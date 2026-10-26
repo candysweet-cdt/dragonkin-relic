@@ -497,6 +497,23 @@ def check_anim_overlay(data):
     print('动画叠加: 已检查 idle 动 root 的实体')
 
 
+def check_summon_cap(data):
+    """本包禁止 JSON 的 behavior.summon_entity：它没有数量上限，多只 BOSS/祭司会堆爆刷怪量。
+    召唤统一走脚本 bossPhase.py（全场幼龙 ≤ 8）。"""
+    for path, d in data.items():
+        if os.sep + 'entities' + os.sep not in path:
+            continue
+        ent = d.get('minecraft:entity') or {}
+        ident = (ent.get('description') or {}).get('identifier', '')
+        groups = ent.get('component_groups') or {}
+        if 'minecraft:behavior.summon_entity' in (ent.get('components') or {}):
+            bad(f'{ident} 用了 JSON summon_entity —— 没有数量上限，召唤请走 bossPhase.py')
+        for g, body in groups.items():
+            if 'minecraft:behavior.summon_entity' in body:
+                bad(f'{ident} 的组件组 {g} 用了 JSON summon_entity —— 同上，改脚本限量召唤')
+    print('召唤限流: 已检查（JSON summon_entity 一律禁止）')
+
+
 def check_entity_events(data):
     """事件引用的 component_groups 必须真实存在（阶段/受击组都靠这条）。"""
     n = 0
@@ -697,6 +714,7 @@ def main():
     check_skills(data)
     check_anim_overlay(data)
     check_aggression(data)
+    check_summon_cap(data)
     check_entity_events(data)
     check_id_registry(data)
     check_scripts()
