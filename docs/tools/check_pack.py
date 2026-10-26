@@ -517,10 +517,10 @@ def check_repair_paths(data):
         stem = ident.split(':', 1)[1]
         has_repairable = 'minecraft:repairable' in comps
         has_rebuild = ('fycq:repair_' + stem) in recipes
-        if not has_repairable and not has_rebuild:
-            bad(f'{ident} 有耐久但既没 minecraft:repairable 也没重铸配方（坏了没法修）')
-        if not has_repairable:
-            bad(f'{ident} 缺 minecraft:repairable（铁砧修复靠它，重铸只是兜底）')
+        if not has_rebuild:
+            bad(f'{ident} 有耐久但没有重铸配方 repair_{stem}（坏了只能靠钻石修，不主题）')
+        if has_repairable:
+            bad(f'{ident} 又写了 minecraft:repairable —— 实测无效（铁砧只认 netease:weapon.level），删掉')
     print(f'修复路径: {n} 件有耐久装备已核对（repairable + 重铸）')
 
 

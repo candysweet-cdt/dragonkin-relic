@@ -148,9 +148,8 @@ def main():
             'minecraft:max_stack_size': 1,
             'minecraft:max_damage': dura,
             'minecraft:hand_equipped': True,
-            # 铁砧修复材料（探针：网易文档未列该组件，若引擎不认则靠重铸配方兜底）
-            'minecraft:repairable': {'repair_items': [
-                {'items': [S_SCALE, S_FANG], 'repair_amount': 0.25}]},
+            # 修复：铁砧只认 netease:weapon.level 决定的材料（level 3 = 钻石，实测
+            # minecraft:repairable 不生效）；龙鳞路线靠重铸配方 repair_<id>
             'netease:weapon': {
                 'type': wtype,
                 'level': 3,
@@ -167,8 +166,6 @@ def main():
         comps = {
             'minecraft:max_stack_size': 1,
             'minecraft:max_damage': dura,
-            'minecraft:repairable': {'repair_items': [
-                {'items': [S_SCALE, S_FANG], 'repair_amount': 0.25}]},
             'netease:armor': {
                 'defense': defense,
                 'enchantment': 15,
