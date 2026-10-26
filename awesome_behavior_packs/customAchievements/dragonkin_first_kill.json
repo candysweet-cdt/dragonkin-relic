@@ -6,7 +6,7 @@
     "use_default_icon_background": true,
     "goal_number": 1,
     "node_description": "首次击败龙蛇。奖励：龙血结晶 ×3、龙鳞 ×8",
-    "window_background": "textures/ui/background/sign_warped",
+    "window_background": "textures/ui/dragonkin_achievement_bg",
     "is_hidden": false,
     "finish_tip": true,
     "is_cloud": false,

@@ -601,6 +601,9 @@ def check_achievements(data):
             bad(f'{name} 的 finish_tip 不是 true —— 完成时不会弹成就')
         if 'parent_node' not in d and not d.get('window_background'):
             bad(f'{name} 是根节点但没有 window_background')
+        bg = d.get('window_background')
+        if bg and not os.path.isfile(os.path.join(RP, bg + '.png')):
+            bad(f'{name} 的 window_background 指向不存在的贴图 {bg}.png（实机会显示紫黑格）')
         for key in ('unfinished_icon', 'finished_icon'):
             icon = d.get(key)
             if icon and not os.path.isfile(os.path.join(RP, icon + '.png')):

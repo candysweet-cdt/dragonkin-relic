@@ -126,6 +126,7 @@
 20. **龙巢召唤 + 自定义成就（2026-10-27）**：两套机制都监听 `ServerBlockUseEvent`（自定义方块右键），按手持物分流：龙心 = 召唤、龙裔装备 = 修复。
     召唤前用 `CreateGame(playerId).GetEntitiesAround(playerId, 32, {'test': 'is_family', 'subject': 'other', 'value': 'drasnea'})` 防叠 BOSS，`CreateBlockInfo(levelId).GetBlockNew(...)` 检查上方 4 格净空；`CreateEngineEntityByTypeStr` 必须传维度，否则会默认生成在主世界。
     成就节点放 `awesome_behavior_packs/customAchievements/*.json`：图标写 `textures/items/xxx`（不带 `.png`，相对资源包根）；本包**不配 `goal_details`**，由 `achievementServer.py` 在 `MobDieEvent` 里 `CreateAchievement(levelId).SetNodeFinish(playerId, nodeId)`，和奖励同批触发、按玩家各算一次；玩家标记走 `CreateExtraData(playerId)`（随存档保存）。
+    教程示例的 `window_background: textures/ui/background/sign_warped` **在本版本不存在**，实机会整页紫黑格；改用包内 64×64 无缝龙鳞瓦片 `textures/ui/dragonkin_achievement_bg`（`docs/tools/draw_achievement_bg.py` 生成，引擎按背景板平铺）。守卫会断言根节点背景图真实存在。
     奖励用 `SpawnItemToPlayerInv`，返回 False（背包满）时用 `CreateEngineItemEntity` 掉在脚下；`MobDieEvent` 回调里不能改手持物品，发奖/发提示统一 `AddTimer(0.05)` 延后。
     守卫：`check_altar_summon` / `check_achievements`（脚本常量、modMain 注册、节点字段、图标存在、finish_tip、脚本覆盖 node_ID）。
 
