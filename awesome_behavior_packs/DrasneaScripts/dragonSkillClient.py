@@ -212,9 +212,15 @@ class DragonSkillClient(ClientSystem):
         try:
             self.NotifyToServer(CAST_EVENT, {'playerId': clientApi.GetLocalPlayerId()})
         except Exception as e:
-            print('[fycq-skill] NotifyToServer failed: %r' % (e,))
+            print('[fycq-skill] NotifyToServer FAILED %r' % (e,))
+            try:
+                compFactory.CreateGame(clientApi.GetLevelId()).SetTipMessage(
+                    u'龙息斩上报失败（脚本异常）')
+            except Exception:
+                pass
             return
         # 冷却只在真正发出去之后才起算，否则按钮会假装有倒计时
         self.lastSent = now
         self.cdUntil = now + COOLDOWN
         self.flashUntil = 0.0
+        print('[fycq-skill] sent cast, localId=%s' % clientApi.GetLocalPlayerId())

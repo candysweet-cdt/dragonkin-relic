@@ -52,12 +52,20 @@ class DragonSlashServer(ServerSystem):
     def OnCast(self, args):
         args = args or {}
         # 引擎会给跨端事件注入 __id__ = 发送方玩家 id，比客户端自报的更可信
-        playerId = args.get('__id__') or args.get('playerId')
         players = serverApi.GetPlayerList()
+        playerId = args.get('__id__') or args.get('playerId')
+        via = '__id__' if '__id__' in args else 'playerId'
         if playerId not in players:
-            print('[fycq-slash] reject: sender=%r not in players=%r' % (playerId, players))
-            return
-        print('[fycq-slash] cast from %s' % playerId)
+            # 单机时客户端 id 与服务端 id 可能不同名；只有场上 exactly 1 名玩家才回退，
+            # 多人在线时不回退（否则任何人都能冒充别人放技能）
+            if len(players) == 1:
+                print('[fycq-slash] sender=%r not in %r -> fallback single player' % (
+                    playerId, players))
+                playerId, via = players[0], 'fallback'
+            else:
+                print('[fycq-slash] reject: sender=%r not in players=%r' % (playerId, players))
+                return
+        print('[fycq-slash] cast from %s via %s' % (playerId, via))
 
         now = time.time()
         left = COOLDOWN - (now - self.last.get(playerId, 0.0))
@@ -67,8 +75,8 @@ class DragonSlashServer(ServerSystem):
 
         item = itemName(compFactory.CreateItem(playerId).GetPlayerItem(
             serverApi.GetMinecraftEnum().ItemPosType.CARRIED, 0))
+        print('[fycq-slash] carried=%r sword=%s' % (item, item in SWORDS))
         if item not in SWORDS:
-            print('[fycq-slash] reject: carried=%r' % item)
             self.Reply(playerId, {'state': 'no_sword'})
             return
 
