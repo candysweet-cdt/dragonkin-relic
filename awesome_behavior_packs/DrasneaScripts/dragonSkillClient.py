@@ -95,6 +95,7 @@ class DragonSkillHudScreen(ScreenNode):
         self.btn.SetPosition((self._dragFrom[0] + dx, self._dragFrom[1] + dy))
 
     def OnUp(self, args):
+        print('[fycq-skill] touch up moved=%s system=%s' % (self._moved, bool(_system[0])))
         if self._moved:
             self._savePos(self.btn.GetPosition())
         elif _system[0]:
@@ -165,11 +166,15 @@ class DragonSkillClient(ClientSystem):
         self.refresh()
 
     def OnRightClick(self, args):
-        if heldIsSword():
+        sword = heldIsSword()
+        print('[fycq-skill] right click heldSword=%s' % sword)
+        if sword:
             self.RequestCast()
 
     def OnTick(self, args=None):
         self.tick += 1
+        if self.tick % 200 == 0:
+            print('[fycq-skill] alive tick=%d node=%s' % (self.tick, bool(_node[0])))
         node = _node[0]
         if not node:
             return
@@ -207,20 +212,27 @@ class DragonSkillClient(ClientSystem):
 
     def RequestCast(self):
         now = time.time()
-        if now < self.cdUntil or now - self.lastSent < 0.3:
+        if now < self.cdUntil:
+            print('[fycq-skill] blocked by local cd %.1fs' % (self.cdUntil - now))
             return
+        if now - self.lastSent < 0.3:
+            print('[fycq-skill] blocked by 0.3s debounce')
+            return
+        print('[fycq-skill] request cast localId=%s' % clientApi.GetLocalPlayerId())
         try:
             self.NotifyToServer(CAST_EVENT, {'playerId': clientApi.GetLocalPlayerId()})
         except Exception as e:
             print('[fycq-skill] NotifyToServer FAILED %r' % (e,))
-            try:
-                compFactory.CreateGame(clientApi.GetLevelId()).SetTipMessage(
-                    u'龙息斩上报失败（脚本异常）')
-            except Exception:
-                pass
+            self.tip(u'技能上报异常 %r' % (e,))
             return
         # 冷却只在真正发出去之后才起算，否则按钮会假装有倒计时
         self.lastSent = now
         self.cdUntil = now + COOLDOWN
         self.flashUntil = 0.0
-        print('[fycq-skill] sent cast, localId=%s' % clientApi.GetLocalPlayerId())
+        print('[fycq-skill] sent cast')
+
+    def tip(self, message):
+        try:
+            compFactory.CreateGame(clientApi.GetLevelId()).SetTipMessage(message)
+        except Exception:
+            pass
