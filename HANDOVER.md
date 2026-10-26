@@ -148,7 +148,7 @@
 23. **A 批：龙魂觉醒 + 套装效果 + 龙息斩（2026-10-27）**：
     - 新增 6 个 item ID 已按规程 `reserve → claim`（`dragon_soul` + 觉醒剑/四件甲），镜像 36 条。
     - 升级配方用 shapeless：觉醒剑 = 原剑 + 龙魂 + 4 鳞；每件甲 = 原件 + 龙魂 + 2 鳞。觉醒件同样有 `repair_<id>` 重铸配方，并加入 `repairStation.py` 的 GEAR。
-    - 套装效果：`dragonSetBonus.py` 每 2 秒查 4 个 ARMOR 槽（0头/1胸/2腿/3靴），四件齐（原版/觉醒混搭）就 `AddEffectToEntity('fire_resistance'/'regeneration', 4s)`；不脱就续，脱了自然过期。
+    - 套装效果：`dragonSetBonus.py` 每 2 秒查 4 个 ARMOR 槽（0头/1胸/2腿/3靴），四件齐（原版/觉醒混搭）就给 `fire_resistance` / `regeneration` **10 秒**，并且先用 `GetAllEffects` 看剩余时间、**不足 4 秒才续**（作者指出一直刷会让效果闪）。
     - 龙息斩：`dragonSlash.py` 监听 `ServerItemTryUseEvent`，`serverApi.GetDirFromRot` 取朝向，横向投影做锥形判定；`GetEntitiesAround` 用 `is_family=mob` 过滤掉玩家，跳过三只友军，`CreateHurt(...).Hurt(..., EntityAttack, playerId, None, True)`；12 秒冷却。
     - **`ServerItemTryUseEvent` 对手持剑的触发要实机确认**；若不触发，改客户端事件转发。右键方块同时会走 `ServerItemUseOnEvent`，脚本用 0.2 秒窗口抑制误触。
     守卫：`check_combat_scripts`；`check_repair_paths` 覆盖 14 件有耐久装备。
@@ -167,7 +167,7 @@
 - **龙巢召唤**：**首召（每个世界一次）主手龙鳞 + 8 龙鳞，不需要龙心**（否则龙心只能靠龙蛇掉，死循环）；之后主手龙心 + 4 龙鳞。8 秒玩家冷却、附近 32 格已有龙蛇/上方不足 4 格净空/材料不够均拒绝且不扣材料
 - **成就 4 节点**（同一页，根 `fycq_dragonkin_first_kill`）：首杀「龙裔猎人」、首召「龙巢初醒」、击杀 10 幼龙「幼龙克星」、集齐四件套「龙鳞全装」（原版/觉醒混搭均可）；首杀发 3 结晶 + 8 鳞，其余只弹成就
 - **龙魂觉醒**：龙蛇玩家击杀保底 1 龙魂；龙牙剑 + 龙魂 + 4 鳞 → 觉醒剑（13 伤害/2800 耐久），每件甲 + 龙魂 + 2 鳞 → 觉醒甲（+1 防、+2 韧性、+10% 耐久）；觉醒件同样可龙巢修复/重铸
-- **套装效果**（`dragonSetBonus.py`）：四件龙鳞甲（原版/觉醒混搭）→ 抗火 I + 生命恢复 I，每 2 秒续 4 秒；脱一件后 4 秒内结束
+- **套装效果**（`dragonSetBonus.py`）：四件龙鳞甲（原版/觉醒混搭）→ 抗火 I + 生命恢复 I；一次给 10 秒，**只有剩余不足 4 秒才续**（反复 AddEffect 会让状态图标/粒子闪），脱一件后最多 10 秒自然结束
 - **龙息斩**（`dragonSlash.py`）：龙牙剑/觉醒剑右键 → 前方 5.5 格锥形，普通剑 8 / 觉醒剑 12 伤害，12 秒冷却；只打 mob，跳过幼龙/祭司/龙卫
 - **龙息与友伤**：phase2/3 龙息火球落地云 **5 秒销毁**（原版 120 秒）；龙裔 `damage_sensor` 免疫 `magic`，BOSS 不再被自己的云伤到、幼龙也不会被擦伤反击；`knockback_roar` 只作用于玩家；四只实体已移除 `hurt_by_target`
 - **首杀成就（按玩家各算）**：`customAchievements/dragonkin_first_kill.json` + `achievementServer.py`；每个玩家第一次击杀龙蛇弹「龙裔猎人」成就，发 龙血结晶 ×3 + 龙鳞 ×8，ExtraData 防重复

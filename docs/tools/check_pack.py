@@ -683,7 +683,7 @@ def check_combat_scripts():
         for const in ('fycq:dragon_scale_helmet', 'fycq:dragon_scale_boots_awakened'):
             if "'" + const + "'" not in src:
                 bad(f'dragonSetBonus.py 缺 {const}')
-        for token in ('fire_resistance', 'regeneration', 'ARMOR'):
+        for token in ('fire_resistance', 'regeneration', 'ARMOR', 'GetAllEffects'):
             if token not in src:
                 bad(f'dragonSetBonus.py 缺 {token}')
         if 'DragonSetBonusServer' not in main_src:
