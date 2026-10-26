@@ -1,149 +1,47 @@
 {
  "breakdown": {
   "by_kind": {
-   "actor": 111,
-   "block_item": 10,
-   "egg": 111,
-   "face": 18,
-   "food": 77,
-   "lang": 17,
-   "machine": 39,
-   "material": 258,
-   "model": 1390,
+   "actor": 4,
+   "egg": 4,
+   "food": 1,
+   "material": 4,
    "other": 4,
-   "pattern": 2,
-   "plain": 1339,
-   "screen": 9,
-   "tab": 7,
-   "tool": 146
+   "plain": 7,
+   "tab": 1,
+   "tool": 5
   },
   "by_mod": {
-   "dragonkin-relic": 30,
-   "furniture-wy": 1474,
-   "growth-realm": 775,
-   "starrail": 1259
+   "dragonkin-relic": 30
   },
   "by_namespace": {
-   "cadtgrow": 775,
-   "cadttech": 1259,
-   "fycq": 1504
+   "fycq": 30
   },
   "by_tab": {
-   "-": 158,
-   "cadtgrow": 744,
-   "cadttech_cabin": 125,
-   "cadttech_frontier": 328,
-   "cadttech_industry": 474,
-   "cadttech_material": 277,
-   "drasnea": 29,
-   "fycq": 1403
+   "-": 1,
+   "drasnea": 29
   },
-  "by_tag": {
-   "block_entity": 318,
-   "container": 318,
-   "crop": 142,
-   "infinite": 4,
-   "me": 17,
-   "power": 66,
-   "recipe": 2193,
-   "seat": 154,
-   "slab": 8,
-   "stairs": 85,
-   "steam": 246
-  },
+  "by_tag": {},
   "by_theme": {
-   "-": 51,
-   "aero": 53,
-   "apiary": 26,
-   "aqua": 30,
-   "arch": 50,
-   "archive": 32,
-   "astro": 56,
-   "auto": 32,
-   "botany": 124,
-   "brass": 2,
-   "build": 177,
-   "clinic": 48,
-   "clock": 56,
-   "crew": 48,
-   "decor": 32,
-   "dessert": 12,
-   "dish": 32,
-   "dock": 69,
-   "dragon": 29,
-   "drink": 17,
-   "farm": 204,
-   "feast": 12,
-   "fit": 48,
-   "forgeheart": 21,
-   "fruit": 2,
-   "garden": 2,
-   "glass": 2,
-   "greenhouse": 2,
-   "guofeng": 48,
-   "herb": 28,
-   "home": 234,
-   "ingredient": 11,
-   "interior": 50,
-   "kitchen": 46,
-   "lantern": 2,
-   "maple": 48,
-   "me": 19,
-   "mech": 49,
-   "moss": 2,
-   "mycelium": 2,
-   "myco": 26,
-   "orbit": 11,
-   "orchard": 36,
-   "outdoor": 44,
-   "pond": 2,
-   "power": 83,
-   "preserve": 12,
-   "queen": 2,
-   "rail": 66,
-   "sakura": 50,
-   "school": 60,
-   "season": 16,
-   "seed": 2,
-   "shop": 45,
-   "spa": 48,
-   "space": 313,
-   "steam": 624,
-   "stellar": 30,
-   "structure": 14,
-   "veg": 46,
-   "village": 60,
-   "vine": 2,
-   "wafu": 45,
-   "wedding": 48,
-   "xeno": 45
+   "-": 1,
+   "dragon": 29
   },
   "status": {}
  },
  "counts": {
   "block": {
-   "used": 2768
-  },
-  "entity": {
-   "used": 111
-  },
-  "face_key": {
-   "used": 18
-  },
-  "item": {
-   "used": 497
-  },
-  "lang_key": {
-   "used": 17
-  },
-  "spawn_egg": {
-   "used": 111
-  },
-  "tab": {
    "used": 7
   },
-  "ui_screen": {
-   "used": 9
+  "entity": {
+   "used": 4
+  },
+  "item": {
+   "used": 14
+  },
+  "spawn_egg": {
+   "used": 4
+  },
+  "tab": {
+   "used": 1
   }
  },
  "entries": [
@@ -863,6 +761,10 @@
   }
  ],
  "schema": 3,
- "scoped_to": "模组 dragonkin-relic（按 mods.pack_dir 命中本包）",
- "server_time": 1793035724
+ "scoped": {
+  "mod": "dragonkin-relic",
+  "namespace": ""
+ },
+ "scoped_to": "模组 dragonkin-relic",
+ "server_time": 1793036038
 }
