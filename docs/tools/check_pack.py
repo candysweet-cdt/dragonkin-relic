@@ -721,6 +721,10 @@ def check_skill_hud(data):
                   'CreateHurt', 'RESULT_EVENT', 'NotifyToClient', '__id__', 'reject'):
         if token not in ssrc:
             bad(f'dragonSlash.py 缺 {token}')
+    if 'PlayerAttackEntityEvent' not in ssrc:
+        bad('dragonSlash.py 缺服务端兜底触发（手持龙牙剑命中即放锥形斩）—— '
+            'HUD 按钮依赖客户端→服务端跨端事件，那条路一旦不通技能就整个不可用；'
+            '本包击杀归属已实机验证 PlayerAttackEntityEvent 会触发')
     if 'CreateEventData' in csrc:
         bad('dragonSkillClient.py 又用 CreateEventData 当 NotifyToServer 的载荷 —— '
             '参考模组一律传普通 dict；而且倒计时在发送之后才起算，'

@@ -172,6 +172,13 @@
     - 尺寸 64 → **44**（作者原话「按钮太大了点」）；标签 `offset` 从 `[0,30]` 归零到按钮中央。守卫断言 `size` 是 24–48 的整数边长（负测：填回 64 会 FAIL）。
     - 触屏没有稳定右键：`RightClickBeforeClientEvent` 官方口径是"移动端长按/PC F11 模式、PC 普通模式鼠标右键"，《自定义3D武器》打动作还额外监听 `TapBeforeClientEvent` + `LeftClickBeforeClientEvent`。**不要把施放绑到 tap**（普通点一下就放技能会误触），主路径只能是 HUD 按钮。
 
+26. **读日志定位「技能放不出来」：磁盘日志能证明什么、不能证明什么（2026-10-27）**：
+    - **游戏真的挂了哪个包**看 `logs/Debug_Log<会话>.txt` 里的 `Pack Stack - [00] 封印&传奇：龙裔遗骸 (id: e454a00c-…, version: 1.0.0) @ …` 与 `checkVipUsingMod {"vip_using_mod":[e454a00c…, b63887dc…]}`；两条都在 ⇒ 包与本次会话对得上。**别拿世界目录里的拷贝判断加载内容**：`%APPDATA%\MinecraftPE_Netease\minecraftWorlds\<世界>/behavior_packs/awesome_behavior_packs/` 是**旧副本**（本次查到还是 01:37 的脚本，而 HUD 是 03:03 之后写的），真正生效的是 `…/games/com.netease/behavior_packs/behavior_pack` 这条**指向 MCStudio live 工程的符号链接**（指向哪个工程随 MCStudio 当前工程变，04:19 那次已切去星轨）。
+    - **`Debug_Log` 完全不收录 Python `print`/traceback**（grep `fycq` / `Traceback` / `LoadWindowsAddonPy` 全 0）；MCStudio「脚本测试日志」是另一条 TCP 通道（`MCStudio.Modules.Developer.LogListener`），编辑器日志里 04:23:56 出现过 `SocketException：远程主机强制关闭了一个现有的连接` —— **窗口没输出 ≠ 脚本没跑**，要重启 MCStudio 再看。
+    - 04:00 那次龙裔会话的实证：24 件 `Loading file netease_items_beh/*.json` 全在、7 个 `registerBlock name: fycq:*` 全在、觉醒剑能进背包（`ItemStack transfer (… 1 x 龙牙剑·觉醒(261)@0): creative_output_items #0 -> hotbar_items #0`）⇒ **包 / 物品 / 创造栏都不是原因**。只有一条 `ERROR BLOCKS BlockTypeRegistry::lookupByName() failed to find block "fycq:dragon_fang_sword_awakened"`，紧跟 `InventoryTransactionManager::addAction: verifyBalance failed` —— 引擎拿方块表解析物品名的噪声，不影响使用，别去改物品 JSON。
+    - 结论：倒计时消失说明跨端上报那段没走通，而磁盘日志给不出 python 侧证据。所以**给技能加一条完全不依赖跨端的服务端兜底**：手持龙牙剑**命中**任何生物（`PlayerAttackEntityEvent`，本包击杀归属已实机验证会触发）就放同一条锥形斩，两条路共用 12 秒冷却；HUD 按钮照旧，通了就是额外触发。兜底那路不刷屏幕提示（只在按钮上显示命中数），免得每 12 秒自动弹一次。
+    守卫：`check_skill_hud` 现在断言服务端必须有 `PlayerAttackEntityEvent` 兜底触发（删掉即 FAIL，已负测）。
+
 ## 4. 当前内容
 
 - BOSS `fycq:drasnea`：500 血、29 组件、4 段动画（idle/move/attack/death）、原版 BOSS 血条、火球三连 + 冲撞、专属掉落、不自然刷怪（`spawn_rules` 已删，靠刷怪蛋/`/summon`）
