@@ -153,8 +153,8 @@ def main():
                 'defense': defense,
                 'enchantment': 15,
                 'armor_slot': slot,
-                'toughness': 3,
-                'knockback_resistance': 0.1,
+                'toughness': 6,            # 高伤害时减伤不被穿透（体感：越打越抗）
+                'knockback_resistance': 0.6,  # 站桩不被打飞
             },
         }
         dump(os.path.join(BP, 'netease_items_beh', ident + '.json'), item_beh(ident, comps, 'armor'))
