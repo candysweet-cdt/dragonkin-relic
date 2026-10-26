@@ -34,8 +34,9 @@
                                                  ID 没有归属、`--mod` 校验直接不过
       mirror --pack "Project/Growth Realm"      拉快照落地成 docs/tools/id_registry.json
       check  --pack "Project/Growth Realm"      镜像 ↔ 包内实占 双向对账
-                                                 （`behavior_pack/` 与 MCStudio 内容库的
-                                                 `awesome_behavior_packs/` 两种目录名都认）
+                                                 （behavior_pack / behavior_packs /
+                                                 awesome_behavior_packs / behavior_pack_xxx
+                                                 四种工程目录名都认）
 
     退出码：0 成功；1 用法/参数错；2 服务不可达或未鉴权；3 对账发现「注册表声称有、
     包里却没有」的错账（这是唯一必须停下来问人的方向）。
@@ -68,20 +69,28 @@ UI_EXCLUDE = {"_ui_defs", "neteasecommonui"}
 # 创造分页/主题的真源（各包自己的文件，注册表不抄）
 TAB_SOURCES = ("docs/tools/creative_tabs.json",)
 # 没有 creative_tabs.json 的包（生长之境 / 家具拓展），分页真源就是引擎读的那份
-TAB_FALLBACK = "behavior_pack/netease_tab"
-# MCStudio 内容库工程把两层包目录叫 awesome_*_packs，与 behavior_pack/resource_pack 等价
-# （见工作区 AGENTS.md「两类工程形态」）。龙裔遗骸就是这种形态，只认 behavior_pack 会扫出
-# 空集 —— check/mirror 对它静默失效。所以按存在性探测两种名字，不猜内容。
-BP_LEAVES = ("behavior_pack", "awesome_behavior_packs")
-RP_LEAVES = ("resource_pack", "awesome_resource_packs")
+TAB_FALLBACK = "behavior_pack/netease_tab"   # 目录名的别名由 pack_subdir 统一去认
 
 
 def pack_subdir(pack, rel):
-    """`behavior_pack/netease_blocks` 这种相对路径 → 实际存在的目录；都没有就返回 None。"""
+    """`behavior_pack/netease_blocks` 这种相对路径 → 实际存在的目录；都没有就返回 None。
+
+    实测存在的四种写法（MCStudio 会按工程形态改名，判定只看有没有 `netease_*` 目录）：
+      `behavior_pack/`（工作区里的开发工程）
+      `behavior_packs/`
+      `awesome_behavior_packs/`（MCStudio 内容库工程，如龙裔遗骸）
+      `behavior_pack_z6qLDV7H_d2286d12/`（MCStudio 导出时带随机后缀的实机工程）
+    只认第一种会对后三种**全扫成空集**，`check` 于是静默报「无错账」—— 2026-10-27 实测踩过。
+    """
     head, _, tail = rel.partition("/")
-    leaves = BP_LEAVES if head == "behavior_pack" else RP_LEAVES
-    for cand in leaves:
-        p = os.path.join(pack, cand, tail)
+    stem = "behavior_pack" if head.startswith("behavior_pack") else "resource_pack"
+    names = {stem, stem + "s", "awesome_" + stem + "s"}
+    try:
+        names.update(d for d in os.listdir(pack) if d.startswith(stem + "_"))
+    except OSError:
+        return None
+    for name in sorted(names):
+        p = os.path.join(pack, name, tail)
         if os.path.isdir(p):
             return p
     return None
