@@ -497,14 +497,36 @@ def check_anim_overlay(data):
     print('动画叠加: 已检查 idle 动 root 的实体')
 
 
+def check_weapon_balance(data):
+    """基岩版没有攻击冷却：斧的伤害必须低于剑，否则斧在同等耐久下全面压过剑。"""
+    dmg = {}
+    for path, d in data.items():
+        if os.sep + 'netease_items_beh' + os.sep not in path:
+            continue
+        item = d['minecraft:item']
+        weapon = item.get('components', {}).get('netease:weapon')
+        if not weapon:
+            continue
+        ident = item['description']['identifier']
+        dmg[ident] = (weapon.get('type'), weapon.get('attack_damage', 0))
+    swords = [v for t, v in dmg.values() if t == 'sword']
+    axes = [(k, v) for k, (t, v) in dmg.items() if t == 'hatchet']
+    if swords:
+        top = max(swords)
+        for ident, value in axes:
+            if value >= top:
+                bad(f'{ident} 伤害 {value} ≥ 剑 {top} —— 基岩版无攻击冷却，斧不该压过剑')
+    print(f'武器数值: {len(dmg)} 件武器已核对（斧伤害 < 剑）')
+
+
 def check_repair_paths(data):
-    """每件有耐久的龙裔装备，都必须能修：要么有 repairable，要么有重铸配方。"""
+    """每件有耐久的龙裔装备，都必须有重铸配方（铁砧不认自定义材料）。"""
     recipes = set()
     for path, d in data.items():
         if os.sep + 'netease_recipes' + os.sep in path:
             body = d.get('minecraft:recipe_shaped') or d.get('minecraft:recipe_shapeless') or {}
             recipes.add((body.get('description') or {}).get('identifier', ''))
-    n = 0
+    durable = []
     for path, d in data.items():
         if os.sep + 'netease_items_beh' + os.sep not in path:
             continue
@@ -513,7 +535,7 @@ def check_repair_paths(data):
         comps = item['components']
         if 'minecraft:max_damage' not in comps:
             continue
-        n += 1
+        durable.append(ident)
         stem = ident.split(':', 1)[1]
         has_repairable = 'minecraft:repairable' in comps
         has_rebuild = ('fycq:repair_' + stem) in recipes
@@ -521,7 +543,21 @@ def check_repair_paths(data):
             bad(f'{ident} 有耐久但没有重铸配方 repair_{stem}（坏了只能靠钻石修，不主题）')
         if has_repairable:
             bad(f'{ident} 又写了 minecraft:repairable —— 实测无效（铁砧只认 netease:weapon.level），删掉')
-    print(f'修复路径: {n} 件有耐久装备已核对（repairable + 重铸）')
+    script = os.path.join(BP, 'DrasneaScripts', 'repairStation.py')
+    if not os.path.isfile(script):
+        bad('缺 DrasneaScripts/repairStation.py —— 铁砧修不了自定义盔甲，龙巢修复是唯一龙鳞路线')
+    else:
+        src = open(script, encoding='utf-8').read()
+        for const in ('fycq:dragon_nest', 'fycq:dragon_scale'):
+            if "'" + const + "'" not in src:
+                bad(f'repairStation.py 缺常量 {const}')
+        missing = [g for g in durable if "'" + g + "'" not in src]
+        if missing:
+            bad(f'repairStation.py 的 GEAR 漏了: {", ".join(missing)}')
+        main_src = open(os.path.join(BP, 'DrasneaScripts', 'modMain.py'), encoding='utf-8').read()
+        if 'RepairStationServer' not in main_src:
+            bad('modMain.py 没有注册 RepairStationServer，龙巢修复不会加载')
+    print(f'修复路径: {len(durable)} 件有耐久装备已核对（重铸配方 + 龙巢修复覆盖）')
 
 
 def check_summon_cap(data):
@@ -741,6 +777,7 @@ def main():
     check_skills(data)
     check_anim_overlay(data)
     check_aggression(data)
+    check_weapon_balance(data)
     check_repair_paths(data)
     check_summon_cap(data)
     check_entity_events(data)

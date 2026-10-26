@@ -15,7 +15,7 @@
                 "type": "hatchet",
                 "level": 3,
                 "speed": 10,
-                "attack_damage": 11,
+                "attack_damage": 9,
                 "enchantment": 12
             }
         }

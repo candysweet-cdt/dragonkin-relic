@@ -31,7 +31,7 @@ TOOL_DURABILITY = 2341
 TOOLS = {
     'dragon_fang_sword': ('龙牙剑', 'sword', 10, TOOL_DURABILITY, 18),
     'dragon_scale_pickaxe': ('龙鳞镐', 'pickaxe', 7, TOOL_DURABILITY, 12),
-    'dragon_scale_axe': ('龙鳞斧', 'hatchet', 11, TOOL_DURABILITY, 12),
+    'dragon_scale_axe': ('龙鳞斧', 'hatchet', 9, TOOL_DURABILITY, 12),
     'dragon_scale_shovel': ('龙鳞锹', 'shovel', 7, TOOL_DURABILITY, 12),
     'dragon_scale_hoe': ('龙鳞锄', 'hoe', 3, TOOL_DURABILITY, 12),
 }
