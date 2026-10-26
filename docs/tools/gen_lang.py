@@ -53,6 +53,13 @@ ENTITIES = {
 }
 
 
+# 覆盖原版文案：龙血结晶可当附魔材料，附魔台提示不能再写死「青金石」
+EXTRA = {
+    'container.enchant.lapis.one': '1 份附魔材料',
+    'container.enchant.lapis.many': '%d 份附魔材料',
+}
+
+
 def main():
     lines = [f'itemCategory.name.{CATEGORY}=龙裔遗骸']
     for ident, cn in ENTITIES.items():
@@ -64,6 +71,8 @@ def main():
         lines.append(f'tile.{fid(ident)}.name={cn}')
     for key, cn in group_labels().items():
         lines.append(f'{key}={cn}')
+    for key, text in EXTRA.items():
+        lines.append('%s=%s' % (key, text))
     path = os.path.join(RP, 'texts', 'zh_CN.lang')
     with open(path, 'w', encoding='utf-8', newline='\n') as f:
         f.write('\n'.join(lines) + '\n')

@@ -34,3 +34,5 @@ tile.fycq:dragon_scale_pillar.name=龙鳞柱
 tile.fycq:dragon_nest.name=龙巢
 itemGroup.name.drasnea_tool=龙裔工具
 itemGroup.name.drasnea_armor=龙裔盔甲
+container.enchant.lapis.one=1 份附魔材料
+container.enchant.lapis.many=%d 份附魔材料
