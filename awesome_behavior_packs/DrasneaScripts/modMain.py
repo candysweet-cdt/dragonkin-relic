@@ -14,7 +14,7 @@ import mod.server.extraServerApi as serverApi
 MOD_NAME = 'DrasneaScripts'
 
 
-@Mod.Binding(name=MOD_NAME, version='0.0.2')
+@Mod.Binding(name=MOD_NAME, version='0.0.3')
 class DrasneaScriptsMod(object):
 
     def __init__(self):
@@ -26,6 +26,8 @@ class DrasneaScriptsMod(object):
                                  MOD_NAME + '.probeServer.DrasneaProbeServer')
         serverApi.RegisterSystem(MOD_NAME, 'AggroGuardServer',
                                  MOD_NAME + '.aggroGuard.AggroGuardServer')
+        serverApi.RegisterSystem(MOD_NAME, 'BossPhaseServer',
+                                 MOD_NAME + '.bossPhase.BossPhaseServer')
 
     @Mod.DestroyServer()
     def destroyServer(self):

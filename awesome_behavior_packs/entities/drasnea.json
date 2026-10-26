@@ -200,6 +200,95 @@
                     }
                 ]
             }
+        },
+        "component_groups": {
+            "fycq:drasnea_phase2": {
+                "minecraft:movement": {
+                    "value": 0.36
+                },
+                "minecraft:attack": {
+                    "damage": 16
+                },
+                "minecraft:boss": {
+                    "should_darken_sky": true,
+                    "hud_range": 120,
+                    "name": "龙蛇·血怒"
+                },
+                "minecraft:behavior.knockback_roar": {
+                    "priority": 3,
+                    "duration": 1.0,
+                    "attack_time": 0.4,
+                    "knockback_damage": 12,
+                    "knockback_strength": 4,
+                    "knockback_range": 7.0,
+                    "cooldown_time": 8.0
+                }
+            },
+            "fycq:drasnea_phase3": {
+                "minecraft:movement": {
+                    "value": 0.42
+                },
+                "minecraft:attack": {
+                    "damage": 22
+                },
+                "minecraft:boss": {
+                    "should_darken_sky": true,
+                    "hud_range": 120,
+                    "name": "龙蛇·狂怒"
+                },
+                "minecraft:behavior.knockback_roar": {
+                    "priority": 3,
+                    "duration": 1.0,
+                    "attack_time": 0.35,
+                    "knockback_damage": 14,
+                    "knockback_strength": 5,
+                    "knockback_range": 8.0,
+                    "cooldown_time": 6.0
+                },
+                "minecraft:behavior.summon_entity": {
+                    "priority": 2,
+                    "summon_choices": [
+                        {
+                            "min_activation_range": 0.0,
+                            "max_activation_range": 12.0,
+                            "weight": 1,
+                            "cooldown_time": 14.0,
+                            "cast_duration": 1.2,
+                            "sequence": [
+                                {
+                                    "shape": "circle",
+                                    "target": "self",
+                                    "base_delay": 1.2,
+                                    "num_entities_spawned": 3,
+                                    "entity_type": "fycq:dragon_whelp",
+                                    "size": 0.0
+                                }
+                            ]
+                        }
+                    ]
+                }
+            }
+        },
+        "events": {
+            "fycq:drasnea_phase2": {
+                "add": {
+                    "component_groups": [
+                        "fycq:drasnea_phase2"
+                    ]
+                }
+            },
+            "fycq:drasnea_phase3": {
+                "add": {
+                    "component_groups": [
+                        "fycq:drasnea_phase3"
+                    ]
+                },
+                "remove": {
+                    "component_groups": [
+                        "fycq:drasnea_phase2"
+                    ]
+                }
+            }
         }
     }
 }

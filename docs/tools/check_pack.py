@@ -497,6 +497,24 @@ def check_anim_overlay(data):
     print('动画叠加: 已检查 idle 动 root 的实体')
 
 
+def check_entity_events(data):
+    """事件引用的 component_groups 必须真实存在（阶段/受击组都靠这条）。"""
+    n = 0
+    for path, d in data.items():
+        if os.sep + 'entities' + os.sep not in path:
+            continue
+        ent = d.get('minecraft:entity') or {}
+        ident = (ent.get('description') or {}).get('identifier', '')
+        groups = set(ent.get('component_groups') or {})
+        for name, body in (ent.get('events') or {}).items():
+            for op in ('add', 'remove'):
+                for g in ((body.get(op) or {}).get('component_groups') or []):
+                    n += 1
+                    if g not in groups:
+                        bad(f'{ident} 事件 {name} {op} 了不存在的组件组 {g}')
+    print(f'实体事件: {n} 处组件组引用已核对')
+
+
 def check_aggression(data):
     """仇恨与友伤：不许隔墙全图仇恨，不许同族互殴。"""
     for path, d in data.items():
@@ -679,6 +697,7 @@ def main():
     check_skills(data)
     check_anim_overlay(data)
     check_aggression(data)
+    check_entity_events(data)
     check_id_registry(data)
     check_scripts()
     check_manifests(data)

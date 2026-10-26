@@ -17,19 +17,25 @@
                     {
                         "name": "regeneration",
                         "chance": 1.0,
-                        "duration": 10,
+                        "duration": 12,
                         "amplifier": 1
                     },
                     {
                         "name": "absorption",
                         "chance": 1.0,
-                        "duration": 60,
+                        "duration": 90,
                         "amplifier": 0
                     },
                     {
                         "name": "fire_resistance",
                         "chance": 1.0,
-                        "duration": 20,
+                        "duration": 60,
+                        "amplifier": 0
+                    },
+                    {
+                        "name": "resistance",
+                        "chance": 1.0,
+                        "duration": 10,
                         "amplifier": 0
                     }
                 ]

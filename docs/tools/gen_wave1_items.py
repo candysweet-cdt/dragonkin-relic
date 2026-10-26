@@ -207,9 +207,10 @@ def main():
                 'saturation_modifier': 'poor',
                 'using_converts_to': 'minecraft:glass_bottle',
                 'effects': [
-                    {'name': 'regeneration', 'chance': 1.0, 'duration': 10, 'amplifier': 1},
-                    {'name': 'absorption', 'chance': 1.0, 'duration': 60, 'amplifier': 0},
-                    {'name': 'fire_resistance', 'chance': 1.0, 'duration': 20, 'amplifier': 0},
+                    {'name': 'regeneration', 'chance': 1.0, 'duration': 12, 'amplifier': 1},
+                    {'name': 'absorption', 'chance': 1.0, 'duration': 90, 'amplifier': 0},
+                    {'name': 'fire_resistance', 'chance': 1.0, 'duration': 60, 'amplifier': 0},
+                    {'name': 'resistance', 'chance': 1.0, 'duration': 10, 'amplifier': 0},
                 ],
             },
             'netease:customtips': {'value': '§7饮下：回复生命并获得抗性'},

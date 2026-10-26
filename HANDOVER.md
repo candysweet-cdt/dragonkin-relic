@@ -113,6 +113,10 @@
     ② `_meta_args()` 里引用了未定义的 `type_`，`claim`/`reserve` 带 `--mod` 且不填 `--namespace` 时直接 NameError。已改成 `getattr(a, "type", "")`。
     守卫：`check_pack.py` 的 `check_id_registry` 读 `docs/tools/id_registry.json`，离线断言「包内每个 ID 都登记、注册表每条都在包里」（双向）。
 
+18. **血量阶段用脚本触发实体事件**（2026-10-27）：`bossPhase.py` 监听 `ActorHurtServerEvent`，读 `CreateAttr().GetAttrValue/GetAttrMaxValue(HEALTH)` 算比例，过阈值就 `CreateEntityEvent(entityId).TriggerCustomEvent(entityId, 'fycq:drasnea_phase2/3')`；实体侧用 `component_groups` + `events` 覆盖 `movement`/`attack`/`boss.name`/`knockback_roar`/`summon_entity`。
+    **必须加 `hp > 0` 守卫**：实测死亡后还会再收到一次 `ActorHurtServerEvent`（hp=-8.5），不挡就会在尸体上触发阶段。
+    守卫：`check_entity_events` 断言实体 `events` 增删的每个 `component_groups` 都真实存在。
+
 ## 4. 当前内容
 
 - BOSS `fycq:drasnea`：500 血、29 组件、4 段动画（idle/move/attack/death）、原版 BOSS 血条、火球三连 + 冲撞、专属掉落、不自然刷怪（`spawn_rules` 已删，靠刷怪蛋/`/summon`）
@@ -120,6 +124,7 @@
 - 7 方块：龙鳞块 / 龙鳞砖 / 龙鳞柱 / 龙骨块 / 龙晶块 / 龙晶灯 / 龙巢
 - 3 生物（波 3）：`dragon_whelp` 幼龙（30 血近战，掉龙鳞）、`dragon_priest` 龙祭司（60 血火球远程，掉龙鳞+龙血结晶）、`dragon_guard` 龙卫（120 血近战精英，掉龙牙+龙鳞）；各带几何体、64×128 贴图、idle/move/death 三段动画、控制器、渲染控制器、掉落表、`netease:egg` 刷怪蛋与原版音效绑定
 - 每只生物 5 态动画：`idle / move / attack / hurt / death`（攻击态由延迟攻击驱动，受击态由受击标记驱动）
+- **龙蛇三阶段**（脚本 `bossPhase.py`，阈值 66% / 33%）：phase2 移速 0.36 伤害 16 震地 CD 8 血条「龙蛇·血怒」；phase3 移速 0.42 伤害 22 震地 CD 6 召唤 3 只/CD 14 血条「龙蛇·狂怒」
 - 技能：BOSS 震地怒吼（击退 4 格、伤 10）+ 召唤 2 只幼龙；龙祭司召唤 1 只幼龙 + 火球；龙卫震地怒吼 + 贴身范围伤害；幼龙扑咬
 - 音效：`sound_effects` 短名 + 动画时间轴播放（复用原版音效事件）
 - 掉落：每只都有保底池 + 稀有池（`random_chance_with_looting` 受抢夺加成）：BOSS 35% 龙血结晶、龙卫 12% 龙血结晶、祭司 5% 龙心
