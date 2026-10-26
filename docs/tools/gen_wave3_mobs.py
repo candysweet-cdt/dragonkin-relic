@@ -230,8 +230,8 @@ MOBS = {
             'family': ['dragonkin', 'monster', 'mob', 'fycq'],
             'loot': [{'item': 'dragon_scale', 'min': 1, 'max': 2, 'loot_min': 0, 'loot_max': 1},
                      {'item': 'dragon_fang', 'min': 1, 'max': 1, 'chance': 0.15, 'loot_mult': 0.01}],
-            'xp': 12, 'aggro': 12,
-            'skills': [{'type': 'leap_at_target', 'priority': 4, 'target_dist': 0.6}],
+            'xp': 12, 'aggro': 12, 'fly': True,
+            'skills': [],
             'sounds': {'roar': 'mob.ghast.warn', 'attack': 'mob.ghast.scream',
                        'hurt': 'mob.ghast.hurt', 'death': 'mob.ghast.death',
                        'flap': 'mob.enderdragon.flap'},
@@ -435,7 +435,24 @@ def build_beh(stem, spec):
         'minecraft:behavior.random_look_around': {'priority': 9},
         'minecraft:ambient_sound_interval': {'value': 12.0, 'range': 12.0,
                                              'event_name': 'ambient'},
+        # 自然刷出来的怪要能按距离消失，避免越积越多
+        'minecraft:despawn': {'despawn_from_distance': {}},
     }
+    if b.get('fly'):
+        # 幼龙真飞：照蜜蜂/悦灵用 hover 导航 + 无重力，关掉走路导航与扑咬
+        comps['minecraft:physics'] = {'has_gravity': False, 'has_collision': True}
+        for key in ('minecraft:navigation.walk', 'minecraft:movement.basic',
+                    'minecraft:behavior.random_stroll'):
+            comps.pop(key, None)
+        comps['minecraft:navigation.hover'] = {
+            'can_path_over_water': True, 'can_sink': False, 'can_pass_doors': False,
+            'can_path_from_air': True, 'avoid_water': True,
+            'avoid_damage_blocks': True, 'avoid_sun': False}
+        comps['minecraft:movement.hover'] = {}
+        comps['minecraft:can_fly'] = {}
+        comps['minecraft:behavior.random_hover'] = {
+            'priority': 7, 'xz_dist': 8, 'y_dist': 8, 'y_offset': -1,
+            'interval': 1, 'hover_height': [1, 4]}
     if b.get('ranged'):
         comps['minecraft:shooter'] = {'def': 'minecraft:fireball'}
         comps['minecraft:behavior.ranged_attack'] = {

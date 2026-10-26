@@ -25,6 +25,16 @@ FLAG = 'fycq_drasnea_first_kill_v2'
 REWARD = (('fycq:dragon_blood_crystal', 3), ('fycq:dragon_scale', 8))
 BLAME_TTL = 60.0
 
+FULL_SET_NODE = 'fycq_dragonkin_full_set'
+FULL_SET = ('fycq:dragon_scale_helmet', 'fycq:dragon_scale_chestplate',
+            'fycq:dragon_scale_leggings', 'fycq:dragon_scale_boots')
+CHECK_EVERY = 150        # tick，5 秒查一次
+INVENTORY_SLOTS = 36
+
+
+def itemName(itemDict):
+    return (itemDict or {}).get('newItemName') or (itemDict or {}).get('itemName') or ''
+
 
 class AchievementServer(ServerSystem):
 
@@ -32,12 +42,15 @@ class AchievementServer(ServerSystem):
         super(AchievementServer, self).__init__(namespace, systemName)
         self.bosses = {}
         self.lastHit = {}
+        self.tick = 0
+        self.fullSetDone = set()
         engineNs = serverApi.GetEngineNamespace()
         engineSys = serverApi.GetEngineSystemName()
         self.ListenForEvent(engineNs, engineSys, 'AddEntityServerEvent', self, self.OnAddEntity)
         self.ListenForEvent(engineNs, engineSys, 'PlayerAttackEntityEvent', self, self.OnPlayerAttack)
         self.ListenForEvent(engineNs, engineSys, 'ActuallyHurtServerEvent', self, self.OnActuallyHurt)
         self.ListenForEvent(engineNs, engineSys, 'MobDieEvent', self, self.OnDie)
+        self.ListenForEvent(engineNs, engineSys, 'OnScriptTickServer', self, self.OnTick)
 
     def OnAddEntity(self, args):
         if args.get('engineTypeStr') == BOSS:
@@ -85,6 +98,25 @@ class AchievementServer(ServerSystem):
         self.tip(attacker, serverApi.GenerateColor('YELLOW') + '龙裔猎人：首次击杀龙蛇！')
         # MobDieEvent 里不能改玩家手持物品，奖励延迟一帧
         compFactory.CreateGame(LEVEL_ID).AddTimer(0.05, self.grant, attacker)
+
+    def OnTick(self, args=None):
+        self.tick += 1
+        if self.tick % CHECK_EVERY:
+            return
+        posType = serverApi.GetMinecraftEnum().ItemPosType
+        for playerId in serverApi.GetPlayerList():
+            if playerId in self.fullSetDone:
+                continue
+            itemComp = compFactory.CreateItem(playerId)
+            names = set()
+            for slot in range(INVENTORY_SLOTS):
+                names.add(itemName(itemComp.GetPlayerItem(posType.INVENTORY, slot)))
+            for slot in range(4):
+                names.add(itemName(itemComp.GetPlayerItem(posType.ARMOR, slot)))
+            if all(name in names for name in FULL_SET):
+                compFactory.CreateAchievement(LEVEL_ID).SetNodeFinish(playerId, FULL_SET_NODE)
+                self.fullSetDone.add(playerId)
+                print('[fycq-achievement] full set by %s' % playerId)
 
     def isBoss(self, entityId):
         try:

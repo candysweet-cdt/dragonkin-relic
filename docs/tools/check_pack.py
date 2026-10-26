@@ -600,6 +600,65 @@ def check_wing_edges():
     print(f'翅膀侧面: {wings} 块膜 / {len(strips)} 个侧面纹素（{len(strips & protected)} 个与其它面共用）已核对')
 
 
+def check_spawn_rules(data):
+    """三只小怪要有自然刷怪规则；BOSS 不许自然刷。"""
+    rules = {}
+    for path, d in data.items():
+        if os.sep + 'spawn_rules' + os.sep in path:
+            body = (d.get('minecraft:spawn_rules') or {})
+            ident = (body.get('description') or {}).get('identifier')
+            if ident:
+                rules[ident] = body
+    for ident in ('fycq:dragon_whelp', 'fycq:dragon_priest', 'fycq:dragon_guard'):
+        body = rules.get(ident)
+        name = ident.split(':', 1)[1] + '.json'
+        if not body:
+            bad(f'缺 spawn_rules/{name} —— {ident} 不会自然刷')
+            continue
+        desc = body.get('description') or {}
+        if desc.get('population_control') != 'monster':
+            bad(f'{name} 的 population_control 不是 monster')
+        conds = body.get('conditions') or []
+        if not conds:
+            bad(f'{name} 没有 conditions')
+        for cond in conds:
+            for key in ('minecraft:brightness_filter', 'minecraft:difficulty_filter',
+                        'minecraft:weight', 'minecraft:herd', 'minecraft:biome_filter'):
+                if key not in cond:
+                    bad(f'{name} 的条件缺 {key}')
+            if 'minecraft:spawns_on_surface' not in cond:
+                bad(f'{name} 没有 spawns_on_surface')
+    if 'fycq:drasnea' in rules:
+        bad('BOSS fycq:drasnea 不应有自然刷怪规则')
+    print(f'自然刷怪: {len(rules)} 条规则已核对（BOSS 不自然刷）')
+
+
+def check_whelp_flight(data):
+    """幼龙真飞：hover 导航 + 无重力 + can_fly；不能还留着走路/扑咬组件。"""
+    target = None
+    for path, d in data.items():
+        if os.sep + 'entities' + os.sep not in path:
+            continue
+        ent = d.get('minecraft:entity') or {}
+        if (ent.get('description') or {}).get('identifier') == 'fycq:dragon_whelp':
+            target = ent
+    if not target:
+        bad('找不到 fycq:dragon_whelp')
+        return
+    comps = target.get('components') or {}
+    for key in ('minecraft:navigation.hover', 'minecraft:movement.hover',
+                'minecraft:can_fly', 'minecraft:behavior.random_hover'):
+        if key not in comps:
+            bad(f'幼龙缺 {key}（不会真飞）')
+    if (comps.get('minecraft:physics') or {}).get('has_gravity') is not False:
+        bad('幼龙的 physics.has_gravity 不是 false')
+    for key in ('minecraft:navigation.walk', 'minecraft:movement.basic',
+                'minecraft:behavior.leap_at_target', 'minecraft:behavior.random_stroll'):
+        if key in comps:
+            bad(f'幼龙还留着 {key}（会和 hover 导航打架）')
+    print('幼龙飞行: hover 导航已核对')
+
+
 def check_breath():
     """龙息云清理脚本：存在、注册、常量指向真实 ID。"""
     script = os.path.join(BP, 'DrasneaScripts', 'dragonBreath.py')
@@ -627,6 +686,9 @@ def check_altar_summon():
         for const in ('fycq:dragon_nest', 'fycq:dragon_heart', 'fycq:dragon_scale', 'fycq:drasnea'):
             if "'" + const + "'" not in src:
                 bad(f'altarSummon.py 缺常量 {const}')
+        for name in ('FIRST_COST_SCALE', 'FIRST_SUMMON_NODE'):
+            if name not in src:
+                bad(f'altarSummon.py 缺 {name}（首召 8 龙鳞 + 首召成就）')
         main_src = open(os.path.join(BP, 'DrasneaScripts', 'modMain.py'), encoding='utf-8').read()
         if 'AltarSummonServer' not in main_src:
             bad('modMain.py 没有注册 AltarSummonServer，龙巢召唤不会加载')
@@ -665,21 +727,38 @@ def check_achievements(data):
             icon = d.get(key)
             if icon and not os.path.isfile(os.path.join(RP, icon + '.png')):
                 bad(f'{name} 的 {key} 指向不存在的贴图 {icon}.png')
+    details = {d.get('node_ID'): d for _, d in nodes}
+    for node_id, d in details.items():
+        parent = d.get('parent_node')
+        if parent:
+            if parent not in ids:
+                bad(f'节点 {node_id} 的 parent_node {parent} 不存在')
+            if parent == node_id:
+                bad(f'节点 {node_id} 的 parent_node 指向自己')
     script = os.path.join(BP, 'DrasneaScripts', 'achievementServer.py')
+    altar_script = os.path.join(BP, 'DrasneaScripts', 'altarSummon.py')
     if not os.path.isfile(script):
         bad('缺 DrasneaScripts/achievementServer.py —— 成就不会完成/发奖')
     else:
         src = open(script, encoding='utf-8').read()
-        for node in ids:
-            if "'" + node + "'" not in src:
-                bad(f'achievementServer.py 没有完成节点 {node}')
+        altar_src = open(altar_script, encoding='utf-8').read() if os.path.isfile(altar_script) else ''
+        for node_id, d in details.items():
+            goal = d.get('goal_details')
+            if goal:
+                if goal.get('goal_type') not in ('default_kill', 'default_get'):
+                    bad(f'节点 {node_id} 的 goal_type 不支持: {goal.get("goal_type")}')
+                if goal.get('goal_type') == 'default_kill' and not goal.get('entity_identifier'):
+                    bad(f'节点 {node_id} 的 default_kill 缺 entity_identifier')
+                continue
+            if ("'" + node_id + "'") not in src and ("'" + node_id + "'") not in altar_src:
+                bad(f'节点 {node_id} 既没有 goal_details，也没有脚本完成它')
         main_src = open(os.path.join(BP, 'DrasneaScripts', 'modMain.py'), encoding='utf-8').read()
         if 'AchievementServer' not in main_src:
             bad('modMain.py 没有注册 AchievementServer，首杀成就不会加载')
         if 'PlayerAttackEntityEvent' not in src:
             bad('achievementServer.py 没监听 PlayerAttackEntityEvent —— '
                 'MobDieEvent.attacker 是占位 id，会认不出击杀者')
-    print(f'自定义成就: {len(nodes)} 个节点（字段/图标/弹窗/脚本覆盖）')
+    print(f'自定义成就: {len(nodes)} 个节点（字段/父子/图标/弹窗/脚本覆盖）')
 
 
 def check_summon_cap(data):
@@ -930,6 +1009,8 @@ def main():
     check_weapon_balance(data)
     check_repair_paths(data)
     check_wing_edges()
+    check_spawn_rules(data)
+    check_whelp_flight(data)
     check_breath()
     check_altar_summon()
     check_achievements(data)

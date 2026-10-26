@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
-"""龙巢召唤：主手拿龙心、背包里有龙鳞，右键龙巢召唤一只龙蛇。
+"""龙巢召唤：右键龙巢召唤一只龙蛇。
 
-代价：1 龙心 + 4 龙鳞（龙心是龙蛇的玩家击杀保底掉落，龙鳞 6–10，击杀一次基本够再开一次）。
+首召（每个世界一次）：主手拿龙鳞，消耗 8 龙鳞，不需要龙心 ——
+否则「龙心只有龙蛇掉」会形成死循环。
+之后：主手拿龙心，消耗 1 龙心 + 4 龙鳞；祭司 5% 掉龙心、龙蛇玩家击杀保底 1 颗。
 限制：龙巢 32 格内已有龙蛇时拒绝；同一玩家 8 秒冷却；龙巢上方要 4 格净空。
 """
 import time
@@ -19,6 +21,9 @@ BOSS = 'fycq:drasnea'
 
 COST_HEART = 1
 COST_SCALE = 4
+FIRST_COST_SCALE = 8
+EVER_FLAG = 'fycq_drasnea_ever_summoned'
+FIRST_SUMMON_NODE = 'fycq_dragonkin_first_summon'
 NEAR_RADIUS = 32
 COOLDOWN = 8.0
 INVENTORY_SLOTS = 36
@@ -50,14 +55,24 @@ class AltarSummonServer(ServerSystem):
     def OnBlockUse(self, args):
         if args.get('blockName') != NEST:
             return
-        if itemName(args.get('itemDict')) != HEART:
+        held = itemName(args.get('itemDict'))
+        if held not in (HEART, SCALE):
             return
         playerId = args.get('playerId')
         args['cancel'] = True
         itemComp = compFactory.CreateItem(playerId)
-        if itemName(itemComp.GetPlayerItem(serverApi.GetMinecraftEnum().ItemPosType.CARRIED, 0)) != HEART:
-            self.tip(playerId, serverApi.GenerateColor('YELLOW') + '请把龙心拿在主手')
+        if itemName(itemComp.GetPlayerItem(serverApi.GetMinecraftEnum().ItemPosType.CARRIED, 0)) != held:
+            self.tip(playerId, serverApi.GenerateColor('YELLOW') + '请把龙心/龙鳞拿在主手')
             return
+        everSummoned = bool(compFactory.CreateExtraData(LEVEL_ID).GetExtraData(EVER_FLAG))
+        if held == HEART:
+            heartCost, scaleCost = COST_HEART, COST_SCALE
+        elif everSummoned:
+            self.tip(playerId, serverApi.GenerateColor('YELLOW') +
+                     '龙巢首召已完成，请把龙心拿在主手')
+            return
+        else:
+            heartCost, scaleCost = 0, FIRST_COST_SCALE
         now = time.time()
         left = COOLDOWN - (now - self.last.get(playerId, 0))
         if left > 0:
@@ -73,9 +88,13 @@ class AltarSummonServer(ServerSystem):
             return
         hearts = self.count(itemComp, HEART)
         scales = self.count(itemComp, SCALE)
-        if hearts < COST_HEART or scales < COST_SCALE:
-            self.tip(playerId, serverApi.GenerateColor('RED') +
-                     '召唤需要 1 龙心 + 4 龙鳞（背包 %d 心 / %d 鳞）' % (hearts, scales))
+        if hearts < heartCost or scales < scaleCost:
+            if heartCost:
+                message = ('召唤需要 %d 龙心 + %d 龙鳞（背包 %d 心 / %d 鳞）'
+                           % (heartCost, scaleCost, hearts, scales))
+            else:
+                message = '召唤需要 %d 龙鳞（背包 %d 鳞）' % (scaleCost, scales)
+            self.tip(playerId, serverApi.GenerateColor('RED') + message)
             return
         rot = compFactory.CreateRot(playerId).GetRot()
         yaw = ((rot[1] if rot else 0.0) + 180.0) % 360.0
@@ -83,15 +102,23 @@ class AltarSummonServer(ServerSystem):
         if not eid:
             self.tip(playerId, serverApi.GenerateColor('RED') + '召唤失败，材料未消耗')
             return
-        self.consume(itemComp, HEART, COST_HEART)
-        self.consume(itemComp, SCALE, COST_SCALE)
+        if heartCost:
+            self.consume(itemComp, HEART, heartCost)
+        self.consume(itemComp, SCALE, scaleCost)
         self.last[playerId] = now
         self.bosses[eid] = True
-        self.tip(playerId, serverApi.GenerateColor('GREEN') + '龙巢觉醒，龙蛇降临')
+        compFactory.CreateExtraData(LEVEL_ID).SetExtraData(EVER_FLAG, 1)
+        compFactory.CreateAchievement(LEVEL_ID).SetNodeFinish(playerId, FIRST_SUMMON_NODE)
+        if heartCost:
+            message = '龙巢觉醒，龙蛇降临'
+        else:
+            message = '龙巢初次苏醒（消耗 8 龙鳞），龙蛇降临'
+        self.tip(playerId, serverApi.GenerateColor('GREEN') + message)
         command = compFactory.CreateCommand(LEVEL_ID)
         if command:
             command.SetCommand('/playsound mob.enderdragon.growl @s ~ ~ ~ 2 0.8', playerId)
-        print('[fycq-altar] summon by %s at (%s,%s,%s) dim=%s' % (playerId, x, y, z, dim))
+        print('[fycq-altar] summon by %s at (%s,%s,%s) dim=%s cost=%s'
+              % (playerId, x, y, z, dim, 'heart' if heartCost else 'first-scales'))
 
     def bossNear(self, playerId):
         try:

@@ -53,7 +53,7 @@
                 "value": 0.1
             },
             "minecraft:physics": {
-                "has_gravity": true,
+                "has_gravity": false,
                 "has_collision": true
             },
             "minecraft:pushable": {
@@ -64,11 +64,6 @@
                 "total_supply": 30,
                 "suffocate_time": 0
             },
-            "minecraft:navigation.walk": {
-                "can_path_over_water": true,
-                "avoid_water": false
-            },
-            "minecraft:movement.basic": {},
             "minecraft:jump.static": {},
             "minecraft:behavior.float": {
                 "priority": 0
@@ -95,12 +90,6 @@
                 "hit_delay_pct": 0.6,
                 "track_target": true,
                 "sound_event": "attack.strong"
-            },
-            "minecraft:behavior.random_stroll": {
-                "priority": 7,
-                "xz_dist": 10,
-                "y_dist": 3,
-                "speed_multiplier": 0.7
             },
             "minecraft:behavior.look_at_player": {
                 "priority": 8,
@@ -139,9 +128,30 @@
                     }
                 ]
             },
-            "minecraft:behavior.leap_at_target": {
-                "priority": 4,
-                "target_dist": 0.6
+            "minecraft:despawn": {
+                "despawn_from_distance": {}
+            },
+            "minecraft:navigation.hover": {
+                "can_path_over_water": true,
+                "can_sink": false,
+                "can_pass_doors": false,
+                "can_path_from_air": true,
+                "avoid_water": true,
+                "avoid_damage_blocks": true,
+                "avoid_sun": false
+            },
+            "minecraft:movement.hover": {},
+            "minecraft:can_fly": {},
+            "minecraft:behavior.random_hover": {
+                "priority": 7,
+                "xz_dist": 8,
+                "y_dist": 8,
+                "y_offset": -1,
+                "interval": 1,
+                "hover_height": [
+                    1,
+                    4
+                ]
             }
         },
         "events": {

@@ -168,6 +168,9 @@
                     "subject": "other",
                     "value": "player"
                 }
+            },
+            "minecraft:despawn": {
+                "despawn_from_distance": {}
             }
         },
         "events": {

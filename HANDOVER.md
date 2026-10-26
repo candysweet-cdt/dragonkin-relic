@@ -138,17 +138,26 @@
     - 原版 `dragon_fireball` 的 `spawn_aoe_cloud.duration = 120` 秒，太长；`dragonBreath.py` 追踪 BOSS 发射的龙息球，命中后 5 秒销毁对应 `minecraft:area_effect_cloud`（其它云不动）。
     守卫：`check_aggression` 新增「禁 hurt_by_target / roar 必须玩家过滤 / magic 免伤」；`check_breath` 校验脚本与注册；`check_scripts` 禁 `self.AddTimer(`。
 
+22. **自然刷怪 + 幼龙飞行 + 成就树 + 首召闭环（2026-10-27）**：
+    - `spawn_rules` 放 `awesome_behavior_packs/spawn_rules/<stem>.json`，条件用 `spawns_on_surface` + `brightness_filter` + `difficulty_filter` + `weight` + `herd` + `biome_filter`；BOSS 不写规则。三只小怪加 `minecraft:despawn` 防越积越多。
+    - 幼龙真飞照蜜蜂/悦灵：`navigation.hover` + `movement.hover` + `can_fly` + `behavior.random_hover` + `physics.has_gravity:false`；**删掉** `navigation.walk` / `movement.basic` / `random_stroll` / `leap_at_target`，否则两套导航打架。
+    - 自定义成就树：子节点 `parent_node` 指 `fycq_dragonkin_first_kill`；10 杀幼龙用 `goal_details.default_kill` 自动记；首召在 `altarSummon` 成功后 `SetNodeFinish`；四件套由 `achievementServer` 每 5 秒扫背包+盔甲后 `SetNodeFinish`。
+    - **首召闭环**：首召 8 龙鳞（世界标记 `fycq_drasnea_ever_summoned`），之后 1 龙心 + 4 龙鳞；祭司 5% 龙心是提前再召的捷径。
+    守卫：`check_spawn_rules` / `check_whelp_flight`；`check_achievements` 增加父节点存在性与「无 goal_details 的节点必须有脚本完成」。
+
 ## 4. 当前内容
 
 - BOSS `fycq:drasnea`：500 血、29 组件、4 段动画（idle/move/attack/death）、原版 BOSS 血条、火球三连 + 冲撞、专属掉落、不自然刷怪（`spawn_rules` 已删，靠刷怪蛋/`/summon`）
 - 18 物品：4 材料 + 龙牙剑 + 镐斧锹锄 + 龙鳞四件套 + 龙血凝露（饮用回血/抗性，返空瓶）+ 4 张刷怪蛋，外加 1 张显式刷怪蛋 `fycq:zz_drasnea_egg`（`custom_item_type: egg` + `netease:egg`，官方规范见《1-自定义物品/4-自定义生物蛋》，支持右键生成/刷怪笼/发射器；`zz_` 前缀让它排在分页末尾）
 - 7 方块：龙鳞块 / 龙鳞砖 / 龙鳞柱 / 龙骨块 / 龙晶块 / 龙晶灯 / 龙巢
-- 3 生物（波 3）：`dragon_whelp` 幼龙（30 血近战，掉龙鳞）、`dragon_priest` 龙祭司（60 血火球远程，掉龙鳞+龙血结晶）、`dragon_guard` 龙卫（120 血近战精英，掉龙牙+龙鳞）；各带几何体、64×128 贴图、idle/move/death 三段动画、控制器、渲染控制器、掉落表、`netease:egg` 刷怪蛋与原版音效绑定
-- 每只生物 5 态动画：`idle / move / attack / hurt / death`（攻击态由延迟攻击驱动，受击态由受击标记驱动）
+- 3 生物（波 3）：`dragon_whelp` 幼龙（30 血，**hover 悬浮飞行**近战）、`dragon_priest` 龙祭司（60 血火球远程）、`dragon_guard` 龙卫（120 血近战精英）；各带几何体、64×128 贴图、动画、控制器、渲染控制器、掉落表、`netease:egg` 刷怪蛋与原版音效绑定
+- **自然刷怪**：三只都有 `spawn_rules`（夜晚、亮度 0–7，群山/台地/台地类群系，权重 6/3/1，队伍 1–2/1/1），带 `minecraft:despawn` 按距离消失；BOSS **不自然刷**
+- 三只小怪 5 态动画：`idle / move / attack / hurt / death`（攻击态由延迟攻击驱动，受击态由受击标记驱动）；BOSS 4 段（受击用 `is_hurt_color` 红闪）
 - **龙蛇三阶段**（脚本 `bossPhase.py`，阈值 66% / 33%）：phase2 移速 0.36 / 伤害 16 / 震地 CD 8 / **龙息火球 + 冲锋** / 血条「龙蛇·血怒」；phase3 移速 0.42 / 伤害 22 / 震地 CD 6 / **贴身灼烧 area_attack** / 血条「龙蛇·狂怒」
 - **限量召唤**：JSON 的 `summon_entity` 全部移除（无数量上限），改由脚本每 10s 招一波；**按召唤者独立计数**：每只龙蛇最多 6 只、每只祭司最多 2 只；**蛋召/野生的幼龙不计入、不受限**
 - **修复**：工具铁砧只能用**钻石**（`netease:weapon.level=3` 决定），盔甲铁砧修不了（无修复材料字段）；`minecraft:repairable` 实测不生效、已撤。龙鳞路线 = **龙巢修复**（手拿装备右键龙巢，1 龙鳞 = 25% 最大耐久，保留附魔）+ **重铸配方**（装备 + 2 龙鳞 → 新件，重置耐久与附魔）
-- **龙巢召唤**：主手龙心 + 背包 4 龙鳞，右键龙巢召唤一只龙蛇；8 秒玩家冷却、附近 32 格已有龙蛇/上方不足 4 格净空/材料不够均拒绝且不扣材料
+- **龙巢召唤**：**首召（每个世界一次）主手龙鳞 + 8 龙鳞，不需要龙心**（否则龙心只能靠龙蛇掉，死循环）；之后主手龙心 + 4 龙鳞。8 秒玩家冷却、附近 32 格已有龙蛇/上方不足 4 格净空/材料不够均拒绝且不扣材料
+- **成就 4 节点**（同一页，根 `fycq_dragonkin_first_kill`）：首杀「龙裔猎人」、首召「龙巢初醒」、击杀 10 幼龙「幼龙克星」、集齐四件套「龙鳞全装」；首杀发 3 结晶 + 8 鳞，其余只弹成就
 - **龙息与友伤**：phase2/3 龙息火球落地云 **5 秒销毁**（原版 120 秒）；龙裔 `damage_sensor` 免疫 `magic`，BOSS 不再被自己的云伤到、幼龙也不会被擦伤反击；`knockback_roar` 只作用于玩家；四只实体已移除 `hurt_by_target`
 - **首杀成就（按玩家各算）**：`customAchievements/dragonkin_first_kill.json` + `achievementServer.py`；每个玩家第一次击杀龙蛇弹「龙裔猎人」成就，发 龙血结晶 ×3 + 龙鳞 ×8，ExtraData 防重复
 - 技能：BOSS 震地怒吼（**只击退玩家** 4 格、伤 10）+ 召唤 2 只幼龙；龙祭司召唤 1 只幼龙 + 火球；龙卫震地怒吼（只打玩家）+ 贴身范围伤害；幼龙扑咬
@@ -159,11 +168,13 @@
 
 ## 5. 待办
 
-- **实机验收**：按 `docs/验收清单.md` 跑（三阶段、召唤上限、龙巢修复/召唤、首杀成就、斧伤手感、**龙息云 5 秒消失且不自伤/误伤**、**怒吼只打玩家**、**幼龙不反击**、三只小怪的动画/音效/掉落）
-- **波 3 收尾**：三只生物目前**只能靠刷怪蛋/`/summon` 出现**（没写 `spawn_rules`，不自然刷）；要不要给它们配自然刷怪群系、以及幼龙是否真要飞（现在 `has_gravity: true` 走地，翅膀只作动画）待定
-- **数值平衡**：龙鳞获取量、四件套成本、龙巢召唤代价（1 心 + 4 鳞）与首杀奖励（3 结晶 + 8 鳞）是否合理，等实机手感
+- **实机验收**：按 `docs/验收清单.md` 跑（三阶段、召唤上限、龙巢修复/首召/常规召唤、4 个成就、斧伤手感、龙息云 5 秒消失且不自伤/误伤、怒吼只打玩家、幼龙不反击、**自然刷怪群系/权重**、**幼龙 hover 飞行**）
+- **数值平衡**：自然刷怪权重（6/3/1）、龙鳞获取量、四件套成本、首召 8 鳞与后续 1 心 + 4 鳞、首杀奖励（3 结晶 + 8 鳞）是否合理，等实机手感
+- **模型剩余共面**：翅膀已修；头部小骨 `bone100–118`、`head/head`、`bone55/bone2` 仍余 107 处可能闪烁，实机看到再修
+- **上架准备**：pack_icon 目前是旧图；商店封面/宣传图/简介/版本号待作者定
 - 屏幕 BOSS 血条 UI：**作者明确不做**，沿用原版顶部 BOSS 条
 
 ## 6. 快照
 
-`Project/.backup/2026-10-26-drasnea-before.zip`（改造前原始包）、`2026-10-26-drasnea-wave12.zip`（波 1+2 落地后）。本包无 git（按工作区约定不顺手 `git init`）。
+- git 仓库已建（2026-10-27，按作者「commit吧」），annotated tag **`v1.0.0-20261027`** 是初始回退点；之后每批「同步 live + diff 复核 → commit」。
+- 历史 zip：`Project/.backup/2026-10-26-drasnea-before.zip`（改造前原始包）、`2026-10-26-drasnea-wave12.zip`（波 1+2 落地后）。

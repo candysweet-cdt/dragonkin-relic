@@ -1,0 +1,15 @@
+{
+    "node_ID": "fycq_dragonkin_first_summon",
+    "parent_node": "fycq_dragonkin_first_kill",
+    "depend_parent": false,
+    "title": "龙巢初醒",
+    "unfinished_icon": "textures/blocks/dragon_nest",
+    "finished_icon": "textures/blocks/dragon_nest",
+    "use_default_icon_background": true,
+    "goal_number": 1,
+    "node_description": "首次用龙巢召唤龙蛇（首召消耗 8 龙鳞）",
+    "is_hidden": false,
+    "finish_tip": true,
+    "is_cloud": false,
+    "auto_sent_cloud": false
+}

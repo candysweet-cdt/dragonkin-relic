@@ -1,0 +1,15 @@
+{
+    "node_ID": "fycq_dragonkin_full_set",
+    "parent_node": "fycq_dragonkin_first_kill",
+    "depend_parent": false,
+    "title": "龙鳞全装",
+    "unfinished_icon": "textures/items/dragon_scale_chestplate",
+    "finished_icon": "textures/items/dragon_scale_chestplate",
+    "use_default_icon_background": true,
+    "goal_number": 1,
+    "node_description": "同时拥有龙鳞头盔、胸甲、护腿、靴",
+    "is_hidden": false,
+    "finish_tip": true,
+    "is_cloud": false,
+    "auto_sent_cloud": false
+}

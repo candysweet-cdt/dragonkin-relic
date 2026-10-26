@@ -150,6 +150,9 @@
                         "deals_damage": true
                     }
                 ]
+            },
+            "minecraft:despawn": {
+                "despawn_from_distance": {}
             }
         },
         "events": {

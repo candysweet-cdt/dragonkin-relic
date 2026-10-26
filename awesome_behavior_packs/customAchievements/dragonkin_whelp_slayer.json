@@ -1,0 +1,19 @@
+{
+    "node_ID": "fycq_dragonkin_whelp_slayer",
+    "parent_node": "fycq_dragonkin_first_kill",
+    "depend_parent": false,
+    "title": "幼龙克星",
+    "unfinished_icon": "textures/items/zz_dragon_whelp_egg",
+    "finished_icon": "textures/items/zz_dragon_whelp_egg",
+    "use_default_icon_background": true,
+    "goal_details": {
+        "goal_type": "default_kill",
+        "entity_identifier": "fycq:dragon_whelp"
+    },
+    "goal_number": 10,
+    "node_description": "击杀 10 只幼龙",
+    "is_hidden": false,
+    "finish_tip": true,
+    "is_cloud": false,
+    "auto_sent_cloud": false
+}
