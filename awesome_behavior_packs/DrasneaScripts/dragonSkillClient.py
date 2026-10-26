@@ -22,7 +22,9 @@ MOD_NAME = 'DrasneaScripts'
 UI_KEY = 'dragonskillhud'
 UI_DEF = 'dragonskillhud.main'
 SCREEN_PATH = MOD_NAME + '.dragonSkillClient.DragonSkillHudScreen'
+SERVER_SYSTEM = 'DragonSlashServer'
 CAST_EVENT = 'FycqDragonSkillCast'
+RESULT_EVENT = 'FycqDragonSkillResult'
 SWORDS = ('fycq:dragon_fang_sword', 'fycq:dragon_fang_sword_awakened')
 COOLDOWN = 12.0
 CONFIG_KEY = 'fycq_dragonskill_hud'
@@ -30,6 +32,7 @@ BTN_PATH = '/skillPanel/skillButton'
 LABEL_PATH = BTN_PATH + '/button_label'
 DRAG_SLOP = 6.0
 REFRESH_EVERY = 20         # tick，兜底刷新可见性（进世界/换存档时事件可能不补发）
+FLASH_TICKS = 30           # 服务端回执在按钮上停留的 tick 数
 
 _node = [None]
 _system = [None]
@@ -140,6 +143,8 @@ class DragonSkillClient(ClientSystem):
         self.tick = 0
         self.cdUntil = 0.0
         self.lastSent = 0.0
+        self.flashText = ''
+        self.flashUntil = 0.0
         engineNs = clientApi.GetEngineNamespace()
         engineSys = clientApi.GetEngineSystemName()
         self.ListenForEvent(engineNs, engineSys, 'UiInitFinished', self, self.OnUiInit)
@@ -148,6 +153,7 @@ class DragonSkillClient(ClientSystem):
         self.ListenForEvent(engineNs, engineSys, 'RightClickBeforeClientEvent',
                             self, self.OnRightClick)
         self.ListenForEvent(engineNs, engineSys, 'OnScriptTickClient', self, self.OnTick)
+        self.ListenForEvent(MOD_NAME, SERVER_SYSTEM, RESULT_EVENT, self, self.OnResult)
         print('[fycq-skill] client system ready')
 
     def OnUiInit(self, args):
@@ -168,10 +174,31 @@ class DragonSkillClient(ClientSystem):
         if not node:
             return
         if self.tick % 5 == 0:
-            left = self.cdUntil - time.time()
-            node.setLabel('%d' % int(math.ceil(left)) if left > 0 else '')
+            now = time.time()
+            if now < self.flashUntil:
+                node.setLabel(self.flashText)
+            else:
+                left = self.cdUntil - now
+                node.setLabel('%d' % int(math.ceil(left)) if left > 0 else '')
         if self.tick % REFRESH_EVERY == 0:
             self.refresh()
+
+    def OnResult(self, args):
+        args = args or {}
+        state = args.get('state')
+        if state == 'cooldown':
+            self.cdUntil = time.time() + (args.get('left') or 0)
+            self.flashText = ''
+            self.flashUntil = 0.0
+            return
+        if state == 'hit':
+            self.flashText = '%d' % args.get('hits', 0)
+        elif state == 'no_sword':
+            self.flashText = u'剑'
+        else:
+            self.flashText = '0'
+        self.flashUntil = time.time() + FLASH_TICKS / 20.0
+        print('[fycq-skill] server ack %s' % args)
 
     def refresh(self):
         node = _node[0]
@@ -182,8 +209,12 @@ class DragonSkillClient(ClientSystem):
         now = time.time()
         if now < self.cdUntil or now - self.lastSent < 0.3:
             return
+        try:
+            self.NotifyToServer(CAST_EVENT, {'playerId': clientApi.GetLocalPlayerId()})
+        except Exception as e:
+            print('[fycq-skill] NotifyToServer failed: %r' % (e,))
+            return
+        # 冷却只在真正发出去之后才起算，否则按钮会假装有倒计时
         self.lastSent = now
         self.cdUntil = now + COOLDOWN
-        data = self.CreateEventData()
-        data['playerId'] = clientApi.GetLocalPlayerId()
-        self.NotifyToServer(CAST_EVENT, data)
+        self.flashUntil = 0.0

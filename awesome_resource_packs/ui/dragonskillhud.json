@@ -13,7 +13,7 @@
         "contained": true,
         "layer": 3,
         "offset": [ "70%+0px", "56%+0px" ],
-        "size": [ 64, 64 ],
+        "size": [ 44, 44 ],
         "visible": false,
         "controls": [
             {
@@ -45,7 +45,7 @@
                     "color": [ 1, 1, 1 ],
                     "font_size": "$font_size",
                     "shadow": true,
-                    "offset": [ 0, 30 ]
+                    "offset": [ 0, 0 ]
                 }
             }
         ]

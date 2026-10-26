@@ -159,10 +159,18 @@
     - 按钮必须写 `"button_mappings": []`，否则点击被控件映射吃掉、Python 的 `AddTouchEventParams` 回调收不到；`dragged` 三件套是 `draggable: "both"` + `contained: true` + `is_handle_button_move_event: true`。
     - 拖拽与点击共用一套回调：`GetBaseUIControl(path).asButton().AddTouchEventParams({'isSwallow': True})` + `SetButtonTouchDownCallback/MoveCallback/UpCallback`；Move 回调参数里是 `TouchPosX/TouchPosY`（相对屏幕），位移超过 6px 视为拖动 → `SetPosition` + 存位置、**抬起时不施放**；没超过就当作点击施放。抬起才算拖动结束，避免边拖边放。
     - 位置持久化用 `serverApi.CreateConfigClient(LEVEL_ID).SetConfigData(key, {'x':..,'y':..}, True)`（`isGlobal=True` 跨世界），`GetConfigData` 取回；`GetBaseUIControl(...).GetPosition()` 拿初始位置。
-    - 客户端 → 服务端用 `compFactory.CreateEventData()` + `NotifyToServer(事件名, data)`；**payload 必须自己带上 `playerId`**（服务端回调收到的 `args` 不含发送者身份），服务端 `GetPlayerList()` 再校验一次。服务端监听四元组是 `(客户端mod名, 客户端System名, 事件名)`。
+    - 客户端 → 服务端用 `ClientSystem.NotifyToServer(事件名, 普通dict)`；服务端监听四元组是 `(客户端mod名, 客户端System名, 事件名)`，mod 名就是 `@Mod.Binding(name=...)` / `RegisterSystem` 第一个参数。**引擎会给服务端回调的 args 注入 `__id__` = 发送方玩家 id**（参考模组《一键生成生物UI控件交互事件传递》直接用它取玩家），比自己塞进 payload 的 `playerId` 更可信 —— 两条都带上、服务端优先认 `__id__`。
     - 显隐由 `OnCarriedNewItemChangedClientEvent` 驱动（切物品瞬间），再用 `OnScriptTickClient` 兜底（进世界/初始化时补一次）。冷却只在前端显示数字（`ceil(剩余)`），**服务端独立再算一次 CD**，前端数字不是权威。
     - `ui_screen` 类型的 ID 已按规程注册（键名 `^[a-z0-9]+$`，kind=`hud`，本包镜像 37 条）；`check_id_registry` 现在会扫 `RP/ui/*.json` 的每个命名空间，防止手写 UI 文件绕过台账。
     守卫：`check_skill_hud`（`_ui_defs` 收录、命名空间、`base_screen` 基模板、`button_mappings == []`、`is_handle_button_move_event`、`draggable/contained`、默认 `visible: false`、按钮贴图存在、客户端/服务端事件名与 `COOLDOWN` 一致、`dragonSlash.py` 里不得再出现 `ServerItemTryUseEvent`）。
+
+25. **技能按钮实机第二轮：按钮太大 + 「点了没技能，只有 12 秒倒计时」（2026-10-27）**：
+    - **「倒计时出现」不等于「服务端收到」**。上一版 `RequestCast` 的写法是先 `self.cdUntil = now + COOLDOWN` 再 `NotifyToServer(...)`，所以**发送那行一旦抛异常，按钮照样倒计时**，看起来就是"技能放了但没效果"。现在顺序反过来：`try: NotifyToServer(普通dict)` 成功才起算本地冷却，失败打 `[fycq-skill] NotifyToServer failed`；载荷从 `self.CreateEventData()` 换成**普通 dict**（参考模组一律传 dict：《冰与火法杖》`NotifyToServer("bullet", {...})`、《自定义3D武器》`NotifyToServer('AttackedPacket', {...})`）。守卫禁止客户端再出现 `CreateEventData`。
+    - **加了服务端→客户端的回执，让一次实机就能分段定位**：`dragonSlash` 每次都 `NotifyToClient(playerId, 'FycqDragonSkillResult', {state, hits, left})`，按钮上短暂显示命中数（`3` / `0` / `剑`），冷却回执还会把客户端倒计时同步成服务端剩余秒。**只有倒计时、按钮数字不出现 ⇒ 服务端压根没收到**，去「脚本测试日志」看 `[fycq-slash] server ready` / `cast from` / `reject:` 三行。守卫断言服务端必须有 `RESULT_EVENT`/`NotifyToClient`/`__id__`/`reject` 四类要素。
+    - **`ALLY` 跳过是错的**：世界里会咬玩家的正是幼龙/祭司/龙卫（玩家没有友好龙裔，龙巢召的是龙蛇本体），上一版把三个都跳过 → 对着一群龙裔放技能会"什么都没打中"。现在只排除玩家家族，锥形内所有非玩家生物都吃这一刀。守卫禁止 `ALLY` 再出现。
+    - 判定改成参考模组《自定义3D武器》`sector_attack` 的口径：`CreatePos(id).GetFootPos()`（脚部，不是中心）、`any_of` + `is_family` + `operator: not` + `value: player`（不是"必须是 mob"）、`Hurt(damage, cause, attacker, childAttacker, knock)` 的**返回值不参与命中计数**（参考实现根本不读返回值，靠它计数会永远 0）。
+    - 尺寸 64 → **44**（作者原话「按钮太大了点」）；标签 `offset` 从 `[0,30]` 归零到按钮中央。守卫断言 `size` 是 24–48 的整数边长（负测：填回 64 会 FAIL）。
+    - 触屏没有稳定右键：`RightClickBeforeClientEvent` 官方口径是"移动端长按/PC F11 模式、PC 普通模式鼠标右键"，《自定义3D武器》打动作还额外监听 `TapBeforeClientEvent` + `LeftClickBeforeClientEvent`。**不要把施放绑到 tap**（普通点一下就放技能会误触），主路径只能是 HUD 按钮。
 
 ## 4. 当前内容
 
@@ -179,7 +187,7 @@
 - **成就 4 节点**（同一页，根 `fycq_dragonkin_first_kill`）：首杀「龙裔猎人」、首召「龙巢初醒」、击杀 10 幼龙「幼龙克星」、集齐四件套「龙鳞全装」（原版/觉醒混搭均可）；首杀发 3 结晶 + 8 鳞，其余只弹成就
 - **龙魂觉醒**：龙蛇玩家击杀保底 1 龙魂；龙牙剑 + 龙魂 + 4 鳞 → 觉醒剑（13 伤害/2800 耐久），每件甲 + 龙魂 + 2 鳞 → 觉醒甲（+1 防、+2 韧性、+10% 耐久）；觉醒件同样可龙巢修复/重铸
 - **套装效果**（`dragonSetBonus.py`）：四件龙鳞甲（原版/觉醒混搭）→ 抗火 I + 生命恢复 I；一次给 10 秒，**只有剩余不足 4 秒才续**（反复 AddEffect 会让状态图标/粒子闪），脱一件后最多 10 秒自然结束
-- **龙息斩**（`dragonSlash.py` 服务端 + `dragonSkillClient.py` 客户端）：手持龙牙剑/觉醒剑时屏幕出现**可拖动技能按钮**（位置持久化，点一下施放、拖动不误放），鼠标右键/触屏交互键也能放（兜底，不挡右键容器）；前方 5.5 格锥形，普通剑 8 / 觉醒剑 12 伤害，12 秒冷却（服务端独立计时）；只打 mob，跳过幼龙/祭司/龙卫
+- **龙息斩**（`dragonSlash.py` 服务端 + `dragonSkillClient.py` 客户端）：手持龙牙剑/觉醒剑时屏幕出现**直径 44 的可拖动技能按钮**（位置持久化，点一下施放、拖动不误放），鼠标右键/触屏交互键作为兜底且**不取消事件**（不挡右键容器）；前方 5.5 格 ±65° 锥形，普通剑 8 / 觉醒剑 12 伤害 + 击退，12 秒冷却（服务端权威，客户端倒计时会被服务端回执同步）；命中数/未命中/需持剑都会回显到按钮上；除了玩家以外什么都打（含幼龙/祭司/龙卫）
 - **龙息与友伤**：phase2/3 龙息火球落地云 **5 秒销毁**（原版 120 秒）；龙裔 `damage_sensor` 免疫 `magic`，BOSS 不再被自己的云伤到、幼龙也不会被擦伤反击；`knockback_roar` 只作用于玩家；四只实体已移除 `hurt_by_target`
 - **首杀成就（按玩家各算）**：`customAchievements/dragonkin_first_kill.json` + `achievementServer.py`；每个玩家第一次击杀龙蛇弹「龙裔猎人」成就，发 龙血结晶 ×3 + 龙鳞 ×8，ExtraData 防重复
 - 技能：BOSS 震地怒吼（**只击退玩家** 4 格、伤 10）+ 召唤 2 只幼龙；龙祭司召唤 1 只幼龙 + 火球；龙卫震地怒吼（只打玩家）+ 贴身范围伤害；幼龙扑咬

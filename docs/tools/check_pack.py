@@ -694,6 +694,10 @@ def check_skill_hud(data):
             bad('skillButton 缺 contained: true（拖动会被父控件限制，防止拖出屏幕）')
         if btn.get('visible') is not False:
             bad('skillButton 初始 visible 必须是 false（只有手持龙牙剑才显示）')
+        size = btn.get('size')
+        if not (isinstance(size, list) and len(size) == 2
+                and all(isinstance(v, int) and 24 <= v <= 48 for v in size)):
+            bad(f'skillButton.size = {size}，作者要求按钮缩小（整数边长 24–48，64 太大）')
         for ctrl in btn.get('controls') or []:
             for state, body in ctrl.items():
                 if state in ('default', 'hover', 'pressed'):
@@ -714,9 +718,19 @@ def check_skill_hud(data):
         if token not in csrc:
             bad(f'dragonSkillClient.py 缺 {token}')
     for token in ('CAST_EVENT', 'CLIENT_SYSTEM', 'GetPlayerList', 'GetDirFromRot',
-                  'CreateHurt'):
+                  'CreateHurt', 'RESULT_EVENT', 'NotifyToClient', '__id__', 'reject'):
         if token not in ssrc:
             bad(f'dragonSlash.py 缺 {token}')
+    if 'CreateEventData' in csrc:
+        bad('dragonSkillClient.py 又用 CreateEventData 当 NotifyToServer 的载荷 —— '
+            '参考模组一律传普通 dict；而且倒计时在发送之后才起算，'
+            '否则发送抛错也会显示 12 秒倒计时、服务端毫不知情')
+    for token in ('GetEntitiesAround', 'GetFootPos'):
+        if token not in ssrc:
+            bad(f'dragonSlash.py 缺 {token}（锥形判定要按脚部坐标算，与参考模组一致）')
+    if 'ALLY' in ssrc:
+        bad('dragonSlash.py 又按 ALLY 跳过龙裔 —— 世界里针对玩家的恰恰是幼龙/祭司/龙卫，'
+            '技能按钮对它们必须能造成伤害')
     if 'ServerItemTryUseEvent' in ssrc:
         bad('dragonSlash.py 又用了 ServerItemTryUseEvent —— 对 netease:weapon 不触发，'
             '只能靠 HUD 按钮 / RightClickBeforeClientEvent 上报')
