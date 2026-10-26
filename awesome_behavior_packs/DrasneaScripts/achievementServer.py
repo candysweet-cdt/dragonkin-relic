@@ -1,10 +1,18 @@
 # -*- coding: utf-8 -*-
 """首杀成就：每个玩家第一次击杀龙蛇 → 弹出「龙裔猎人」成就 + 一次性奖励。
 
+MobDieEvent.attacker 在这台引擎上是占位 id（实测 -4294967295），不能用来认击杀者。
+改为记录「最后一个打中 BOSS 的玩家」：近战走 PlayerAttackEntityEvent，
+弹射物走 ActuallyHurtServerEvent 的 projectileId → GetSourceEntityId 找主人。
+击杀时 attacker 不是玩家就用最近 60 秒内的记录。
+
 成就节点在 customAchievements/dragonkin_first_kill.json；节点不配 goal_details，
 由脚本 SetNodeFinish 完成，保证「按玩家各算一次」且与奖励同批触发。
 玩家标记写 ExtraData（随存档保存），奖励只发一次。
+注意：计时器是 Game 组件的 AddTimer，ServerSystem 本身没有 AddTimer。
 """
+import time
+
 import mod.server.extraServerApi as serverApi
 
 ServerSystem = serverApi.GetServerSystemCls()
@@ -13,8 +21,9 @@ LEVEL_ID = serverApi.GetLevelId()
 
 BOSS = 'fycq:drasnea'
 NODE_ID = 'fycq_dragonkin_first_kill'
-FLAG = 'fycq_drasnea_first_kill'
+FLAG = 'fycq_drasnea_first_kill_v2'
 REWARD = (('fycq:dragon_blood_crystal', 3), ('fycq:dragon_scale', 8))
+BLAME_TTL = 60.0
 
 
 class AchievementServer(ServerSystem):
@@ -22,14 +31,39 @@ class AchievementServer(ServerSystem):
     def __init__(self, namespace, systemName):
         super(AchievementServer, self).__init__(namespace, systemName)
         self.bosses = {}
+        self.lastHit = {}
         engineNs = serverApi.GetEngineNamespace()
         engineSys = serverApi.GetEngineSystemName()
         self.ListenForEvent(engineNs, engineSys, 'AddEntityServerEvent', self, self.OnAddEntity)
+        self.ListenForEvent(engineNs, engineSys, 'PlayerAttackEntityEvent', self, self.OnPlayerAttack)
+        self.ListenForEvent(engineNs, engineSys, 'ActuallyHurtServerEvent', self, self.OnActuallyHurt)
         self.ListenForEvent(engineNs, engineSys, 'MobDieEvent', self, self.OnDie)
 
     def OnAddEntity(self, args):
         if args.get('engineTypeStr') == BOSS:
             self.bosses[args.get('id')] = True
+
+    def OnPlayerAttack(self, args):
+        victim = args.get('victimId')
+        playerId = args.get('playerId')
+        if victim in self.bosses and playerId in serverApi.GetPlayerList():
+            self.lastHit[victim] = (playerId, time.time())
+
+    def OnActuallyHurt(self, args):
+        victim = args.get('entityId')
+        if victim not in self.bosses:
+            return
+        players = serverApi.GetPlayerList()
+        playerId = args.get('srcId')
+        if playerId not in players:
+            projectileId = args.get('projectileId')
+            if projectileId and projectileId != '-1':
+                try:
+                    playerId = compFactory.CreateBulletAttributes(projectileId).GetSourceEntityId()
+                except Exception:
+                    playerId = None
+        if playerId in players:
+            self.lastHit[victim] = (playerId, time.time())
 
     def OnDie(self, args):
         eid = args.get('id')
@@ -37,15 +71,20 @@ class AchievementServer(ServerSystem):
             return
         self.bosses.pop(eid, None)
         attacker = args.get('attacker')
-        if attacker not in serverApi.GetPlayerList():
-            return
+        players = serverApi.GetPlayerList()
+        if attacker not in players:
+            hit = self.lastHit.pop(eid, None)
+            if not hit or time.time() - hit[1] > BLAME_TTL:
+                return
+            attacker = hit[0]
+        self.lastHit.pop(eid, None)
         extra = compFactory.CreateExtraData(attacker)
         if extra.GetExtraData(FLAG):
             return
         extra.SetExtraData(FLAG, 1)
         self.tip(attacker, serverApi.GenerateColor('YELLOW') + '龙裔猎人：首次击杀龙蛇！')
         # MobDieEvent 里不能改玩家手持物品，奖励延迟一帧
-        self.AddTimer(0.05, self.grant, attacker)
+        compFactory.CreateGame(LEVEL_ID).AddTimer(0.05, self.grant, attacker)
 
     def isBoss(self, entityId):
         try:

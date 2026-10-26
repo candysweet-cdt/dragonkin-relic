@@ -73,9 +73,6 @@
             "minecraft:behavior.float": {
                 "priority": 0
             },
-            "minecraft:behavior.hurt_by_target": {
-                "priority": 1
-            },
             "minecraft:behavior.nearest_attackable_target": {
                 "priority": 2,
                 "must_see": true,
@@ -129,6 +126,10 @@
                             },
                             "deals_damage": false
                         }
+                    },
+                    {
+                        "cause": "magic",
+                        "deals_damage": false
                     },
                     {
                         "on_damage": {

@@ -560,6 +560,63 @@ def check_repair_paths(data):
     print(f'修复路径: {len(durable)} 件有耐久装备已核对（重铸配方 + 龙巢修复覆盖）')
 
 
+def check_wing_edges():
+    """翅膀加厚后，1px 侧面条带必须透明：否则整块膜的矩形轮廓会描成悬浮方框。"""
+    from PIL import Image
+    model_path = os.path.join(RP, 'models', 'entity', 'drasnea.json')
+    tex_path = os.path.join(RP, 'textures', 'entity', 'fycq', 'drasnea.png')
+    geo = load(model_path)['geometry.drasnea']
+    px = Image.open(tex_path).convert('RGBA').load()
+
+    def ir(v):
+        return int(round(v))
+
+    def faces(uv, size):
+        u, v = ir(uv[0]), ir(uv[1])
+        w, h, d = ir(size[0]), ir(size[1]), ir(size[2])
+        return {
+            'west': (u, v + d, d, h), 'north': (u + d, v + d, w, h),
+            'east': (u + d + w, v + d, d, h), 'south': (u + d + w + d, v + d, w, h),
+            'up': (u + d, v, w, d), 'down': (u + d + w, v, w, d),
+        }
+
+    protected, strips, wings = set(), set(), 0
+    for bone in geo['bones']:
+        for cube in bone.get('cubes') or []:
+            if not isinstance(cube.get('uv'), list):
+                continue
+            wing = ('wind' in bone['name'] and abs(cube['size'][0] - 1.0) < 1e-6)
+            wings += 1 if wing else 0
+            for name, (x, y, w, h) in faces(cube['uv'], cube['size']).items():
+                cells = [(xx, yy) for yy in range(y, y + h) for xx in range(x, x + w)]
+                if wing and name in ('north', 'south', 'up', 'down'):
+                    strips.update(cells)
+                else:
+                    protected.update(cells)
+    dirty = [(x, y) for (x, y) in sorted(strips - protected) if px[x, y][3] > 0]
+    if dirty:
+        bad(f'翅膀侧面有 {len(dirty)} 个不透明纹素（例 {dirty[:4]}）—— 实机会描出悬浮矩形框；'
+            '跑 docs/tools/fix_wing_edge_strips.py --write')
+    print(f'翅膀侧面: {wings} 块膜 / {len(strips)} 个侧面纹素（{len(strips & protected)} 个与其它面共用）已核对')
+
+
+def check_breath():
+    """龙息云清理脚本：存在、注册、常量指向真实 ID。"""
+    script = os.path.join(BP, 'DrasneaScripts', 'dragonBreath.py')
+    if not os.path.isfile(script):
+        bad('缺 DrasneaScripts/dragonBreath.py —— 原版龙息云会留 120 秒')
+        return
+    src = open(script, encoding='utf-8').read()
+    for const in ('minecraft:dragon_fireball', 'minecraft:area_effect_cloud',
+                  'fycq:drasnea'):
+        if "'" + const + "'" not in src:
+            bad(f'dragonBreath.py 缺常量 {const}')
+    main_src = open(os.path.join(BP, 'DrasneaScripts', 'modMain.py'), encoding='utf-8').read()
+    if 'DragonBreathServer' not in main_src:
+        bad('modMain.py 没有注册 DragonBreathServer，龙息云不会按时消失')
+    print('龙息云: 脚本与注册已核对')
+
+
 def check_altar_summon():
     """龙巢召唤脚本与注册：常量指向真实 ID，modMain 确实注册了系统。"""
     script = os.path.join(BP, 'DrasneaScripts', 'altarSummon.py')
@@ -619,6 +676,9 @@ def check_achievements(data):
         main_src = open(os.path.join(BP, 'DrasneaScripts', 'modMain.py'), encoding='utf-8').read()
         if 'AchievementServer' not in main_src:
             bad('modMain.py 没有注册 AchievementServer，首杀成就不会加载')
+        if 'PlayerAttackEntityEvent' not in src:
+            bad('achievementServer.py 没监听 PlayerAttackEntityEvent —— '
+                'MobDieEvent.attacker 是占位 id，会认不出击杀者')
     print(f'自定义成就: {len(nodes)} 个节点（字段/图标/弹窗/脚本覆盖）')
 
 
@@ -691,6 +751,27 @@ def check_aggression(data):
                     and first.get('deals_damage') is False):
                 bad(f'{ident} 的 damage_sensor 第一条不是「dragonkin 家族免伤」'
                     '（必须排第一，否则同族技能会打伤自己人并触发反击）')
+            if not any(t.get('cause') == 'magic' and t.get('deals_damage') is False
+                       for t in triggers):
+                bad(f'{ident} 的 damage_sensor 缺「cause: magic 免伤」'
+                    '（原版龙息云会伤到 BOSS 自己和幼龙）')
+        bodies = [('components', comps)] + list((ent.get('component_groups') or {}).items())
+        for where, body in bodies:
+            if 'minecraft:behavior.hurt_by_target' in body:
+                bad(f'{ident} 的 {where} 仍写着 hurt_by_target —— 被同族擦到会立刻反击，'
+                    '是内讧的根；玩家目标交给 nearest_attackable_target')
+            roar = body.get('minecraft:behavior.knockback_roar')
+            if roar:
+                for key in ('damage_filters', 'knockback_filters'):
+                    f = roar.get(key) or {}
+                    if not (f.get('test') == 'is_family' and f.get('value') == 'player'):
+                        bad(f'{ident} 的 {where} knockback_roar 缺 {key} 玩家过滤'
+                            '（默认打范围内所有实体，会误伤幼龙）')
+            aa = body.get('minecraft:area_attack')
+            if aa:
+                f = aa.get('entity_filter') or {}
+                if not (f.get('test') == 'is_family' and f.get('value') == 'player'):
+                    bad(f'{ident} 的 {where} area_attack 没有限定玩家')
     print(f'仇恨与友伤: {sum(1 for p in data if os.sep + "entities" + os.sep in p)} 个实体检查完毕')
 
 
@@ -747,6 +828,13 @@ def check_scripts():
             bad(f'{os.path.basename(d)}/ 缺 __init__.py（Python 2 下不算包，'
                 '引擎 ImportModMain 会报 No module named ...）')
         src = open(os.path.join(d, 'modMain.py'), encoding='utf-8').read()
+        for py in glob.glob(os.path.join(d, '*.py')):
+            if py.endswith('modMain.py'):
+                continue
+            body = open(py, encoding='utf-8').read()
+            if 'self.AddTimer(' in body:
+                bad(f'{os.path.basename(py)} 用了 self.AddTimer —— ServerSystem 没有这个接口'
+                    '（实测 AttributeError）；改用 CreateGame(levelId).AddTimer')
         for mod_path in re.findall(r"RegisterSystem\(\s*['\"][^'\"]+['\"]\s*,\s*['\"][^'\"]+['\"]\s*,"
                                    r"\s*['\"]([^'\"]+)['\"]", src):
             total += 1
@@ -841,6 +929,8 @@ def main():
     check_aggression(data)
     check_weapon_balance(data)
     check_repair_paths(data)
+    check_wing_edges()
+    check_breath()
     check_altar_summon()
     check_achievements(data)
     check_summon_cap(data)

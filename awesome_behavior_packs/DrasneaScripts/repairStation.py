@@ -78,7 +78,8 @@ class RepairStationServer(ServerSystem):
             return
         self.pending.add(playerId)
         # SetItemDurability 在方块使用/物品事件里直接调用会失效，必须延迟一帧
-        self.AddTimer(0.05, self.applyRepair, playerId, posType, maxDur, display, need, slots)
+        compFactory.CreateGame(LEVEL_ID).AddTimer(
+            0.05, self.applyRepair, playerId, posType, maxDur, display, need, slots)
         self.tip(playerId, serverApi.GenerateColor('YELLOW') + '龙巢正在修复 %s…' % display)
 
     def heldSlot(self, itemComp, name):

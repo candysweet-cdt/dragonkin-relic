@@ -72,6 +72,7 @@
 11. **零厚度方块必然自闪**（2026-10-26 作者反馈「龙蛇翅膀材质闪烁」后查出）：`size` 某一轴为 0 的 cube，正面与背面完全重合，同一个方块自己跟自己抢深度。本模型两翼三段膜 `leftwind/leftwind2/leftwind3` + `rightwind*` 共 **6 块**都是 `size[0]=0`。修法：**补 1 个单位（1 个纹素）居中厚度**（`fix_model_coplanar.py --write`），只动这 6 块、193 骨骼结构不变。
     ⚠ 2026-10-27 追加教训：**厚度不能用 0.05 这种亚像素值** —— 亚像素边缘面会被光栅化成 1px 细线（截图里翅膀边上的长直线），而且边缘面 UV 落在亚像素上会采到随机颜色。改成 1 纹素后边缘是一条正常的薄边；同时要在贴图上给边缘带补色，**只补「透明且未被其它部件占用」的像素**（本包补了 216 px；翅膜与 bone5/bone10/bone16 共用 UV 区，不能整片涂）。
     另：`leftwind3/rightwind3` 的 UV 展开总宽 162 > 贴图 128，但逐面矩形仍都在图内（右边界 127..128），不是溢出问题。
+    ⚠ 2026-10-27 二次实机：加厚到 1 纹素后，±Z/±Y 四个 1px 侧面会沿整块 cube 的矩形描出**悬浮黑框**（透明区也被描边，截图确认）。侧面 UV 条带必须清成透明；但 x=18、x=86/87 等 36 个纹素与爪子/角/相邻翅膜的宽面共用，不能整条清。脚本 `fix_wing_edge_strips.py` 只清「属侧面条带且未被其它面覆盖」的 230 个纹素；守卫 `check_wing_edges` 断言没有不透明残留（注入 1 px 即报错）。
     检测工具 `analyze_model_flicker.py`：把 cube 的 6 面按骨骼链变换到模型空间、按「法线+平面偏移」分桶、桶内用**凸多边形真求交**算重叠面积。⚠ 不要用投影 AABB 近似——斜置的大膜片会被误判（初版因此把左右翼、bone55/bone2 全报成冲突）。
     现状：补厚后翅膀相关冲突清零，全模型仍余 **107 处**真重叠，集中在头部小骨 `bone100–bone118`（各 12–15 处）、`head/head`（12 面积）、`bone55/bone2`（9.5 面积）——这几处也会闪，但作者只报了翅膀，未处理。
     另：`mc_preview` **不认老格式 `geometry.xxx` 根键模型**，BOSS 预览会退化成蛋色占位块，所以 BOSS 模型改完只能靠数值 + 实机验证。
@@ -130,6 +131,13 @@
     奖励用 `SpawnItemToPlayerInv`，返回 False（背包满）时用 `CreateEngineItemEntity` 掉在脚下；`MobDieEvent` 回调里不能改手持物品，发奖/发提示统一 `AddTimer(0.05)` 延后。
     守卫：`check_altar_summon` / `check_achievements`（脚本常量、modMain 注册、节点字段、图标存在、finish_tip、脚本覆盖 node_ID）。
 
+21. **实机三连修正（2026-10-27 晚，作者报「幼龙还击后 BOSS 跑掉」「击杀不结算」「龙息不消失且自伤」）**：
+    - `ServerSystem` **没有 `AddTimer`**：实机 `AttributeError: 'AchievementServer' object has no attribute 'AddTimer'`。定时器一律用 `CreateGame(levelId).AddTimer(delay, func, *args)`；`repairStation` / `achievementServer` / `dragonBreath` 已改，守卫禁止脚本出现 `self.AddTimer(`。
+    - `MobDieEvent.attacker` 是占位 id（实测 `-4294967295`），不能认击杀者。改为 `PlayerAttackEntityEvent` 记最近一次玩家攻击 + `ActuallyHurtServerEvent`（`projectileId` → `CreateBulletAttributes(pid).GetSourceEntityId()`）兜底，60 秒内有效；首杀标记换成 `..._v2`，旧版报错那次的玩家再杀一只即可结算。
+    - 内讧根因：`knockback_roar` 默认打范围内**所有**实体（没有过滤），龙息云也会伤同族。三处 roar 都已加 `damage_filters` / `knockback_filters` 玩家过滤；四只实体删掉 `behavior.hurt_by_target`（被擦到就反击）；`damage_sensor` 增加 `cause: magic` 免伤（原版龙息云的 potion 伤害）。
+    - 原版 `dragon_fireball` 的 `spawn_aoe_cloud.duration = 120` 秒，太长；`dragonBreath.py` 追踪 BOSS 发射的龙息球，命中后 5 秒销毁对应 `minecraft:area_effect_cloud`（其它云不动）。
+    守卫：`check_aggression` 新增「禁 hurt_by_target / roar 必须玩家过滤 / magic 免伤」；`check_breath` 校验脚本与注册；`check_scripts` 禁 `self.AddTimer(`。
+
 ## 4. 当前内容
 
 - BOSS `fycq:drasnea`：500 血、29 组件、4 段动画（idle/move/attack/death）、原版 BOSS 血条、火球三连 + 冲撞、专属掉落、不自然刷怪（`spawn_rules` 已删，靠刷怪蛋/`/summon`）
@@ -141,8 +149,9 @@
 - **限量召唤**：JSON 的 `summon_entity` 全部移除（无数量上限），改由脚本每 10s 招一波；**按召唤者独立计数**：每只龙蛇最多 6 只、每只祭司最多 2 只；**蛋召/野生的幼龙不计入、不受限**
 - **修复**：工具铁砧只能用**钻石**（`netease:weapon.level=3` 决定），盔甲铁砧修不了（无修复材料字段）；`minecraft:repairable` 实测不生效、已撤。龙鳞路线 = **龙巢修复**（手拿装备右键龙巢，1 龙鳞 = 25% 最大耐久，保留附魔）+ **重铸配方**（装备 + 2 龙鳞 → 新件，重置耐久与附魔）
 - **龙巢召唤**：主手龙心 + 背包 4 龙鳞，右键龙巢召唤一只龙蛇；8 秒玩家冷却、附近 32 格已有龙蛇/上方不足 4 格净空/材料不够均拒绝且不扣材料
+- **龙息与友伤**：phase2/3 龙息火球落地云 **5 秒销毁**（原版 120 秒）；龙裔 `damage_sensor` 免疫 `magic`，BOSS 不再被自己的云伤到、幼龙也不会被擦伤反击；`knockback_roar` 只作用于玩家；四只实体已移除 `hurt_by_target`
 - **首杀成就（按玩家各算）**：`customAchievements/dragonkin_first_kill.json` + `achievementServer.py`；每个玩家第一次击杀龙蛇弹「龙裔猎人」成就，发 龙血结晶 ×3 + 龙鳞 ×8，ExtraData 防重复
-- 技能：BOSS 震地怒吼（击退 4 格、伤 10）+ 召唤 2 只幼龙；龙祭司召唤 1 只幼龙 + 火球；龙卫震地怒吼 + 贴身范围伤害；幼龙扑咬
+- 技能：BOSS 震地怒吼（**只击退玩家** 4 格、伤 10）+ 召唤 2 只幼龙；龙祭司召唤 1 只幼龙 + 火球；龙卫震地怒吼（只打玩家）+ 贴身范围伤害；幼龙扑咬
 - 音效：`sound_effects` 短名 + 动画时间轴播放（复用原版音效事件）
 - 掉落：每只都有保底池 + 稀有池（`random_chance_with_looting` 受抢夺加成）：BOSS 35% 龙血结晶、龙卫 12% 龙血结晶、祭司 5% 龙心
 - 30 配方（18 常规 + 3 条反向拆解 + 9 条重铸）；创造栏单页平铺 + 工具/盔甲两组
@@ -150,7 +159,7 @@
 
 ## 5. 待办
 
-- **实机验收**：按 `docs/验收清单.md` 跑（三阶段、召唤上限、龙巢修复/召唤、首杀成就、斧伤手感、三只小怪的动画/音效/掉落）
+- **实机验收**：按 `docs/验收清单.md` 跑（三阶段、召唤上限、龙巢修复/召唤、首杀成就、斧伤手感、**龙息云 5 秒消失且不自伤/误伤**、**怒吼只打玩家**、**幼龙不反击**、三只小怪的动画/音效/掉落）
 - **波 3 收尾**：三只生物目前**只能靠刷怪蛋/`/summon` 出现**（没写 `spawn_rules`，不自然刷）；要不要给它们配自然刷怪群系、以及幼龙是否真要飞（现在 `has_gravity: true` 走地，翅膀只作动画）待定
 - **数值平衡**：龙鳞获取量、四件套成本、龙巢召唤代价（1 心 + 4 鳞）与首杀奖励（3 结晶 + 8 鳞）是否合理，等实机手感
 - 屏幕 BOSS 血条 UI：**作者明确不做**，沿用原版顶部 BOSS 条

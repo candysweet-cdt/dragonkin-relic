@@ -68,9 +68,6 @@
             "minecraft:behavior.float": {
                 "priority": 0
             },
-            "minecraft:behavior.hurt_by_target": {
-                "priority": 1
-            },
             "minecraft:behavior.nearest_attackable_target": {
                 "priority": 2,
                 "must_reach": false,
@@ -166,6 +163,10 @@
                             },
                             "deals_damage": false
                         }
+                    },
+                    {
+                        "cause": "magic",
+                        "deals_damage": false
                     }
                 ]
             },
@@ -176,7 +177,17 @@
                 "knockback_damage": 10,
                 "knockback_strength": 4,
                 "knockback_range": 7.0,
-                "cooldown_time": 12.0
+                "cooldown_time": 12.0,
+                "damage_filters": {
+                    "test": "is_family",
+                    "subject": "other",
+                    "value": "player"
+                },
+                "knockback_filters": {
+                    "test": "is_family",
+                    "subject": "other",
+                    "value": "player"
+                }
             }
         },
         "component_groups": {
@@ -199,7 +210,17 @@
                     "knockback_damage": 12,
                     "knockback_strength": 4,
                     "knockback_range": 7.0,
-                    "cooldown_time": 8.0
+                    "cooldown_time": 8.0,
+                    "damage_filters": {
+                        "test": "is_family",
+                        "subject": "other",
+                        "value": "player"
+                    },
+                    "knockback_filters": {
+                        "test": "is_family",
+                        "subject": "other",
+                        "value": "player"
+                    }
                 },
                 "minecraft:shooter": {
                     "def": "minecraft:dragon_fireball"
@@ -227,7 +248,17 @@
                     "knockback_damage": 14,
                     "knockback_strength": 5,
                     "knockback_range": 8.0,
-                    "cooldown_time": 6.0
+                    "cooldown_time": 6.0,
+                    "damage_filters": {
+                        "test": "is_family",
+                        "subject": "other",
+                        "value": "player"
+                    },
+                    "knockback_filters": {
+                        "test": "is_family",
+                        "subject": "other",
+                        "value": "player"
+                    }
                 },
                 "minecraft:shooter": {
                     "def": "minecraft:dragon_fireball"

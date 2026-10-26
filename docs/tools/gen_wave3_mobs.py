@@ -415,7 +415,8 @@ def build_beh(stem, spec):
         'minecraft:movement.basic': {},
         'minecraft:jump.static': {},
         'minecraft:behavior.float': {'priority': 0},
-        'minecraft:behavior.hurt_by_target': {'priority': 1},
+        # 不写 hurt_by_target：龙息云/咆哮擦到同族时会立刻反击，引发内讧；
+        # 玩家目标由下面的 nearest_attackable_target 负责。
         # 仇恨范围：必须看得见（must_see）+ 有限距离，避免隔墙全图追人
         'minecraft:behavior.nearest_attackable_target': {
             'priority': 2, 'must_see': True, 'reselect_targets': True,
@@ -443,11 +444,13 @@ def build_beh(stem, spec):
             'attack_radius': 18.0, 'speed_multiplier': 1.0}
     # 受击标记：damage_sensor 抛事件 → 加 is_sheared + 0.45s timer → 自动解除
     # （参考天启之境 melee_soldier 的纯 JSON 写法，不需要脚本）
-    # 友伤免疫必须排在第一位：龙裔家族互相打不掉血 → 不会触发 hurt_by_target 内讧
+    # 友伤免疫必须排在第一位：龙裔家族互相打不掉血
+    # 第二条挡龙息云（magic）：原版 dragon_fireball 的 AoE 云会伤到同族
     comps['minecraft:damage_sensor'] = {'triggers': [
         {'on_damage': {'filters': {'test': 'is_family', 'subject': 'other',
                                    'value': 'dragonkin'},
                        'deals_damage': False}},
+        {'cause': 'magic', 'deals_damage': False},
         {'on_damage': {'event': f'fycq:{stem}_hurt'}, 'deals_damage': True}]}
 
     for sk in b.get('skills', []):
@@ -456,11 +459,14 @@ def build_beh(stem, spec):
             comps['minecraft:behavior.leap_at_target'] = {
                 'priority': sk['priority'], 'target_dist': sk['target_dist']}
         elif kind == 'knockback_roar':
+            # 必须限定玩家：默认会对范围内所有实体生效，会把同族卷进内讧
             comps['minecraft:behavior.knockback_roar'] = {
                 'priority': sk['priority'], 'duration': sk['duration'],
                 'attack_time': sk['attack_time'], 'knockback_damage': sk['damage'],
                 'knockback_strength': sk['strength'], 'knockback_range': sk['range'],
-                'cooldown_time': sk['cooldown']}
+                'cooldown_time': sk['cooldown'],
+                'damage_filters': {'test': 'is_family', 'subject': 'other', 'value': 'player'},
+                'knockback_filters': {'test': 'is_family', 'subject': 'other', 'value': 'player'}}
         elif kind == 'area_attack':
             comps['minecraft:area_attack'] = {
                 'priority': sk['priority'], 'cause': 'entity_attack',
