@@ -32,6 +32,11 @@ GEAR = {
     'fycq:dragon_scale_chestplate': '龙鳞胸甲',
     'fycq:dragon_scale_leggings': '龙鳞护腿',
     'fycq:dragon_scale_boots': '龙鳞靴',
+    'fycq:dragon_fang_sword_awakened': '龙牙剑·觉醒',
+    'fycq:dragon_scale_helmet_awakened': '龙鳞头盔·觉醒',
+    'fycq:dragon_scale_chestplate_awakened': '龙鳞胸甲·觉醒',
+    'fycq:dragon_scale_leggings_awakened': '龙鳞护腿·觉醒',
+    'fycq:dragon_scale_boots_awakened': '龙鳞靴·觉醒',
 }
 
 

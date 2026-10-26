@@ -4,26 +4,26 @@
    "actor": 4,
    "egg": 4,
    "food": 1,
-   "material": 4,
-   "other": 4,
+   "material": 5,
+   "other": 8,
    "plain": 7,
    "tab": 1,
-   "tool": 5
+   "tool": 6
   },
   "by_mod": {
-   "dragonkin-relic": 30
+   "dragonkin-relic": 36
   },
   "by_namespace": {
-   "fycq": 30
+   "fycq": 36
   },
   "by_tab": {
    "-": 1,
-   "drasnea": 29
+   "drasnea": 35
   },
   "by_tag": {},
   "by_theme": {
    "-": 1,
-   "dragon": 29
+   "dragon": 35
   },
   "status": {}
  },
@@ -35,7 +35,7 @@
    "used": 4
   },
   "item": {
-   "used": 14
+   "used": 20
   },
   "spawn_egg": {
    "used": 4
@@ -301,6 +301,23 @@
    "updated_at": 1793034894
   },
   {
+   "created_at": 1793038839,
+   "full_key": "fycq:dragon_fang_sword_awakened",
+   "holder": "gen_wave4",
+   "key": "dragon_fang_sword_awakened",
+   "kind": "tool",
+   "mod": "dragonkin-relic",
+   "namespace": "fycq",
+   "note": "龙牙剑·觉醒：龙牙剑+龙魂+4龙鳞升级",
+   "reserved_until": null,
+   "status": "used",
+   "tab": "drasnea",
+   "tags": [],
+   "theme": "dragon",
+   "type": "item",
+   "updated_at": 1793039113
+  },
+  {
    "created_at": 1793034894,
    "full_key": "fycq:dragon_heart",
    "holder": "",
@@ -369,6 +386,23 @@
    "updated_at": 1793034894
   },
   {
+   "created_at": 1793038840,
+   "full_key": "fycq:dragon_scale_boots_awakened",
+   "holder": "gen_wave4",
+   "key": "dragon_scale_boots_awakened",
+   "kind": "other",
+   "mod": "dragonkin-relic",
+   "namespace": "fycq",
+   "note": "龙鳞靴·觉醒",
+   "reserved_until": null,
+   "status": "used",
+   "tab": "drasnea",
+   "tags": [],
+   "theme": "dragon",
+   "type": "item",
+   "updated_at": 1793039114
+  },
+  {
    "created_at": 1793034894,
    "full_key": "fycq:dragon_scale_chestplate",
    "holder": "",
@@ -386,6 +420,23 @@
    "updated_at": 1793034894
   },
   {
+   "created_at": 1793038840,
+   "full_key": "fycq:dragon_scale_chestplate_awakened",
+   "holder": "gen_wave4",
+   "key": "dragon_scale_chestplate_awakened",
+   "kind": "other",
+   "mod": "dragonkin-relic",
+   "namespace": "fycq",
+   "note": "龙鳞胸甲·觉醒",
+   "reserved_until": null,
+   "status": "used",
+   "tab": "drasnea",
+   "tags": [],
+   "theme": "dragon",
+   "type": "item",
+   "updated_at": 1793039113
+  },
+  {
    "created_at": 1793034894,
    "full_key": "fycq:dragon_scale_helmet",
    "holder": "",
@@ -401,6 +452,23 @@
    "theme": "dragon",
    "type": "item",
    "updated_at": 1793034894
+  },
+  {
+   "created_at": 1793038840,
+   "full_key": "fycq:dragon_scale_helmet_awakened",
+   "holder": "gen_wave4",
+   "key": "dragon_scale_helmet_awakened",
+   "kind": "other",
+   "mod": "dragonkin-relic",
+   "namespace": "fycq",
+   "note": "龙鳞头盔·觉醒",
+   "reserved_until": null,
+   "status": "used",
+   "tab": "drasnea",
+   "tags": [],
+   "theme": "dragon",
+   "type": "item",
+   "updated_at": 1793039113
   },
   {
    "created_at": 1793034894,
@@ -437,6 +505,23 @@
    "updated_at": 1793034894
   },
   {
+   "created_at": 1793038840,
+   "full_key": "fycq:dragon_scale_leggings_awakened",
+   "holder": "gen_wave4",
+   "key": "dragon_scale_leggings_awakened",
+   "kind": "other",
+   "mod": "dragonkin-relic",
+   "namespace": "fycq",
+   "note": "龙鳞护腿·觉醒",
+   "reserved_until": null,
+   "status": "used",
+   "tab": "drasnea",
+   "tags": [],
+   "theme": "dragon",
+   "type": "item",
+   "updated_at": 1793039113
+  },
+  {
    "created_at": 1793034894,
    "full_key": "fycq:dragon_scale_pickaxe",
    "holder": "",
@@ -469,6 +554,23 @@
    "theme": "dragon",
    "type": "item",
    "updated_at": 1793034894
+  },
+  {
+   "created_at": 1793038839,
+   "full_key": "fycq:dragon_soul",
+   "holder": "gen_wave4",
+   "key": "dragon_soul",
+   "kind": "material",
+   "mod": "dragonkin-relic",
+   "namespace": "fycq",
+   "note": "龙魂：龙蛇玩家击杀保底掉落，用于觉醒装备",
+   "reserved_until": null,
+   "status": "used",
+   "tab": "drasnea",
+   "tags": [],
+   "theme": "dragon",
+   "type": "item",
+   "updated_at": 1793039112
   },
   {
    "created_at": 1793034894,
@@ -766,5 +868,5 @@
   "namespace": ""
  },
  "scoped_to": "模组 dragonkin-relic",
- "server_time": 1793036038
+ "server_time": 1793039114
 }

@@ -1,0 +1,16 @@
+{
+    "format_version": "1.10",
+    "minecraft:item": {
+        "description": {
+            "identifier": "fycq:dragon_soul",
+            "category": "drasnea",
+            "register_to_create_menu": true
+        },
+        "components": {
+            "minecraft:max_stack_size": 64,
+            "netease:customtips": {
+                "value": "§7龙蛇之魂，可将龙裔装备觉醒"
+            }
+        }
+    }
+}

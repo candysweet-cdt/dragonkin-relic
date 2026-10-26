@@ -1,0 +1,22 @@
+{
+    "format_version": "1.10",
+    "minecraft:item": {
+        "description": {
+            "identifier": "fycq:dragon_scale_chestplate_awakened",
+            "category": "drasnea",
+            "register_to_create_menu": true,
+            "custom_item_type": "armor"
+        },
+        "components": {
+            "minecraft:max_stack_size": 1,
+            "minecraft:max_damage": 651,
+            "netease:armor": {
+                "defense": 9,
+                "enchantment": 18,
+                "armor_slot": 1,
+                "toughness": 8,
+                "knockback_resistance": 0.7
+            }
+        }
+    }
+}

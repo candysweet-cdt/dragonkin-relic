@@ -14,6 +14,9 @@
         "fycq:dragon_blood_crystal": {
             "textures": "textures/items/dragon_blood_crystal"
         },
+        "fycq:dragon_soul": {
+            "textures": "textures/items/dragon_soul"
+        },
         "fycq:dragon_fang_sword": {
             "textures": "textures/items/dragon_fang_sword"
         },
@@ -29,6 +32,9 @@
         "fycq:dragon_scale_hoe": {
             "textures": "textures/items/dragon_scale_hoe"
         },
+        "fycq:dragon_fang_sword_awakened": {
+            "textures": "textures/items/dragon_fang_sword_awakened"
+        },
         "fycq:dragon_scale_helmet": {
             "textures": "textures/items/dragon_scale_helmet"
         },
@@ -40,6 +46,18 @@
         },
         "fycq:dragon_scale_boots": {
             "textures": "textures/items/dragon_scale_boots"
+        },
+        "fycq:dragon_scale_helmet_awakened": {
+            "textures": "textures/items/dragon_scale_helmet_awakened"
+        },
+        "fycq:dragon_scale_chestplate_awakened": {
+            "textures": "textures/items/dragon_scale_chestplate_awakened"
+        },
+        "fycq:dragon_scale_leggings_awakened": {
+            "textures": "textures/items/dragon_scale_leggings_awakened"
+        },
+        "fycq:dragon_scale_boots_awakened": {
+            "textures": "textures/items/dragon_scale_boots_awakened"
         },
         "fycq:zz_drasnea_egg": {
             "textures": "textures/items/zz_drasnea_egg"

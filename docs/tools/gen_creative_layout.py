@@ -39,7 +39,8 @@ GROUPS = [
         'name': 'drasnea_tool',
         'label': '龙裔工具',
         'icon': 'dragon_fang_sword',
-        'list': ['dragon_fang_sword', 'dragon_scale_pickaxe', 'dragon_scale_axe',
+        'list': ['dragon_fang_sword', 'dragon_fang_sword_awakened',
+                 'dragon_scale_pickaxe', 'dragon_scale_axe',
                  'dragon_scale_shovel', 'dragon_scale_hoe'],
     },
     {
@@ -47,11 +48,14 @@ GROUPS = [
         'label': '龙裔盔甲',
         'icon': 'dragon_scale_helmet',
         'list': ['dragon_scale_helmet', 'dragon_scale_chestplate',
-                 'dragon_scale_leggings', 'dragon_scale_boots'],
+                 'dragon_scale_leggings', 'dragon_scale_boots',
+                 'dragon_scale_helmet_awakened', 'dragon_scale_chestplate_awakened',
+                 'dragon_scale_leggings_awakened', 'dragon_scale_boots_awakened'],
     },
 ]
 
-MATERIALS = ['dragon_scale', 'dragon_fang', 'dragon_heart', 'dragon_blood_crystal']
+MATERIALS = ['dragon_scale', 'dragon_fang', 'dragon_heart', 'dragon_blood_crystal',
+             'dragon_soul']
 BLOCKS = ['dragon_scale_block', 'dragon_scale_bricks', 'dragon_scale_pillar',
           'dragon_bone_block', 'dragon_crystal_block', 'dragon_crystal_lamp', 'dragon_nest']
 

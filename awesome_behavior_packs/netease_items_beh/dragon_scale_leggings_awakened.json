@@ -1,0 +1,22 @@
+{
+    "format_version": "1.10",
+    "minecraft:item": {
+        "description": {
+            "identifier": "fycq:dragon_scale_leggings_awakened",
+            "category": "drasnea",
+            "register_to_create_menu": true,
+            "custom_item_type": "armor"
+        },
+        "components": {
+            "minecraft:max_stack_size": 1,
+            "minecraft:max_damage": 611,
+            "netease:armor": {
+                "defense": 7,
+                "enchantment": 18,
+                "armor_slot": 2,
+                "toughness": 8,
+                "knockback_resistance": 0.7
+            }
+        }
+    }
+}

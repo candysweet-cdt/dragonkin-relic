@@ -26,8 +26,12 @@ REWARD = (('fycq:dragon_blood_crystal', 3), ('fycq:dragon_scale', 8))
 BLAME_TTL = 60.0
 
 FULL_SET_NODE = 'fycq_dragonkin_full_set'
-FULL_SET = ('fycq:dragon_scale_helmet', 'fycq:dragon_scale_chestplate',
-            'fycq:dragon_scale_leggings', 'fycq:dragon_scale_boots')
+SET_SLOTS = (
+    ('fycq:dragon_scale_helmet', 'fycq:dragon_scale_helmet_awakened'),
+    ('fycq:dragon_scale_chestplate', 'fycq:dragon_scale_chestplate_awakened'),
+    ('fycq:dragon_scale_leggings', 'fycq:dragon_scale_leggings_awakened'),
+    ('fycq:dragon_scale_boots', 'fycq:dragon_scale_boots_awakened'),
+)
 CHECK_EVERY = 150        # tick，5 秒查一次
 INVENTORY_SLOTS = 36
 
@@ -113,7 +117,7 @@ class AchievementServer(ServerSystem):
                 names.add(itemName(itemComp.GetPlayerItem(posType.INVENTORY, slot)))
             for slot in range(4):
                 names.add(itemName(itemComp.GetPlayerItem(posType.ARMOR, slot)))
-            if all(name in names for name in FULL_SET):
+            if all(any(name in names for name in slot) for slot in SET_SLOTS):
                 compFactory.CreateAchievement(LEVEL_ID).SetNodeFinish(playerId, FULL_SET_NODE)
                 self.fullSetDone.add(playerId)
                 print('[fycq-achievement] full set by %s' % playerId)

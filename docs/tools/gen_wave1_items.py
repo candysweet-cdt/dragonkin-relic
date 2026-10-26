@@ -19,6 +19,7 @@ MATERIALS = {
     'dragon_fang': '龙牙',
     'dragon_heart': '龙心',
     'dragon_blood_crystal': '龙血结晶',
+    'dragon_soul': '龙魂',
 }
 
 # 工具/武器：netease:weapon 的 type 选项是 sword / shovel / pickaxe / hatchet / hoe
@@ -34,6 +35,17 @@ TOOLS = {
     'dragon_scale_axe': ('龙鳞斧', 'hatchet', 9, TOOL_DURABILITY, 12),
     'dragon_scale_shovel': ('龙鳞锹', 'shovel', 7, TOOL_DURABILITY, 12),
     'dragon_scale_hoe': ('龙鳞锄', 'hoe', 3, TOOL_DURABILITY, 12),
+}
+
+# 觉醒档：龙牙剑 + 龙魂 + 4 龙鳞；四件甲各 +1 防御、+2 韧性、+10% 耐久
+AWAKENED_TOOLS = {
+    'dragon_fang_sword_awakened': ('龙牙剑·觉醒', 'sword', 13, 2800, 20),
+}
+AWAKENED_ARMORS = {
+    'dragon_scale_helmet_awakened': ('龙鳞头盔·觉醒', 0, 4, 448, 'helmet', 'helmet_layer_visible'),
+    'dragon_scale_chestplate_awakened': ('龙鳞胸甲·觉醒', 1, 9, 651, 'chestplate', 'chest_layer_visible'),
+    'dragon_scale_leggings_awakened': ('龙鳞护腿·觉醒', 2, 7, 611, 'leggings', 'leg_layer_visible'),
+    'dragon_scale_boots_awakened': ('龙鳞靴·觉醒', 3, 4, 529, 'boots', 'boot_layer_visible'),
 }
 
 # 盔甲：armor_slot 0头 1胸 2腿 3靴；defense 取下界与钻石同档
@@ -139,6 +151,8 @@ def main():
             # 让稀有掉落有实际去处：可在附魔台当材料（原版青金石位）
             comps['netease:enchant_material'] = {'value': True}
             comps['netease:customtips'] = {'value': '§7可作附魔材料'}
+        if ident == 'dragon_soul':
+            comps['netease:customtips'] = {'value': '§7龙蛇之魂，可将龙裔装备觉醒'}
         dump(os.path.join(BP, 'netease_items_beh', ident + '.json'), item_beh(ident, comps))
         names[ident] = cn
 
@@ -157,6 +171,26 @@ def main():
                 'attack_damage': dmg,
                 'enchantment': ench,
             },
+        }
+        if wtype == 'sword':
+            comps['netease:customtips'] = {'value': '§7右键释放龙息斩（12 秒冷却）'}
+        dump(os.path.join(BP, 'netease_items_beh', ident + '.json'), item_beh(ident, comps, 'weapon'))
+        names[ident] = cn
+
+    # 觉醒武器
+    for ident, (cn, wtype, dmg, dura, ench) in AWAKENED_TOOLS.items():
+        comps = {
+            'minecraft:max_stack_size': 1,
+            'minecraft:max_damage': dura,
+            'minecraft:hand_equipped': True,
+            'netease:weapon': {
+                'type': wtype,
+                'level': 3,
+                'speed': TOOL_SPEED,
+                'attack_damage': dmg,
+                'enchantment': ench,
+            },
+            'netease:customtips': {'value': '§7右键释放更强的龙息斩（12 秒冷却）'},
         }
         dump(os.path.join(BP, 'netease_items_beh', ident + '.json'), item_beh(ident, comps, 'weapon'))
         names[ident] = cn
@@ -184,6 +218,39 @@ def main():
                     'materials': {'default': 'armor', 'enchanted': 'armor_enchanted'},
                     'textures': {
                         'default': f'textures/models/armor/dragon_scale_{layer}',
+                        'enchanted': 'textures/misc/enchanted_item_glint',
+                    },
+                    'geometry': {'default': f'geometry.humanoid.armor.{geo}'},
+                    'scripts': {'parent_setup': f'variable.{var} = 0.0;'},
+                    'render_controllers': ['controller.render.armor'],
+                },
+            },
+        })
+
+    # 觉醒盔甲（甲片用 *_awakened_1/2）
+    for ident, (cn, slot, defense, dura, geo, var) in AWAKENED_ARMORS.items():
+        comps = {
+            'minecraft:max_stack_size': 1,
+            'minecraft:max_damage': dura,
+            'netease:armor': {
+                'defense': defense,
+                'enchantment': 18,
+                'armor_slot': slot,
+                'toughness': 8,
+                'knockback_resistance': 0.7,
+            },
+        }
+        dump(os.path.join(BP, 'netease_items_beh', ident + '.json'), item_beh(ident, comps, 'armor'))
+        names[ident] = cn
+        layer = 2 if slot == 2 else 1
+        dump(os.path.join(RP, 'attachables', ident + '.json'), {
+            'format_version': '1.8.0',
+            'minecraft:attachable': {
+                'description': {
+                    'identifier': fid(ident),
+                    'materials': {'default': 'armor', 'enchanted': 'armor_enchanted'},
+                    'textures': {
+                        'default': f'textures/models/armor/dragon_scale_awakened_{layer}',
                         'enchanted': 'textures/misc/enchanted_item_glint',
                     },
                     'geometry': {'default': f'geometry.humanoid.armor.{geo}'},
@@ -224,7 +291,8 @@ def main():
         names[ident] = cn
 
     # 资源包物品定义
-    all_ids = list(MATERIALS) + list(TOOLS) + list(ARMORS) + list(EGGS) + list(CONSUMABLES)
+    all_ids = (list(MATERIALS) + list(TOOLS) + list(AWAKENED_TOOLS) + list(ARMORS)
+               + list(AWAKENED_ARMORS) + list(EGGS) + list(CONSUMABLES))
     for ident in all_ids:
         extra = {'minecraft:use_animation': 'drink'} if ident in CONSUMABLES else None
         dump(os.path.join(RP, 'netease_items_res', ident + '.json'), item_res(ident, extra))
@@ -263,8 +331,17 @@ def main():
         'dragon_blood_dew': shapeless('dragon_blood_dew',
                                       [fid('dragon_blood_crystal'), 'minecraft:glass_bottle'], 1),
     }
+    # 觉醒：原装备 + 1 龙魂 + 龙鳞
+    recipes['upgrade_dragon_fang_sword'] = shapeless(
+        'upgrade_dragon_fang_sword',
+        [fid('dragon_fang_sword'), fid('dragon_soul'), S, S, S, S], 1,
+        result=fid('dragon_fang_sword_awakened'))
+    for stem in AWAKENED_ARMORS:
+        base = stem[:-len('_awakened')]
+        recipes['upgrade_' + stem] = shapeless(
+            'upgrade_' + stem, [fid(base), fid('dragon_soul'), S, S], 1, result=fid(stem))
     # 重铸（铁砧修复若不生效时的保底）：同一件 + 2 龙鳞 → 全新一件
-    for stem in list(TOOLS) + list(ARMORS):
+    for stem in (list(TOOLS) + list(AWAKENED_TOOLS) + list(ARMORS) + list(AWAKENED_ARMORS)):
         recipes['repair_' + stem] = shapeless('repair_' + stem, [fid(stem), S_SCALE, S_SCALE],
                                                 1, result=fid(stem))
     for ident, body in recipes.items():
@@ -302,6 +379,16 @@ def main():
                 'entries': [{
                     'type': 'item',
                     'name': fid('dragon_heart'),
+                    'weight': 1,
+                    'functions': [{'function': 'set_count', 'count': {'min': 1, 'max': 1}}],
+                }],
+                'conditions': [{'condition': 'killed_by_player'}],
+            },
+            {
+                'rolls': 1,
+                'entries': [{
+                    'type': 'item',
+                    'name': fid('dragon_soul'),
                     'weight': 1,
                     'functions': [{'function': 'set_count', 'count': {'min': 1, 'max': 1}}],
                 }],

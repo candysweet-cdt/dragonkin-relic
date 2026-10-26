@@ -17,6 +17,9 @@
                 "speed": 10,
                 "attack_damage": 10,
                 "enchantment": 18
+            },
+            "netease:customtips": {
+                "value": "§7右键释放龙息斩（12 秒冷却）"
             }
         }
     }

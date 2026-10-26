@@ -5,6 +5,7 @@
             "icon": "fycq:dragon_fang_sword",
             "list": [
                 "fycq:dragon_fang_sword",
+                "fycq:dragon_fang_sword_awakened",
                 "fycq:dragon_scale_pickaxe",
                 "fycq:dragon_scale_axe",
                 "fycq:dragon_scale_shovel",
@@ -18,7 +19,11 @@
                 "fycq:dragon_scale_helmet",
                 "fycq:dragon_scale_chestplate",
                 "fycq:dragon_scale_leggings",
-                "fycq:dragon_scale_boots"
+                "fycq:dragon_scale_boots",
+                "fycq:dragon_scale_helmet_awakened",
+                "fycq:dragon_scale_chestplate_awakened",
+                "fycq:dragon_scale_leggings_awakened",
+                "fycq:dragon_scale_boots_awakened"
             ]
         }
     ]

@@ -7,7 +7,7 @@
     "finished_icon": "textures/items/dragon_scale_chestplate",
     "use_default_icon_background": true,
     "goal_number": 1,
-    "node_description": "同时拥有龙鳞头盔、胸甲、护腿、靴",
+    "node_description": "同时拥有/穿戴龙鳞四件套（原版或觉醒混搭）",
     "is_hidden": false,
     "finish_tip": true,
     "is_cloud": false,

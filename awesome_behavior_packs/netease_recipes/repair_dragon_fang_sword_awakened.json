@@ -1,0 +1,28 @@
+{
+    "format_version": "1.12",
+    "minecraft:recipe_shapeless": {
+        "description": {
+            "identifier": "fycq:repair_dragon_fang_sword_awakened"
+        },
+        "tags": [
+            "crafting_table"
+        ],
+        "ingredients": [
+            {
+                "item": "fycq:dragon_fang_sword_awakened"
+            },
+            {
+                "item": "fycq:dragon_scale"
+            },
+            {
+                "item": "fycq:dragon_scale"
+            }
+        ],
+        "result": [
+            {
+                "item": "fycq:dragon_fang_sword_awakened",
+                "count": 1
+            }
+        ]
+    }
+}

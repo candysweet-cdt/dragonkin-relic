@@ -1,0 +1,31 @@
+{
+    "format_version": "1.12",
+    "minecraft:recipe_shapeless": {
+        "description": {
+            "identifier": "fycq:upgrade_dragon_scale_helmet_awakened"
+        },
+        "tags": [
+            "crafting_table"
+        ],
+        "ingredients": [
+            {
+                "item": "fycq:dragon_scale_helmet"
+            },
+            {
+                "item": "fycq:dragon_soul"
+            },
+            {
+                "item": "fycq:dragon_scale"
+            },
+            {
+                "item": "fycq:dragon_scale"
+            }
+        ],
+        "result": [
+            {
+                "item": "fycq:dragon_scale_helmet_awakened",
+                "count": 1
+            }
+        ]
+    }
+}

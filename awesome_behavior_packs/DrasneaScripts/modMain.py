@@ -1,13 +1,15 @@
 # -*- coding: utf-8 -*-
 """脚本入口。
 
-六个服务端系统：
+八个服务端系统：
   · DrasneaProbeServer —— 只读探针（打 [fycq-probe] 日志，验证事件与血量可读）
   · AggroGuardServer   —— 创造/旁观玩家不被追逐（JSON 无 is_creative 过滤器，只能脚本兜底）
   · RepairStationServer —— 龙巢修复（手拿装备右键龙巢，消耗龙鳞回满耐久）
-  · AltarSummonServer  —— 龙巢召唤（主手龙心 + 4 龙鳞右键龙巢）
-  · AchievementServer  —— 首杀成就（按玩家各算一次，弹成就 + 奖励）
+  · AltarSummonServer  —— 龙巢召唤（首召 8 龙鳞，之后 1 龙心 + 4 龙鳞）
+  · AchievementServer  —— 4 个成就（首杀/首召/10 幼龙/集齐四件套）
   · DragonBreathServer —— BOSS 龙息火球的落地云 5 秒后销毁（原版 120 秒）
+  · DragonSetBonusServer —— 龙鳞四件套：抗火 I + 生命恢复 I
+  · DragonSlashServer  —— 龙牙剑右键龙息斩（12 秒冷却）
 一个客户端系统：
   · DrasneaProbeClient —— 只确认客户端脚本加载
 """
@@ -40,6 +42,10 @@ class DrasneaScriptsMod(object):
                                  MOD_NAME + '.achievementServer.AchievementServer')
         serverApi.RegisterSystem(MOD_NAME, 'DragonBreathServer',
                                  MOD_NAME + '.dragonBreath.DragonBreathServer')
+        serverApi.RegisterSystem(MOD_NAME, 'DragonSetBonusServer',
+                                 MOD_NAME + '.dragonSetBonus.DragonSetBonusServer')
+        serverApi.RegisterSystem(MOD_NAME, 'DragonSlashServer',
+                                 MOD_NAME + '.dragonSlash.DragonSlashServer')
 
     @Mod.DestroyServer()
     def destroyServer(self):

@@ -659,6 +659,38 @@ def check_whelp_flight(data):
     print('幼龙飞行: hover 导航已核对')
 
 
+def check_combat_scripts():
+    """套装效果与龙息斩：脚本存在、关键常量齐全、modMain 已注册。"""
+    main_src = open(os.path.join(BP, 'DrasneaScripts', 'modMain.py'), encoding='utf-8').read()
+    slash = os.path.join(BP, 'DrasneaScripts', 'dragonSlash.py')
+    bonus = os.path.join(BP, 'DrasneaScripts', 'dragonSetBonus.py')
+    if not os.path.isfile(slash):
+        bad('缺 DrasneaScripts/dragonSlash.py —— 龙息斩不生效')
+    else:
+        src = open(slash, encoding='utf-8').read()
+        for const in ('fycq:dragon_fang_sword', 'fycq:dragon_fang_sword_awakened'):
+            if "'" + const + "'" not in src:
+                bad(f'dragonSlash.py 缺 {const}')
+        for token in ('GetDirFromRot', 'CreateHurt', 'COOLDOWN', 'ServerItemTryUseEvent'):
+            if token not in src:
+                bad(f'dragonSlash.py 缺 {token}')
+        if 'DragonSlashServer' not in main_src:
+            bad('modMain.py 没有注册 DragonSlashServer')
+    if not os.path.isfile(bonus):
+        bad('缺 DrasneaScripts/dragonSetBonus.py —— 套装效果不生效')
+    else:
+        src = open(bonus, encoding='utf-8').read()
+        for const in ('fycq:dragon_scale_helmet', 'fycq:dragon_scale_boots_awakened'):
+            if "'" + const + "'" not in src:
+                bad(f'dragonSetBonus.py 缺 {const}')
+        for token in ('fire_resistance', 'regeneration', 'ARMOR'):
+            if token not in src:
+                bad(f'dragonSetBonus.py 缺 {token}')
+        if 'DragonSetBonusServer' not in main_src:
+            bad('modMain.py 没有注册 DragonSetBonusServer')
+    print('套装/龙息斩: 脚本与注册已核对')
+
+
 def check_breath():
     """龙息云清理脚本：存在、注册、常量指向真实 ID。"""
     script = os.path.join(BP, 'DrasneaScripts', 'dragonBreath.py')
@@ -1011,6 +1043,7 @@ def main():
     check_wing_edges()
     check_spawn_rules(data)
     check_whelp_flight(data)
+    check_combat_scripts()
     check_breath()
     check_altar_summon()
     check_achievements(data)
