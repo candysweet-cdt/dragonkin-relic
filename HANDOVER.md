@@ -123,6 +123,12 @@
     两个脚本细节：`ServerBlockUseEvent` 才是**自定义方块**的右键事件（`ServerItemUseOnEvent` 对带使用逻辑的方块不触发）；`SetItemDurability` 在方块/物品事件里直接调用会失效，必须 `AddTimer(0.05)` 延后。
     守卫：`check_repair_paths` 要求每件有耐久的装备都有重铸配方、**禁止** `minecraft:repairable`，且 `repairStation.py` 的 GEAR 必须覆盖全部有耐久装备。
 
+20. **龙巢召唤 + 自定义成就（2026-10-27）**：两套机制都监听 `ServerBlockUseEvent`（自定义方块右键），按手持物分流：龙心 = 召唤、龙裔装备 = 修复。
+    召唤前用 `CreateGame(playerId).GetEntitiesAround(playerId, 32, {'test': 'is_family', 'subject': 'other', 'value': 'drasnea'})` 防叠 BOSS，`CreateBlockInfo(levelId).GetBlockNew(...)` 检查上方 4 格净空；`CreateEngineEntityByTypeStr` 必须传维度，否则会默认生成在主世界。
+    成就节点放 `awesome_behavior_packs/customAchievements/*.json`：图标写 `textures/items/xxx`（不带 `.png`，相对资源包根）；本包**不配 `goal_details`**，由 `achievementServer.py` 在 `MobDieEvent` 里 `CreateAchievement(levelId).SetNodeFinish(playerId, nodeId)`，和奖励同批触发、按玩家各算一次；玩家标记走 `CreateExtraData(playerId)`（随存档保存）。
+    奖励用 `SpawnItemToPlayerInv`，返回 False（背包满）时用 `CreateEngineItemEntity` 掉在脚下；`MobDieEvent` 回调里不能改手持物品，发奖/发提示统一 `AddTimer(0.05)` 延后。
+    守卫：`check_altar_summon` / `check_achievements`（脚本常量、modMain 注册、节点字段、图标存在、finish_tip、脚本覆盖 node_ID）。
+
 ## 4. 当前内容
 
 - BOSS `fycq:drasnea`：500 血、29 组件、4 段动画（idle/move/attack/death）、原版 BOSS 血条、火球三连 + 冲撞、专属掉落、不自然刷怪（`spawn_rules` 已删，靠刷怪蛋/`/summon`）
@@ -133,6 +139,8 @@
 - **龙蛇三阶段**（脚本 `bossPhase.py`，阈值 66% / 33%）：phase2 移速 0.36 / 伤害 16 / 震地 CD 8 / **龙息火球 + 冲锋** / 血条「龙蛇·血怒」；phase3 移速 0.42 / 伤害 22 / 震地 CD 6 / **贴身灼烧 area_attack** / 血条「龙蛇·狂怒」
 - **限量召唤**：JSON 的 `summon_entity` 全部移除（无数量上限），改由脚本每 10s 招一波；**按召唤者独立计数**：每只龙蛇最多 6 只、每只祭司最多 2 只；**蛋召/野生的幼龙不计入、不受限**
 - **修复**：工具铁砧只能用**钻石**（`netease:weapon.level=3` 决定），盔甲铁砧修不了（无修复材料字段）；`minecraft:repairable` 实测不生效、已撤。龙鳞路线 = **龙巢修复**（手拿装备右键龙巢，1 龙鳞 = 25% 最大耐久，保留附魔）+ **重铸配方**（装备 + 2 龙鳞 → 新件，重置耐久与附魔）
+- **龙巢召唤**：主手龙心 + 背包 4 龙鳞，右键龙巢召唤一只龙蛇；8 秒玩家冷却、附近 32 格已有龙蛇/上方不足 4 格净空/材料不够均拒绝且不扣材料
+- **首杀成就（按玩家各算）**：`customAchievements/dragonkin_first_kill.json` + `achievementServer.py`；每个玩家第一次击杀龙蛇弹「龙裔猎人」成就，发 龙血结晶 ×3 + 龙鳞 ×8，ExtraData 防重复
 - 技能：BOSS 震地怒吼（击退 4 格、伤 10）+ 召唤 2 只幼龙；龙祭司召唤 1 只幼龙 + 火球；龙卫震地怒吼 + 贴身范围伤害；幼龙扑咬
 - 音效：`sound_effects` 短名 + 动画时间轴播放（复用原版音效事件）
 - 掉落：每只都有保底池 + 稀有池（`random_chance_with_looting` 受抢夺加成）：BOSS 35% 龙血结晶、龙卫 12% 龙血结晶、祭司 5% 龙心
@@ -141,18 +149,10 @@
 
 ## 5. 待办
 
+- **实机验收**：按 `docs/验收清单.md` 跑（三阶段、召唤上限、龙巢修复/召唤、首杀成就、斧伤手感、三只小怪的动画/音效/掉落）
 - **波 3 收尾**：三只生物目前**只能靠刷怪蛋/`/summon` 出现**（没写 `spawn_rules`，不自然刷）；要不要给它们配自然刷怪群系、以及幼龙是否真要飞（现在 `has_gravity: true` 走地，翅膀只作动画）待定
-- **实机验收**：三只的体型/剪影离线已用 mc_preview 核过（`preview/wave3_models_v2.png`），但动画播放、`query.is_charging` 攻击态、音效事件名、掉落表实际产出仍需进游戏确认
-- **脚本只读探针（已实机验证通过，2026-10-27）**：`awesome_behavior_packs/DrasneaScripts/`（`modMain.py` + `probeServer.py` + `probeClient.py` + `aggroGuard.py`）。日志前缀 `[fycq-probe]`，判据：
-  1. 进世界后出现 `server system ready` → ModSDK 加载成功
-  2. 出现 `client system ready` → 客户端脚本也加载
-  3. 召唤/生成本包生物 → `add fycq:dragon_whelp id=... pos=(...) hp=...`
-  4. 打它一下 → `hurt fycq:... cause=... dmg=... hp=...`（证明能读血量）
-  5. 打死 → `die fycq:... attacker=... cause=...`
-  若**一条都没有**，先查 MCStudio 工程的 `studio.json` 里 `"CodeEnable": false` 是否门控脚本（本包一直是 false，未验证过含义）。
-  探针通过后再做：血量三阶段、屏幕 BOSS 血条、祭坛交互召唤、首杀成就。
-- **血量三阶段 / 屏幕血条 / 祭坛交互 / 首杀成就**：纯 JSON 做不到（网易无 BossBar 接口，实体 JSON 无血量过滤器），依赖上一条探针通过后再做
-- 数值平衡：龙鳞获取量（BOSS 掉 4–8、幼龙 1–2、祭司 1–3、龙卫 2–4）与四件套成本（5/8/7/4）是否合理，等实机手感
+- **数值平衡**：龙鳞获取量、四件套成本、龙巢召唤代价（1 心 + 4 鳞）与首杀奖励（3 结晶 + 8 鳞）是否合理，等实机手感
+- 屏幕 BOSS 血条 UI：**作者明确不做**，沿用原版顶部 BOSS 条
 
 ## 6. 快照
 

@@ -560,6 +560,65 @@ def check_repair_paths(data):
     print(f'修复路径: {len(durable)} 件有耐久装备已核对（重铸配方 + 龙巢修复覆盖）')
 
 
+def check_altar_summon():
+    """龙巢召唤脚本与注册：常量指向真实 ID，modMain 确实注册了系统。"""
+    script = os.path.join(BP, 'DrasneaScripts', 'altarSummon.py')
+    if not os.path.isfile(script):
+        bad('缺 DrasneaScripts/altarSummon.py —— 龙巢召唤不生效')
+    else:
+        src = open(script, encoding='utf-8').read()
+        for const in ('fycq:dragon_nest', 'fycq:dragon_heart', 'fycq:dragon_scale', 'fycq:drasnea'):
+            if "'" + const + "'" not in src:
+                bad(f'altarSummon.py 缺常量 {const}')
+        main_src = open(os.path.join(BP, 'DrasneaScripts', 'modMain.py'), encoding='utf-8').read()
+        if 'AltarSummonServer' not in main_src:
+            bad('modMain.py 没有注册 AltarSummonServer，龙巢召唤不会加载')
+    print('龙巢召唤: 脚本与注册已核对')
+
+
+def check_achievements(data):
+    """自定义成就节点：字段完整、图标存在、finish_tip 打开，且脚本确实会完成该节点。"""
+    nodes = [(p, d) for p, d in data.items() if os.sep + 'customAchievements' + os.sep in p]
+    if not nodes:
+        bad('缺 customAchievements/ 节点 —— 首杀不会弹成就')
+        return
+    ids = set()
+    for path, d in nodes:
+        name = os.path.basename(path)
+        node = d.get('node_ID')
+        if not node:
+            bad(f'{name} 缺 node_ID')
+            continue
+        if node in ids:
+            bad(f'{name} 的 node_ID {node} 重复')
+        ids.add(node)
+        for key in ('title', 'unfinished_icon', 'finished_icon', 'node_description'):
+            if not d.get(key):
+                bad(f'{name} 缺 {key}')
+        if not isinstance(d.get('goal_number'), int) or d.get('goal_number', 0) < 1:
+            bad(f'{name} 的 goal_number 必须是正整数')
+        if d.get('finish_tip') is not True:
+            bad(f'{name} 的 finish_tip 不是 true —— 完成时不会弹成就')
+        if 'parent_node' not in d and not d.get('window_background'):
+            bad(f'{name} 是根节点但没有 window_background')
+        for key in ('unfinished_icon', 'finished_icon'):
+            icon = d.get(key)
+            if icon and not os.path.isfile(os.path.join(RP, icon + '.png')):
+                bad(f'{name} 的 {key} 指向不存在的贴图 {icon}.png')
+    script = os.path.join(BP, 'DrasneaScripts', 'achievementServer.py')
+    if not os.path.isfile(script):
+        bad('缺 DrasneaScripts/achievementServer.py —— 成就不会完成/发奖')
+    else:
+        src = open(script, encoding='utf-8').read()
+        for node in ids:
+            if "'" + node + "'" not in src:
+                bad(f'achievementServer.py 没有完成节点 {node}')
+        main_src = open(os.path.join(BP, 'DrasneaScripts', 'modMain.py'), encoding='utf-8').read()
+        if 'AchievementServer' not in main_src:
+            bad('modMain.py 没有注册 AchievementServer，首杀成就不会加载')
+    print(f'自定义成就: {len(nodes)} 个节点（字段/图标/弹窗/脚本覆盖）')
+
+
 def check_summon_cap(data):
     """本包禁止 JSON 的 behavior.summon_entity：它没有数量上限，多只 BOSS/祭司会堆爆刷怪量。
     召唤统一走脚本 bossPhase.py（全场幼龙 ≤ 8）。"""
@@ -779,6 +838,8 @@ def main():
     check_aggression(data)
     check_weapon_balance(data)
     check_repair_paths(data)
+    check_altar_summon()
+    check_achievements(data)
     check_summon_cap(data)
     check_entity_events(data)
     check_id_registry(data)
