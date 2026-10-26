@@ -1,0 +1,5 @@
+# 这两个是 idreg 生成物：镜像由 `mirror` 以 LF + sort_keys 写出，客户端副本要跟运维仓权威源比 sha256。
+# 本机 core.autocrlf=true，不固定行尾的话 checkout 出来是 CRLF ⇒ 重跑 mirror 整文件 diff、
+# 副本还可能被包内守卫误判成漂移。
+docs/tools/id_registry.json text eol=lf
+docs/tools/idreg.py text eol=lf
