@@ -124,6 +124,10 @@ def main():
         if ident == 'dragon_heart':
             # 不配 minecraft:foil：附魔光效会把暗红底染成品红，材料件不该发光
             comps['netease:customtips'] = {'value': '§7龙蛇的心脏，仍在跳动'}
+        if ident == 'dragon_blood_crystal':
+            # 让稀有掉落有实际去处：可在附魔台当材料（原版青金石位）
+            comps['netease:enchant_material'] = {'value': True}
+            comps['netease:customtips'] = {'value': '§7可作附魔材料'}
         dump(os.path.join(BP, 'netease_items_beh', ident + '.json'), item_beh(ident, comps))
         names[ident] = cn
 
