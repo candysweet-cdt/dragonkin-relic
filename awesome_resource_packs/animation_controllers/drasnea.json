@@ -1,0 +1,65 @@
+{
+    "format_version": "1.10.0",
+    "animation_controllers": {
+        "controller.animation.drasnea": {
+            "initial_state": "default",
+            "states": {
+                "default": {
+                    "animations": [
+                        "idle"
+                    ],
+                    "blend_transition": 0.2,
+                    "transitions": [
+                        {
+                            "death": "query.is_alive == 0.0"
+                        },
+                        {
+                            "attack": "query.is_delayed_attacking == 1"
+                        },
+                        {
+                            "move": "query.modified_move_speed > 0.05"
+                        }
+                    ]
+                },
+                "move": {
+                    "animations": [
+                        "move"
+                    ],
+                    "blend_transition": 0.2,
+                    "transitions": [
+                        {
+                            "death": "query.is_alive == 0.0"
+                        },
+                        {
+                            "attack": "query.is_delayed_attacking == 1"
+                        },
+                        {
+                            "default": "query.modified_move_speed <= 0.05"
+                        }
+                    ]
+                },
+                "attack": {
+                    "animations": [
+                        "idle",
+                        "attack"
+                    ],
+                    "blend_transition": 0.1,
+                    "transitions": [
+                        {
+                            "death": "query.is_alive == 0.0"
+                        },
+                        {
+                            "default": "query.is_delayed_attacking != 1"
+                        }
+                    ]
+                },
+                "death": {
+                    "animations": [
+                        "death"
+                    ],
+                    "transitions": []
+                }
+            }
+        }
+    }
+}

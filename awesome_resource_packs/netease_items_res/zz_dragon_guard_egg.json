@@ -1,0 +1,13 @@
+{
+    "format_version": "1.10",
+    "minecraft:item": {
+        "description": {
+            "identifier": "fycq:zz_dragon_guard_egg",
+            "category": "drasnea",
+            "register_to_create_menu": true
+        },
+        "components": {
+            "minecraft:icon": "fycq:zz_dragon_guard_egg"
+        }
+    }
+}

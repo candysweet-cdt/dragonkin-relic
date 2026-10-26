@@ -1,0 +1,15 @@
+# Python 缓存
+__pycache__/
+*.py[cod]
+
+# MCStudio 实机工程元数据（只存在于实机目录）
+studio.json
+work.mcscfg
+
+# 生成器产出的预览图（本地自检用，不进仓库）
+docs/tools/preview/
+
+# 系统垃圾
+Thumbs.db
+.DS_Store
+desktop.ini

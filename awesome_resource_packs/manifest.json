@@ -1,0 +1,18 @@
+{
+    "format_version": 1,
+    "header": {
+        "description": "V1.0.0",
+        "name": "封印&传奇：龙裔遗骸",
+        "uuid": "b63887dc-72ff-479d-b984-c8135f0897cc",
+        "version": [1,0,0],
+        "min_engine_version": [1,18,0]
+    },
+    "modules": [
+        {
+            "description": "V1.0.0",
+            "type": "resources",
+            "uuid": "c4ff7841-5972-4f59-ab64-d96aa8315cdb",
+            "version": [1,0,0]
+        }
+    ]
+}

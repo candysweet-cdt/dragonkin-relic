@@ -1,0 +1,331 @@
+{
+    "format_version": "1.12.0",
+    "minecraft:geometry": [
+        {
+            "description": {
+                "identifier": "geometry.dragon_priest",
+                "texture_width": 64,
+                "texture_height": 128,
+                "visible_bounds_width": 2,
+                "visible_bounds_height": 3,
+                "visible_bounds_offset": [
+                    0,
+                    1,
+                    0
+                ]
+            },
+            "bones": [
+                {
+                    "name": "root",
+                    "pivot": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "cubes": []
+                },
+                {
+                    "name": "body",
+                    "pivot": [
+                        0,
+                        12,
+                        0
+                    ],
+                    "cubes": [
+                        {
+                            "origin": [
+                                -4,
+                                6,
+                                -2
+                            ],
+                            "size": [
+                                8,
+                                12,
+                                4
+                            ],
+                            "uv": [
+                                0,
+                                0
+                            ]
+                        },
+                        {
+                            "origin": [
+                                -4.4,
+                                15.5,
+                                -2.4
+                            ],
+                            "size": [
+                                9,
+                                2,
+                                5
+                            ],
+                            "uv": [
+                                0,
+                                17
+                            ]
+                        }
+                    ],
+                    "parent": "root"
+                },
+                {
+                    "name": "head",
+                    "pivot": [
+                        0,
+                        18,
+                        0
+                    ],
+                    "cubes": [
+                        {
+                            "origin": [
+                                -4,
+                                18,
+                                -4
+                            ],
+                            "size": [
+                                8,
+                                8,
+                                8
+                            ],
+                            "uv": [
+                                0,
+                                25
+                            ]
+                        },
+                        {
+                            "origin": [
+                                -4.2,
+                                24,
+                                -4.2
+                            ],
+                            "size": [
+                                8,
+                                2,
+                                8
+                            ],
+                            "uv": [
+                                0,
+                                42
+                            ]
+                        },
+                        {
+                            "origin": [
+                                -0.6,
+                                25.6,
+                                -0.6
+                            ],
+                            "size": [
+                                1,
+                                2,
+                                1
+                            ],
+                            "uv": [
+                                49,
+                                42
+                            ]
+                        },
+                        {
+                            "origin": [
+                                -3,
+                                21,
+                                -4.4
+                            ],
+                            "size": [
+                                2,
+                                1,
+                                1
+                            ],
+                            "uv": [
+                                56,
+                                42
+                            ]
+                        },
+                        {
+                            "origin": [
+                                1,
+                                21,
+                                -4.4
+                            ],
+                            "size": [
+                                2,
+                                1,
+                                1
+                            ],
+                            "uv": [
+                                0,
+                                53
+                            ]
+                        }
+                    ],
+                    "parent": "body"
+                },
+                {
+                    "name": "armL",
+                    "pivot": [
+                        5,
+                        16,
+                        0
+                    ],
+                    "cubes": [
+                        {
+                            "origin": [
+                                4,
+                                6,
+                                -2
+                            ],
+                            "size": [
+                                4,
+                                12,
+                                4
+                            ],
+                            "uv": [
+                                9,
+                                53
+                            ]
+                        }
+                    ],
+                    "parent": "body"
+                },
+                {
+                    "name": "armR",
+                    "pivot": [
+                        -5,
+                        16,
+                        0
+                    ],
+                    "cubes": [
+                        {
+                            "origin": [
+                                -8,
+                                6,
+                                -2
+                            ],
+                            "size": [
+                                4,
+                                12,
+                                4
+                            ],
+                            "uv": [
+                                34,
+                                53
+                            ]
+                        }
+                    ],
+                    "parent": "body"
+                },
+                {
+                    "name": "staff",
+                    "pivot": [
+                        -6,
+                        6,
+                        0
+                    ],
+                    "cubes": [
+                        {
+                            "origin": [
+                                -6.6,
+                                2,
+                                -0.6
+                            ],
+                            "size": [
+                                1,
+                                20,
+                                1
+                            ],
+                            "uv": [
+                                0,
+                                70
+                            ]
+                        },
+                        {
+                            "origin": [
+                                -7.4,
+                                21.5,
+                                -1.4
+                            ],
+                            "size": [
+                                3,
+                                3,
+                                3
+                            ],
+                            "uv": [
+                                7,
+                                70
+                            ]
+                        },
+                        {
+                            "origin": [
+                                -7,
+                                20,
+                                -1
+                            ],
+                            "size": [
+                                2,
+                                2,
+                                2
+                            ],
+                            "uv": [
+                                26,
+                                70
+                            ]
+                        }
+                    ],
+                    "parent": "armR"
+                },
+                {
+                    "name": "legL",
+                    "pivot": [
+                        2,
+                        6,
+                        0
+                    ],
+                    "cubes": [
+                        {
+                            "origin": [
+                                0.5,
+                                0,
+                                -2
+                            ],
+                            "size": [
+                                4,
+                                6,
+                                4
+                            ],
+                            "uv": [
+                                39,
+                                70
+                            ]
+                        }
+                    ],
+                    "parent": "root"
+                },
+                {
+                    "name": "legR",
+                    "pivot": [
+                        -2,
+                        6,
+                        0
+                    ],
+                    "cubes": [
+                        {
+                            "origin": [
+                                -4,
+                                0,
+                                -2
+                            ],
+                            "size": [
+                                4,
+                                6,
+                                4
+                            ],
+                            "uv": [
+                                0,
+                                92
+                            ]
+                        }
+                    ],
+                    "parent": "root"
+                }
+            ]
+        }
+    ]
+}

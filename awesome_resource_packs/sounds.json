@@ -1,0 +1,45 @@
+{
+    "entity_sounds": {
+        "entities": {
+            "fycq:drasnea": {
+                "volume": 1.0,
+                "pitch": 0.8,
+                "events": {
+                    "ambient": "mob.enderdragon.growl",
+                    "hurt": "mob.enderdragon.hit",
+                    "death": "mob.enderdragon.death",
+                    "step": "mob.enderdragon.flap"
+                }
+            },
+            "fycq:dragon_whelp": {
+                "volume": 0.7,
+                "pitch": 1.35,
+                "events": {
+                    "ambient": "mob.ghast.warn",
+                    "hurt": "mob.ghast.hurt",
+                    "death": "mob.ghast.death",
+                    "step": "mob.enderdragon.flap"
+                }
+            },
+            "fycq:dragon_priest": {
+                "volume": 0.8,
+                "pitch": 1.0,
+                "events": {
+                    "ambient": "mob.blaze.breathe",
+                    "hurt": "mob.blaze.hurt",
+                    "death": "mob.blaze.death"
+                }
+            },
+            "fycq:dragon_guard": {
+                "volume": 0.9,
+                "pitch": 0.85,
+                "events": {
+                    "ambient": "mob.ghast.moan",
+                    "hurt": "mob.iron_golem.hurt",
+                    "death": "mob.iron_golem.death",
+                    "attack": "mob.iron_golem.attack"
+                }
+            }
+        }
+    }
+}

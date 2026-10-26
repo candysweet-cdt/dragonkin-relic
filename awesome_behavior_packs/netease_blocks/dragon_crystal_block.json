@@ -1,0 +1,28 @@
+{
+    "format_version": "1.10.0",
+    "minecraft:block": {
+        "description": {
+            "identifier": "fycq:dragon_crystal_block",
+            "category": "drasnea"
+        },
+        "components": {
+            "minecraft:destroy_time": {
+                "value": 5.0
+            },
+            "minecraft:explosion_resistance": {
+                "value": 9
+            },
+            "minecraft:loot": {
+                "table": "loot_tables/blocks/dragon_crystal_block.json"
+            },
+            "minecraft:map_color": {
+                "color": "#B3202F"
+            },
+            "netease:tier": {
+                "digger": "pickaxe",
+                "destroy_special": true,
+                "level": 2
+            }
+        }
+    }
+}

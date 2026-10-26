@@ -1,0 +1,193 @@
+{
+    "format_version": "1.13.0",
+    "minecraft:entity": {
+        "description": {
+            "identifier": "fycq:dragon_priest",
+            "is_spawnable": true,
+            "is_summonable": true,
+            "is_experimental": false
+        },
+        "component_groups": {
+            "fycq:dragon_priest_hurt_flag": {
+                "minecraft:is_sheared": {},
+                "minecraft:timer": {
+                    "time": 0.45,
+                    "looping": false,
+                    "time_down_event": {
+                        "event": "fycq:dragon_priest_hurt_end"
+                    }
+                }
+            }
+        },
+        "components": {
+            "minecraft:experience_reward": {
+                "on_death": "query.last_hit_by_player ? 40 : 0"
+            },
+            "minecraft:nameable": {},
+            "minecraft:type_family": {
+                "family": [
+                    "dragonkin",
+                    "monster",
+                    "mob",
+                    "fycq"
+                ]
+            },
+            "minecraft:loot": {
+                "table": "loot_tables/fycq/dragon_priest.json"
+            },
+            "minecraft:health": {
+                "value": 60,
+                "max": 60
+            },
+            "minecraft:attack": {
+                "damage": 5
+            },
+            "minecraft:collision_box": {
+                "width": 0.7,
+                "height": 1.9
+            },
+            "minecraft:movement": {
+                "value": 0.24
+            },
+            "minecraft:knockback_resistance": {
+                "value": 0.3
+            },
+            "minecraft:physics": {
+                "has_gravity": true,
+                "has_collision": true
+            },
+            "minecraft:pushable": {
+                "is_pushable": true,
+                "is_pushable_by_piston": false
+            },
+            "minecraft:breathable": {
+                "total_supply": 30,
+                "suffocate_time": 0
+            },
+            "minecraft:navigation.walk": {
+                "can_path_over_water": true,
+                "avoid_water": false
+            },
+            "minecraft:movement.basic": {},
+            "minecraft:jump.static": {},
+            "minecraft:behavior.float": {
+                "priority": 0
+            },
+            "minecraft:behavior.hurt_by_target": {
+                "priority": 1
+            },
+            "minecraft:behavior.nearest_attackable_target": {
+                "priority": 2,
+                "must_see": true,
+                "reselect_targets": true,
+                "entity_types": [
+                    {
+                        "filters": {
+                            "test": "is_family",
+                            "subject": "other",
+                            "value": "player"
+                        },
+                        "max_dist": 20
+                    }
+                ]
+            },
+            "minecraft:behavior.delayed_attack": {
+                "priority": 5,
+                "reach_multiplier": 2.0,
+                "attack_duration": 0.5,
+                "hit_delay_pct": 0.6,
+                "track_target": true,
+                "sound_event": "attack.strong"
+            },
+            "minecraft:behavior.random_stroll": {
+                "priority": 7,
+                "xz_dist": 10,
+                "y_dist": 3,
+                "speed_multiplier": 0.7
+            },
+            "minecraft:behavior.look_at_player": {
+                "priority": 8,
+                "look_distance": 8.0,
+                "probability": 0.05
+            },
+            "minecraft:behavior.random_look_around": {
+                "priority": 9
+            },
+            "minecraft:ambient_sound_interval": {
+                "value": 12.0,
+                "range": 12.0,
+                "event_name": "ambient"
+            },
+            "minecraft:shooter": {
+                "def": "minecraft:fireball"
+            },
+            "minecraft:behavior.ranged_attack": {
+                "priority": 3,
+                "burst_shoot_count": 1,
+                "burst_interval": 0.5,
+                "attack_interval_min": 3.0,
+                "attack_interval_max": 5.0,
+                "attack_radius": 18.0,
+                "speed_multiplier": 1.0
+            },
+            "minecraft:damage_sensor": {
+                "triggers": [
+                    {
+                        "on_damage": {
+                            "filters": {
+                                "test": "is_family",
+                                "subject": "other",
+                                "value": "dragonkin"
+                            },
+                            "deals_damage": false
+                        }
+                    },
+                    {
+                        "on_damage": {
+                            "event": "fycq:dragon_priest_hurt"
+                        },
+                        "deals_damage": true
+                    }
+                ]
+            },
+            "minecraft:behavior.summon_entity": {
+                "priority": 2,
+                "summon_choices": [
+                    {
+                        "min_activation_range": 0.0,
+                        "max_activation_range": 10.0,
+                        "weight": 1,
+                        "cooldown_time": 16.0,
+                        "cast_duration": 1.2,
+                        "sequence": [
+                            {
+                                "shape": "circle",
+                                "target": "self",
+                                "base_delay": 1.2,
+                                "num_entities_spawned": 1,
+                                "entity_type": "fycq:dragon_whelp",
+                                "size": 0.0
+                            }
+                        ]
+                    }
+                ]
+            }
+        },
+        "events": {
+            "fycq:dragon_priest_hurt": {
+                "add": {
+                    "component_groups": [
+                        "fycq:dragon_priest_hurt_flag"
+                    ]
+                }
+            },
+            "fycq:dragon_priest_hurt_end": {
+                "remove": {
+                    "component_groups": [
+                        "fycq:dragon_priest_hurt_flag"
+                    ]
+                }
+            }
+        }
+    }
+}

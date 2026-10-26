@@ -1,0 +1,204 @@
+{
+    "format_version": "1.13.0",
+    "minecraft:entity": {
+        "description": {
+            "identifier": "fycq:drasnea",
+            "is_spawnable": true,
+            "is_summonable": true,
+            "is_experimental": false
+        },
+        "components": {
+            "minecraft:experience_reward": {
+                "on_death": "query.last_hit_by_player ? 500 : 0"
+            },
+            "minecraft:nameable": {},
+            "minecraft:type_family": {
+                "family": [
+                    "drasnea",
+                    "monster",
+                    "mob",
+                    "boss",
+                    "fycq"
+                ]
+            },
+            "minecraft:loot": {
+                "table": "loot_tables/fycq/drasnea.json"
+            },
+            "minecraft:health": {
+                "value": 500,
+                "max": 500
+            },
+            "minecraft:attack": {
+                "damage": 12
+            },
+            "minecraft:collision_box": {
+                "width": 2.2,
+                "height": 3.4
+            },
+            "minecraft:movement": {
+                "value": 0.3
+            },
+            "minecraft:knockback_resistance": {
+                "value": 1.0
+            },
+            "minecraft:fire_immune": true,
+            "minecraft:physics": {
+                "has_gravity": true,
+                "has_collision": true
+            },
+            "minecraft:pushable": {
+                "is_pushable": false,
+                "is_pushable_by_piston": false
+            },
+            "minecraft:breathable": {
+                "total_supply": 30,
+                "suffocate_time": 0
+            },
+            "minecraft:persistent": {},
+            "minecraft:shooter": {
+                "def": "minecraft:fireball"
+            },
+            "minecraft:navigation.walk": {
+                "can_path_over_water": true,
+                "avoid_water": false
+            },
+            "minecraft:movement.basic": {},
+            "minecraft:jump.static": {},
+            "minecraft:behavior.float": {
+                "priority": 0
+            },
+            "minecraft:behavior.hurt_by_target": {
+                "priority": 1
+            },
+            "minecraft:behavior.nearest_attackable_target": {
+                "priority": 2,
+                "must_reach": false,
+                "must_see": true,
+                "reselect_targets": true,
+                "scan_interval": 10,
+                "entity_types": [
+                    {
+                        "filters": {
+                            "any_of": [
+                                {
+                                    "test": "is_family",
+                                    "subject": "other",
+                                    "value": "player"
+                                },
+                                {
+                                    "test": "is_family",
+                                    "subject": "other",
+                                    "value": "iron_golem"
+                                },
+                                {
+                                    "test": "is_family",
+                                    "subject": "other",
+                                    "value": "snow_golem"
+                                }
+                            ]
+                        },
+                        "max_dist": 20
+                    }
+                ]
+            },
+            "minecraft:behavior.ranged_attack": {
+                "priority": 3,
+                "burst_shoot_count": 3,
+                "burst_shoot_interval": 0.3,
+                "burst_interval": 0.6,
+                "attack_interval_min": 4.0,
+                "attack_interval_max": 6.0,
+                "attack_radius": 24.0,
+                "attack_radius_min": 6.0,
+                "speed_multiplier": 1.0
+            },
+            "minecraft:behavior.random_stroll": {
+                "priority": 7,
+                "xz_dist": 8,
+                "y_dist": 4,
+                "speed_multiplier": 0.7
+            },
+            "minecraft:behavior.look_at_entity": {
+                "priority": 8,
+                "look_distance": 12.0,
+                "probability": 0.02,
+                "filters": {
+                    "test": "is_family",
+                    "subject": "other",
+                    "value": "mob"
+                }
+            },
+            "minecraft:behavior.look_at_player": {
+                "priority": 9,
+                "look_distance": 16.0,
+                "probability": 0.05
+            },
+            "minecraft:behavior.random_look_around": {
+                "priority": 10
+            },
+            "minecraft:boss": {
+                "should_darken_sky": true,
+                "hud_range": 120,
+                "name": "龙蛇"
+            },
+            "minecraft:ambient_sound_interval": {
+                "value": 8.0,
+                "range": 16.0,
+                "event_name": "ambient"
+            },
+            "minecraft:behavior.delayed_attack": {
+                "priority": 4,
+                "reach_multiplier": 5.5,
+                "attack_duration": 0.6,
+                "hit_delay_pct": 0.7,
+                "track_target": true,
+                "sound_event": "attack.strong"
+            },
+            "minecraft:damage_sensor": {
+                "triggers": [
+                    {
+                        "on_damage": {
+                            "filters": {
+                                "test": "is_family",
+                                "subject": "other",
+                                "value": "dragonkin"
+                            },
+                            "deals_damage": false
+                        }
+                    }
+                ]
+            },
+            "minecraft:behavior.knockback_roar": {
+                "priority": 3,
+                "duration": 1.0,
+                "attack_time": 0.4,
+                "knockback_damage": 10,
+                "knockback_strength": 4,
+                "knockback_range": 7.0,
+                "cooldown_time": 12.0
+            },
+            "minecraft:behavior.summon_entity": {
+                "priority": 2,
+                "summon_choices": [
+                    {
+                        "min_activation_range": 0.0,
+                        "max_activation_range": 12.0,
+                        "weight": 1,
+                        "cooldown_time": 22.0,
+                        "cast_duration": 1.5,
+                        "sequence": [
+                            {
+                                "shape": "circle",
+                                "target": "self",
+                                "base_delay": 1.5,
+                                "num_entities_spawned": 2,
+                                "entity_type": "fycq:dragon_whelp",
+                                "size": 0.0
+                            }
+                        ]
+                    }
+                ]
+            }
+        }
+    }
+}

@@ -1,0 +1,28 @@
+{
+    "format_version": "1.10.0",
+    "minecraft:block": {
+        "description": {
+            "identifier": "fycq:dragon_scale_pillar",
+            "category": "drasnea"
+        },
+        "components": {
+            "minecraft:destroy_time": {
+                "value": 4.0
+            },
+            "minecraft:explosion_resistance": {
+                "value": 6
+            },
+            "minecraft:loot": {
+                "table": "loot_tables/blocks/dragon_scale_pillar.json"
+            },
+            "minecraft:map_color": {
+                "color": "#2E8B7E"
+            },
+            "netease:tier": {
+                "digger": "pickaxe",
+                "destroy_special": true,
+                "level": 2
+            }
+        }
+    }
+}

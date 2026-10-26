@@ -1,0 +1,28 @@
+{
+    "format_version": "1.10.0",
+    "minecraft:block": {
+        "description": {
+            "identifier": "fycq:dragon_bone_block",
+            "category": "drasnea"
+        },
+        "components": {
+            "minecraft:destroy_time": {
+                "value": 3.0
+            },
+            "minecraft:explosion_resistance": {
+                "value": 6
+            },
+            "minecraft:loot": {
+                "table": "loot_tables/blocks/dragon_bone_block.json"
+            },
+            "minecraft:map_color": {
+                "color": "#C9BE9E"
+            },
+            "netease:tier": {
+                "digger": "pickaxe",
+                "destroy_special": true,
+                "level": 2
+            }
+        }
+    }
+}

@@ -1,0 +1,28 @@
+{
+    "format_version": "1.12",
+    "minecraft:recipe_shaped": {
+        "description": {
+            "identifier": "fycq:dragon_scale_pickaxe"
+        },
+        "tags": [
+            "crafting_table"
+        ],
+        "pattern": [
+            "SSS",
+            " T ",
+            " T "
+        ],
+        "key": {
+            "S": {
+                "item": "fycq:dragon_scale"
+            },
+            "T": {
+                "item": "minecraft:stick"
+            }
+        },
+        "result": {
+            "item": "fycq:dragon_scale_pickaxe",
+            "count": 1
+        }
+    }
+}

@@ -1,0 +1,13 @@
+{
+    "format_version": "1.10",
+    "minecraft:item": {
+        "description": {
+            "identifier": "fycq:dragon_scale_axe",
+            "category": "drasnea",
+            "register_to_create_menu": true
+        },
+        "components": {
+            "minecraft:icon": "fycq:dragon_scale_axe"
+        }
+    }
+}

@@ -1,0 +1,10 @@
+{
+    "category": [
+        {
+            "name": "drasnea",
+            "labelText": "itemCategory.name.drasnea",
+            "icon": "textures/items/dragon_scale",
+            "sort_by_identifier": true
+        }
+    ]
+}

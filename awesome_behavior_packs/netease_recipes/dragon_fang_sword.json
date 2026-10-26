@@ -1,0 +1,28 @@
+{
+    "format_version": "1.12",
+    "minecraft:recipe_shaped": {
+        "description": {
+            "identifier": "fycq:dragon_fang_sword"
+        },
+        "tags": [
+            "crafting_table"
+        ],
+        "pattern": [
+            "F",
+            "F",
+            "T"
+        ],
+        "key": {
+            "F": {
+                "item": "fycq:dragon_fang"
+            },
+            "T": {
+                "item": "minecraft:stick"
+            }
+        },
+        "result": {
+            "item": "fycq:dragon_fang_sword",
+            "count": 1
+        }
+    }
+}

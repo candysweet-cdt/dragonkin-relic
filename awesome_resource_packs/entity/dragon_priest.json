@@ -1,0 +1,43 @@
+{
+    "format_version": "1.8.0",
+    "minecraft:client_entity": {
+        "description": {
+            "identifier": "fycq:dragon_priest",
+            "materials": {
+                "default": "entity_alphatest"
+            },
+            "textures": {
+                "default": "textures/entity/fycq/dragon_priest"
+            },
+            "geometry": {
+                "default": "geometry.dragon_priest"
+            },
+            "animations": {
+                "idle": "animation.dragon_priest.idle",
+                "move": "animation.dragon_priest.move",
+                "attack": "animation.dragon_priest.attack",
+                "hurt": "animation.dragon_priest.hurt",
+                "death": "animation.dragon_priest.death"
+            },
+            "sound_effects": {
+                "roar": "mob.blaze.breathe",
+                "attack": "mob.blaze.breathe",
+                "cast": "mob.ghast.fireball",
+                "hurt": "mob.blaze.hurt",
+                "death": "mob.blaze.death"
+            },
+            "animation_controllers": [
+                {
+                    "main": "controller.animation.dragon_priest"
+                }
+            ],
+            "render_controllers": [
+                "controller.render.dragon_priest"
+            ],
+            "spawn_egg": {
+                "base_color": "#2E8B7E",
+                "overlay_color": "#C9A227"
+            }
+        }
+    }
+}

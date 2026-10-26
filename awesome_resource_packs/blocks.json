@@ -1,0 +1,39 @@
+{
+    "format_version": [
+        1,
+        12,
+        0
+    ],
+    "fycq:dragon_scale_block": {
+        "textures": "dragon_scale_block",
+        "sound": "metal"
+    },
+    "fycq:dragon_bone_block": {
+        "textures": "dragon_bone_block",
+        "sound": "stone"
+    },
+    "fycq:dragon_crystal_block": {
+        "textures": "dragon_crystal_block",
+        "sound": "stone"
+    },
+    "fycq:dragon_crystal_lamp": {
+        "textures": "dragon_crystal_lamp",
+        "sound": "stone"
+    },
+    "fycq:dragon_scale_bricks": {
+        "textures": "dragon_scale_bricks",
+        "sound": "metal"
+    },
+    "fycq:dragon_scale_pillar": {
+        "textures": {
+            "up": "dragon_scale_pillar_top",
+            "down": "dragon_scale_pillar_top",
+            "side": "dragon_scale_pillar_side"
+        },
+        "sound": "metal"
+    },
+    "fycq:dragon_nest": {
+        "textures": "dragon_nest",
+        "sound": "grass"
+    }
+}

@@ -1,0 +1,43 @@
+{
+    "format_version": "1.8.0",
+    "minecraft:client_entity": {
+        "description": {
+            "identifier": "fycq:dragon_whelp",
+            "materials": {
+                "default": "entity_alphatest"
+            },
+            "textures": {
+                "default": "textures/entity/fycq/dragon_whelp"
+            },
+            "geometry": {
+                "default": "geometry.dragon_whelp"
+            },
+            "animations": {
+                "idle": "animation.dragon_whelp.idle",
+                "move": "animation.dragon_whelp.move",
+                "attack": "animation.dragon_whelp.attack",
+                "hurt": "animation.dragon_whelp.hurt",
+                "death": "animation.dragon_whelp.death"
+            },
+            "sound_effects": {
+                "roar": "mob.ghast.warn",
+                "attack": "mob.ghast.scream",
+                "hurt": "mob.ghast.hurt",
+                "death": "mob.ghast.death",
+                "flap": "mob.enderdragon.flap"
+            },
+            "animation_controllers": [
+                {
+                    "main": "controller.animation.dragon_whelp"
+                }
+            ],
+            "render_controllers": [
+                "controller.render.dragon_whelp"
+            ],
+            "spawn_egg": {
+                "base_color": "#2E8B7E",
+                "overlay_color": "#C9A227"
+            }
+        }
+    }
+}

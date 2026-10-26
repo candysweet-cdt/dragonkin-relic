@@ -1,0 +1,25 @@
+{
+    "format_version": "1.12",
+    "minecraft:recipe_shaped": {
+        "description": {
+            "identifier": "fycq:dragon_scale_leggings"
+        },
+        "tags": [
+            "crafting_table"
+        ],
+        "pattern": [
+            "SSS",
+            "S S",
+            "S S"
+        ],
+        "key": {
+            "S": {
+                "item": "fycq:dragon_scale"
+            }
+        },
+        "result": {
+            "item": "fycq:dragon_scale_leggings",
+            "count": 1
+        }
+    }
+}

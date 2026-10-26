@@ -1,0 +1,48 @@
+{
+    "resource_pack_name": "fycqDrasnea",
+    "texture_name": "atlas.terrain",
+    "padding": 8,
+    "num_mip_levels": 4,
+    "texture_data": {
+        "dragon_scale_block": {
+            "textures": [
+                "textures/blocks/dragon_scale_block"
+            ]
+        },
+        "dragon_bone_block": {
+            "textures": [
+                "textures/blocks/dragon_bone_block"
+            ]
+        },
+        "dragon_crystal_block": {
+            "textures": [
+                "textures/blocks/dragon_crystal_block"
+            ]
+        },
+        "dragon_crystal_lamp": {
+            "textures": [
+                "textures/blocks/dragon_crystal_lamp"
+            ]
+        },
+        "dragon_scale_bricks": {
+            "textures": [
+                "textures/blocks/dragon_scale_bricks"
+            ]
+        },
+        "dragon_scale_pillar_side": {
+            "textures": [
+                "textures/blocks/dragon_scale_pillar_side"
+            ]
+        },
+        "dragon_scale_pillar_top": {
+            "textures": [
+                "textures/blocks/dragon_scale_pillar_top"
+            ]
+        },
+        "dragon_nest": {
+            "textures": [
+                "textures/blocks/dragon_nest"
+            ]
+        }
+    }
+}

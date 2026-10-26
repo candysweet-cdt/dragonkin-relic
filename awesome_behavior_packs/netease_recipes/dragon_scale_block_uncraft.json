@@ -1,0 +1,22 @@
+{
+    "format_version": "1.12",
+    "minecraft:recipe_shapeless": {
+        "description": {
+            "identifier": "fycq:dragon_scale_block_uncraft"
+        },
+        "tags": [
+            "crafting_table"
+        ],
+        "ingredients": [
+            {
+                "item": "fycq:dragon_scale_block"
+            }
+        ],
+        "result": [
+            {
+                "item": "fycq:dragon_scale",
+                "count": 9
+            }
+        ]
+    }
+}

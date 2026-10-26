@@ -1,0 +1,23 @@
+{
+    "format_version": "1.10.0",
+    "minecraft:block": {
+        "description": {
+            "identifier": "fycq:dragon_nest",
+            "category": "drasnea"
+        },
+        "components": {
+            "minecraft:destroy_time": {
+                "value": 2.0
+            },
+            "minecraft:explosion_resistance": {
+                "value": 3
+            },
+            "minecraft:loot": {
+                "table": "loot_tables/blocks/dragon_nest.json"
+            },
+            "minecraft:map_color": {
+                "color": "#3D2A1B"
+            }
+        }
+    }
+}

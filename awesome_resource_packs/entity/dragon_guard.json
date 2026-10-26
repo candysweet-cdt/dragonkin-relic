@@ -1,0 +1,42 @@
+{
+    "format_version": "1.8.0",
+    "minecraft:client_entity": {
+        "description": {
+            "identifier": "fycq:dragon_guard",
+            "materials": {
+                "default": "entity_alphatest"
+            },
+            "textures": {
+                "default": "textures/entity/fycq/dragon_guard"
+            },
+            "geometry": {
+                "default": "geometry.dragon_guard"
+            },
+            "animations": {
+                "idle": "animation.dragon_guard.idle",
+                "move": "animation.dragon_guard.move",
+                "attack": "animation.dragon_guard.attack",
+                "hurt": "animation.dragon_guard.hurt",
+                "death": "animation.dragon_guard.death"
+            },
+            "sound_effects": {
+                "roar": "mob.ghast.moan",
+                "attack": "mob.iron_golem.attack",
+                "hurt": "mob.iron_golem.hurt",
+                "death": "mob.iron_golem.death"
+            },
+            "animation_controllers": [
+                {
+                    "main": "controller.animation.dragon_guard"
+                }
+            ],
+            "render_controllers": [
+                "controller.render.dragon_guard"
+            ],
+            "spawn_egg": {
+                "base_color": "#2E8B7E",
+                "overlay_color": "#C9A227"
+            }
+        }
+    }
+}

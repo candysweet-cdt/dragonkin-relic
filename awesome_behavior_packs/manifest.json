@@ -1,0 +1,24 @@
+{
+    "format_version": 1,
+    "header": {
+        "description": "V1.0.0",
+        "name": "封印&传奇：龙裔遗骸",
+        "uuid": "e454a00c-ff76-4138-a2c5-586c59ba6a7e",
+        "version": [1,0,0],
+        "min_engine_version": [1,18,0]
+    },
+    "modules": [
+        {
+            "description": "By HZCVinter",
+            "type": "data",
+            "uuid": "89115d5f-ff76-4940-b85d-4be96acf3174",
+            "version": [1,0,0]
+        }
+    ],
+    "dependencies": [
+        {
+            "uuid": "b63887dc-72ff-479d-b984-c8135f0897cc",
+            "version": [1, 0, 0]
+        }
+    ]
+}

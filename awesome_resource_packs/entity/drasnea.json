@@ -1,0 +1,45 @@
+{
+    "format_version": "1.8.0",
+    "minecraft:client_entity": {
+        "description": {
+            "identifier": "fycq:drasnea",
+            "materials": {
+                "default": "entity_alphatest"
+            },
+            "textures": {
+                "default": "textures/entity/fycq/drasnea"
+            },
+            "geometry": {
+                "default": "geometry.drasnea"
+            },
+            "animations": {
+                "idle": "animation.drasnea",
+                "move": "animation.drasnea.move",
+                "attack": "animation.drasnea.attack",
+                "death": "animation.drasnea.death"
+            },
+            "animation_controllers": [
+                {
+                    "main": "controller.animation.drasnea"
+                }
+            ],
+            "particle_effects": {
+                "wing_dust": "minecraft:phantom_trail_particle"
+            },
+            "render_controllers": [
+                "controller.render.drasnea"
+            ],
+            "spawn_egg": {
+                "base_color": "#3A2B1E",
+                "overlay_color": "#D6C05A"
+            },
+            "sound_effects": {
+                "attack": "mob.enderdragon.flap",
+                "roar": "mob.enderdragon.growl",
+                "hurt": "mob.enderdragon.hit",
+                "death": "mob.enderdragon.death",
+                "flap": "mob.enderdragon.flap"
+            }
+        }
+    }
+}

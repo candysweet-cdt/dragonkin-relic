@@ -1,0 +1,28 @@
+{
+    "format_version": "1.12",
+    "minecraft:recipe_shaped": {
+        "description": {
+            "identifier": "fycq:dragon_crystal_lamp"
+        },
+        "tags": [
+            "crafting_table"
+        ],
+        "pattern": [
+            " G ",
+            "GCG",
+            " G "
+        ],
+        "key": {
+            "G": {
+                "item": "minecraft:gold_ingot"
+            },
+            "C": {
+                "item": "fycq:dragon_crystal_block"
+            }
+        },
+        "result": {
+            "item": "fycq:dragon_crystal_lamp",
+            "count": 1
+        }
+    }
+}

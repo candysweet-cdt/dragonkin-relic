@@ -1,0 +1,24 @@
+{
+    "format_version": "1.12",
+    "minecraft:recipe_shaped": {
+        "description": {
+            "identifier": "fycq:dragon_crystal_block"
+        },
+        "tags": [
+            "crafting_table"
+        ],
+        "pattern": [
+            "CC",
+            "CC"
+        ],
+        "key": {
+            "C": {
+                "item": "fycq:dragon_blood_crystal"
+            }
+        },
+        "result": {
+            "item": "fycq:dragon_crystal_block",
+            "count": 1
+        }
+    }
+}

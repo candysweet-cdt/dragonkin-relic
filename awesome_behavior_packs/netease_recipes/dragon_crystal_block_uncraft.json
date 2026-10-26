@@ -1,0 +1,22 @@
+{
+    "format_version": "1.12",
+    "minecraft:recipe_shapeless": {
+        "description": {
+            "identifier": "fycq:dragon_crystal_block_uncraft"
+        },
+        "tags": [
+            "crafting_table"
+        ],
+        "ingredients": [
+            {
+                "item": "fycq:dragon_crystal_block"
+            }
+        ],
+        "result": [
+            {
+                "item": "fycq:dragon_blood_crystal",
+                "count": 4
+            }
+        ]
+    }
+}
