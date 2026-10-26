@@ -6,6 +6,7 @@
 import glob
 import json
 import os
+import re
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -661,6 +662,72 @@ def check_whelp_flight(data):
     print('幼龙飞行: fly 导航已核对')
 
 
+def check_skill_hud(data):
+    """技能按钮 HUD：UI 文件注册、命名与贴图齐全，客户端/服务端脚本对得上。"""
+    defs_path = os.path.join(RP, 'ui', '_ui_defs.json')
+    hud_path = os.path.join(RP, 'ui', 'dragonskillhud.json')
+    if not os.path.isfile(defs_path):
+        bad('缺 resource/ui/_ui_defs.json —— 引擎不会加载任何自定义 UI')
+    else:
+        defs = load(defs_path).get('ui_defs') or []
+        if 'ui/dragonskillhud.json' not in defs:
+            bad('_ui_defs.json 没登记 ui/dragonskillhud.json')
+    if not os.path.isfile(hud_path):
+        bad('缺 resource/ui/dragonskillhud.json —— 技能按钮不会出现')
+        return
+    hud = load(hud_path)
+    if hud.get('namespace') != 'dragonskillhud':
+        bad(f"UI namespace 是 {hud.get('namespace')}，必须与文件名一致（RegisterUI 用 dragonskillhud.main）")
+    if 'main@common.base_screen' not in hud:
+        bad('dragonskillhud.json 缺 main@common.base_screen 根画布')
+    btn = hud.get('skillButton@common.button') or {}
+    if not btn:
+        bad('dragonskillhud.json 缺 skillButton 控件')
+    else:
+        if btn.get('button_mappings') != []:
+            bad('skillButton 的 button_mappings 必须为 []，否则 Python 回调收不到点击')
+        if not btn.get('is_handle_button_move_event'):
+            bad('skillButton 缺 is_handle_button_move_event（拖动需要）')
+        if btn.get('draggable') != 'both':
+            bad(f"skillButton.draggable = {btn.get('draggable')}，应为 both")
+        if btn.get('contained') is not True:
+            bad('skillButton 缺 contained: true（拖动会被父控件限制，防止拖出屏幕）')
+        if btn.get('visible') is not False:
+            bad('skillButton 初始 visible 必须是 false（只有手持龙牙剑才显示）')
+        for ctrl in btn.get('controls') or []:
+            for state, body in ctrl.items():
+                if state in ('default', 'hover', 'pressed'):
+                    tex = (body or {}).get('texture')
+                    if tex and not os.path.isfile(os.path.join(RP, tex + '.png')):
+                        bad(f'skillButton.{state} 贴图不存在: {tex}.png')
+    client = os.path.join(BP, 'DrasneaScripts', 'dragonSkillClient.py')
+    server = os.path.join(BP, 'DrasneaScripts', 'dragonSlash.py')
+    if not os.path.isfile(client):
+        bad('缺 DrasneaScripts/dragonSkillClient.py')
+        return
+    csrc = open(client, encoding='utf-8').read()
+    ssrc = open(server, encoding='utf-8').read() if os.path.isfile(server) else ''
+    for token in ('RegisterUI', "'isHud': 1", 'SetButtonTouchUpCallback',
+                  'SetButtonTouchMoveCallback', 'RightClickBeforeClientEvent',
+                  'OnCarriedNewItemChangedClientEvent', 'CreateConfigClient',
+                  'NotifyToServer'):
+        if token not in csrc:
+            bad(f'dragonSkillClient.py 缺 {token}')
+    for token in ('CAST_EVENT', 'CLIENT_SYSTEM', 'GetPlayerList', 'GetDirFromRot',
+                  'CreateHurt'):
+        if token not in ssrc:
+            bad(f'dragonSlash.py 缺 {token}')
+    if 'ServerItemTryUseEvent' in ssrc:
+        bad('dragonSlash.py 又用了 ServerItemTryUseEvent —— 对 netease:weapon 不触发，'
+            '只能靠 HUD 按钮 / RightClickBeforeClientEvent 上报')
+    for name in ('COOLDOWN', 'CAST_EVENT'):
+        cval = re.search(name + r"\s*=\s*([^#\n]+)", csrc)
+        sval = re.search(name + r"\s*=\s*([^#\n]+)", ssrc)
+        if not (cval and sval and cval.group(1).strip() == sval.group(1).strip()):
+            bad(f'客户端与服务端的 {name} 不一致（按钮冷却显示会和实际不符）')
+    print('技能按钮 HUD: UI 注册/控件/贴图/脚本对账完毕')
+
+
 def check_combat_scripts():
     """套装效果与龙息斩：脚本存在、关键常量齐全、modMain 已注册。"""
     main_src = open(os.path.join(BP, 'DrasneaScripts', 'modMain.py'), encoding='utf-8').read()
@@ -673,7 +740,7 @@ def check_combat_scripts():
         for const in ('fycq:dragon_fang_sword', 'fycq:dragon_fang_sword_awakened'):
             if "'" + const + "'" not in src:
                 bad(f'dragonSlash.py 缺 {const}')
-        for token in ('GetDirFromRot', 'CreateHurt', 'COOLDOWN', 'ServerItemTryUseEvent'):
+        for token in ('GetDirFromRot', 'CreateHurt', 'COOLDOWN'):
             if token not in src:
                 bad(f'dragonSlash.py 缺 {token}')
         if 'DragonSlashServer' not in main_src:
@@ -922,6 +989,12 @@ def check_id_registry(data):
                 d = json.load(open(os.path.join(tab, f), encoding='utf-8'))
                 for c in d.get('category', []):
                     need.add(('tab', c.get('name', '')))
+    ui = os.path.join(RP, 'ui')
+    if os.path.isdir(ui):
+        for f in os.listdir(ui):
+            key = f[:-5] if f.endswith('.json') else ''
+            if key and key.isalnum() and key.islower() and key not in ('_ui_defs', 'neteasecommonui'):
+                need.add(('ui_screen', key))
     for t, k in sorted(need - have):
         bad(f'{t} {k} 未在 ID 注册表登记（跑 idreg batch --action claim 补登记）')
     for t, k in sorted(have - need):
@@ -1046,6 +1119,7 @@ def main():
     check_spawn_rules(data)
     check_whelp_flight(data)
     check_combat_scripts()
+    check_skill_hud(data)
     check_breath()
     check_altar_summon()
     check_achievements(data)

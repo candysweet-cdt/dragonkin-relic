@@ -173,7 +173,8 @@ def main():
             },
         }
         if wtype == 'sword':
-            comps['netease:customtips'] = {'value': '§7右键释放龙息斩（12 秒冷却）'}
+            comps['netease:customtips'] = {
+                'value': '§7手持时出现技能按钮，点击或右键释放龙息斩（12 秒冷却）'}
         dump(os.path.join(BP, 'netease_items_beh', ident + '.json'), item_beh(ident, comps, 'weapon'))
         names[ident] = cn
 
@@ -190,7 +191,8 @@ def main():
                 'attack_damage': dmg,
                 'enchantment': ench,
             },
-            'netease:customtips': {'value': '§7右键释放更强的龙息斩（12 秒冷却）'},
+            'netease:customtips': {
+                'value': '§7手持时出现技能按钮，点击或右键释放龙息斩（12 秒冷却）'},
         }
         dump(os.path.join(BP, 'netease_items_beh', ident + '.json'), item_beh(ident, comps, 'weapon'))
         names[ident] = cn

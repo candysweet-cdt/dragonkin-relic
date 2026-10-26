@@ -1,0 +1,75 @@
+{
+    "namespace": "dragonskillhud",
+
+    "skillButton@common.button": {
+        "$default_color": [ 1, 1, 1 ],
+        "$font_size": "small",
+        "$label_text": "",
+        "anchor_from": "top_left",
+        "anchor_to": "top_left",
+        "button_mappings": [],
+        "is_handle_button_move_event": true,
+        "draggable": "both",
+        "contained": true,
+        "layer": 3,
+        "offset": [ "70%+0px", "56%+0px" ],
+        "size": [ 64, 64 ],
+        "visible": false,
+        "controls": [
+            {
+                "default": {
+                    "type": "image",
+                    "layer": 2,
+                    "texture": "textures/ui/dragon_skill_btn"
+                }
+            },
+            {
+                "hover": {
+                    "type": "image",
+                    "layer": 2,
+                    "texture": "textures/ui/dragon_skill_btn_click"
+                }
+            },
+            {
+                "pressed": {
+                    "type": "image",
+                    "layer": 2,
+                    "texture": "textures/ui/dragon_skill_btn_click"
+                }
+            },
+            {
+                "button_label": {
+                    "type": "label",
+                    "layer": 6,
+                    "text": "$label_text",
+                    "color": [ 1, 1, 1 ],
+                    "font_size": "$font_size",
+                    "shadow": true,
+                    "offset": [ 0, 30 ]
+                }
+            }
+        ]
+    },
+
+    "skillPanel": {
+        "type": "panel",
+        "anchor_from": "top_left",
+        "anchor_to": "top_left",
+        "layer": 2,
+        "offset": [ 0, 0 ],
+        "size": [ "100%+0px", "100%+0px" ],
+        "controls": [
+            {
+                "skillButton@dragonskillhud.skillButton": {}
+            }
+        ]
+    },
+
+    "main@common.base_screen": {
+        "controls": [
+            {
+                "skillPanel@dragonskillhud.skillPanel": {}
+            }
+        ]
+    }
+}

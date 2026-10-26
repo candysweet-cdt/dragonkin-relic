@@ -10,8 +10,9 @@
   · DragonBreathServer —— BOSS 龙息火球的落地云 5 秒后销毁（原版 120 秒）
   · DragonSetBonusServer —— 龙鳞四件套：抗火 I + 生命恢复 I
   · DragonSlashServer  —— 龙牙剑右键龙息斩（12 秒冷却）
-一个客户端系统：
+两个客户端系统：
   · DrasneaProbeClient —— 只确认客户端脚本加载
+  · DragonSkillClient  —— 龙息斩技能按钮 HUD（手持龙牙剑显示、可拖动、点击释放）
 """
 from mod.common.mod import Mod
 import mod.client.extraClientApi as clientApi
@@ -55,6 +56,8 @@ class DrasneaScriptsMod(object):
     def initClient(self):
         clientApi.RegisterSystem(MOD_NAME, 'DrasneaProbeClient',
                                  MOD_NAME + '.probeClient.DrasneaProbeClient')
+        clientApi.RegisterSystem(MOD_NAME, 'DragonSkillClient',
+                                 MOD_NAME + '.dragonSkillClient.DragonSkillClient')
 
     @Mod.DestroyClient()
     def destroyClient(self):

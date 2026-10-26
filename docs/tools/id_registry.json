@@ -4,6 +4,7 @@
    "actor": 4,
    "egg": 4,
    "food": 1,
+   "hud": 1,
    "material": 5,
    "other": 8,
    "plain": 7,
@@ -11,18 +12,19 @@
    "tool": 6
   },
   "by_mod": {
-   "dragonkin-relic": 36
+   "dragonkin-relic": 37
   },
   "by_namespace": {
+   "-": 1,
    "fycq": 36
   },
   "by_tab": {
-   "-": 1,
+   "-": 2,
    "drasnea": 35
   },
   "by_tag": {},
   "by_theme": {
-   "-": 1,
+   "-": 2,
    "dragon": 35
   },
   "status": {}
@@ -41,6 +43,9 @@
    "used": 4
   },
   "tab": {
+   "used": 1
+  },
+  "ui_screen": {
    "used": 1
   }
  },
@@ -656,6 +661,23 @@
    "theme": "",
    "type": "tab",
    "updated_at": 1793034894
+  },
+  {
+   "created_at": 1793040596,
+   "full_key": "dragonskillhud",
+   "holder": "gen_wave4",
+   "key": "dragonskillhud",
+   "kind": "hud",
+   "mod": "dragonkin-relic",
+   "namespace": "",
+   "note": "龙息斩技能按钮 HUD（手持龙牙剑显示，可拖动）",
+   "reserved_until": null,
+   "status": "used",
+   "tab": "",
+   "tags": [],
+   "theme": "",
+   "type": "ui_screen",
+   "updated_at": 1793040881
   }
  ],
  "meta": {
@@ -868,5 +890,5 @@
   "namespace": ""
  },
  "scoped_to": "模组 dragonkin-relic",
- "server_time": 1793039114
+ "server_time": 1793040881
 }

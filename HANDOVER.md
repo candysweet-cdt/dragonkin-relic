@@ -62,7 +62,7 @@
    官方硬约束：`list` 少于 2 件**注册失败**、一件只能进一个分组、分组 `icon` 必须是本组内物品。材料/方块/刷怪蛋都不进组，走 `UNGROUPED` 白名单，与「每组首件」混排（官方第三条规则），蛋靠 `zz_` 收尾。
    代价（作者已接受）：两个组各有一个折叠芯片，芯片用该组 `icon` 再画一格，看起来像"重复条目"。
    配置真源：`gen_creative_layout.py`（`GROUPS` / `MATERIALS` / `BLOCKS` / `UNGROUPED`），identifier 真源：`ids.py`。
-8. **物品/方块 ID 目前干净无序号**。`fycq:drasnea` 实体 ID 是原作者早期发布的，按红线 §1.3 永不改。若后续要接入 ID 注册表服务（cadt-windows:8444），登记的应是最终定稿的 ID；本包尚未接这个对账。
+8. **物品/方块 ID 目前干净无序号**。`fycq:drasnea` 实体 ID 是原作者早期发布的，按红线 §1.3 永不改。本包已接入 ID 注册表服务（cadt-windows:8444，模组条目 `dragonkin-relic`，见教训 17），新增标识符一律 `reserve → claim → mirror → check`。
 9. **动画控制器必须有 `initial_state`，且初始状态名用 `default`**（2026-10-26 作者反馈「生物的动画有问题」后查出）。我重写 BOSS 控制器时把原作者的状态名 `default` 换成了 `idle`、又没写 `initial_state` 字段 —— 结果整条控制器不进入任何状态，动画根本不播（新做的三只生物同错）。参考包（白骨精等）与官方《3-探索实体的资源控制》都是 `"initial_state": "default"` + 名为 `default` 的状态。顺带补了 `blend_transition: 0.2`，状态切换不再硬跳。
     另外两条同批修掉的：**循环动画的关键帧必须铺满 `animation_length`**（我们的 `move` 只铺到 0.36s / 长度 0.727s，播完会卡在最后一帧再跳回）；**动画驱动的腿骨名必须和模型一致**（幼龙是 `legFL/legFR/legBL/legBR`，人形是 `legL/legR`，写错就是原地滑步）。
     守卫：`check_entities` 现在断言 `initial_state` 存在、指向真实状态、且为 `default`；并对所有 `loop: true` 动画断言关键帧覆盖 ≥75% 循环长度、越界 ≤0.05s（四类违规都做过负测）。
@@ -149,9 +149,20 @@
     - 新增 6 个 item ID 已按规程 `reserve → claim`（`dragon_soul` + 觉醒剑/四件甲），镜像 36 条。
     - 升级配方用 shapeless：觉醒剑 = 原剑 + 龙魂 + 4 鳞；每件甲 = 原件 + 龙魂 + 2 鳞。觉醒件同样有 `repair_<id>` 重铸配方，并加入 `repairStation.py` 的 GEAR。
     - 套装效果：`dragonSetBonus.py` 每 2 秒查 4 个 ARMOR 槽（0头/1胸/2腿/3靴），四件齐（原版/觉醒混搭）就给 `fire_resistance` / `regeneration` **10 秒**，并且先用 `GetAllEffects` 看剩余时间、**不足 4 秒才续**（作者指出一直刷会让效果闪）。
-    - 龙息斩：`dragonSlash.py` 监听 `ServerItemTryUseEvent`，`serverApi.GetDirFromRot` 取朝向，横向投影做锥形判定；`GetEntitiesAround` 用 `is_family=mob` 过滤掉玩家，跳过三只友军，`CreateHurt(...).Hurt(..., EntityAttack, playerId, None, True)`；12 秒冷却。
-    - **`ServerItemTryUseEvent` 对手持剑的触发要实机确认**；若不触发，改客户端事件转发。右键方块同时会走 `ServerItemUseOnEvent`，脚本用 0.2 秒窗口抑制误触。
+    - 龙息斩：`dragonSlash.py` 取朝向用 `serverApi.GetDirFromRot`，横向投影做锥形判定；`GetEntitiesAround` 用 `is_family=mob` 过滤掉玩家，跳过三只友军，`CreateHurt(...).Hurt(..., EntityAttack, playerId, None, True)`；12 秒冷却。**触发方式见教训 24**。
     守卫：`check_combat_scripts`；`check_repair_paths` 覆盖 14 件有耐久装备。
+
+24. **技能按钮：右键在触屏版不可靠，`ServerItemTryUseEvent` 对 `netease:weapon` 根本不触发（2026-10-27 实机确认）**：
+    - 作者反馈「觉醒剑右键没用」。排查结论：**`netease:weapon` 物品没有「使用动画」，引擎不会抛 `ServerItemTryUseEvent`**，脚本监听它永远收不到；`ServerItemUseOnEvent`（右键方块）能收到但不等于空手右键。已在 `dragonSlash.py` 里删掉该监听，并让 `check_skill_hud` 禁止这个事件名再出现。
+    - 基岩版要面向触屏玩家，所以主路径改成 **HUD 技能按钮**：手持龙牙剑/觉醒剑时屏幕出现一个可拖动圆形按钮，点一下放技能，位置持久化；`RightClickBeforeClientEvent`（鼠标右键 / 触屏交互键 / 手柄 LT）保留为**兜底**，且**不取消事件**，免得挡掉原版右键容器。
+    - UI 三件套：`RP/ui/_ui_defs.json` 注册命名空间 → `RP/ui/dragonskillhud.json`（`main@common.base_screen` → 100%×100% 的 `skillPanel` → `skillButton@common.button`）→ Python `clientApi.RegisterUI(modName, uiKey, '包.模块.类名', '命名空间.main')` + `CreateUI(..., {'isHud': 1})`。`isHud:1` 的关键作用是**开着背包也不挡操作**。
+    - 按钮必须写 `"button_mappings": []`，否则点击被控件映射吃掉、Python 的 `AddTouchEventParams` 回调收不到；`dragged` 三件套是 `draggable: "both"` + `contained: true` + `is_handle_button_move_event: true`。
+    - 拖拽与点击共用一套回调：`GetBaseUIControl(path).asButton().AddTouchEventParams({'isSwallow': True})` + `SetButtonTouchDownCallback/MoveCallback/UpCallback`；Move 回调参数里是 `TouchPosX/TouchPosY`（相对屏幕），位移超过 6px 视为拖动 → `SetPosition` + 存位置、**抬起时不施放**；没超过就当作点击施放。抬起才算拖动结束，避免边拖边放。
+    - 位置持久化用 `serverApi.CreateConfigClient(LEVEL_ID).SetConfigData(key, {'x':..,'y':..}, True)`（`isGlobal=True` 跨世界），`GetConfigData` 取回；`GetBaseUIControl(...).GetPosition()` 拿初始位置。
+    - 客户端 → 服务端用 `compFactory.CreateEventData()` + `NotifyToServer(事件名, data)`；**payload 必须自己带上 `playerId`**（服务端回调收到的 `args` 不含发送者身份），服务端 `GetPlayerList()` 再校验一次。服务端监听四元组是 `(客户端mod名, 客户端System名, 事件名)`。
+    - 显隐由 `OnCarriedNewItemChangedClientEvent` 驱动（切物品瞬间），再用 `OnScriptTickClient` 兜底（进世界/初始化时补一次）。冷却只在前端显示数字（`ceil(剩余)`），**服务端独立再算一次 CD**，前端数字不是权威。
+    - `ui_screen` 类型的 ID 已按规程注册（键名 `^[a-z0-9]+$`，kind=`hud`，本包镜像 37 条）；`check_id_registry` 现在会扫 `RP/ui/*.json` 的每个命名空间，防止手写 UI 文件绕过台账。
+    守卫：`check_skill_hud`（`_ui_defs` 收录、命名空间、`base_screen` 基模板、`button_mappings == []`、`is_handle_button_move_event`、`draggable/contained`、默认 `visible: false`、按钮贴图存在、客户端/服务端事件名与 `COOLDOWN` 一致、`dragonSlash.py` 里不得再出现 `ServerItemTryUseEvent`）。
 
 ## 4. 当前内容
 
@@ -168,18 +179,18 @@
 - **成就 4 节点**（同一页，根 `fycq_dragonkin_first_kill`）：首杀「龙裔猎人」、首召「龙巢初醒」、击杀 10 幼龙「幼龙克星」、集齐四件套「龙鳞全装」（原版/觉醒混搭均可）；首杀发 3 结晶 + 8 鳞，其余只弹成就
 - **龙魂觉醒**：龙蛇玩家击杀保底 1 龙魂；龙牙剑 + 龙魂 + 4 鳞 → 觉醒剑（13 伤害/2800 耐久），每件甲 + 龙魂 + 2 鳞 → 觉醒甲（+1 防、+2 韧性、+10% 耐久）；觉醒件同样可龙巢修复/重铸
 - **套装效果**（`dragonSetBonus.py`）：四件龙鳞甲（原版/觉醒混搭）→ 抗火 I + 生命恢复 I；一次给 10 秒，**只有剩余不足 4 秒才续**（反复 AddEffect 会让状态图标/粒子闪），脱一件后最多 10 秒自然结束
-- **龙息斩**（`dragonSlash.py`）：龙牙剑/觉醒剑右键 → 前方 5.5 格锥形，普通剑 8 / 觉醒剑 12 伤害，12 秒冷却；只打 mob，跳过幼龙/祭司/龙卫
+- **龙息斩**（`dragonSlash.py` 服务端 + `dragonSkillClient.py` 客户端）：手持龙牙剑/觉醒剑时屏幕出现**可拖动技能按钮**（位置持久化，点一下施放、拖动不误放），鼠标右键/触屏交互键也能放（兜底，不挡右键容器）；前方 5.5 格锥形，普通剑 8 / 觉醒剑 12 伤害，12 秒冷却（服务端独立计时）；只打 mob，跳过幼龙/祭司/龙卫
 - **龙息与友伤**：phase2/3 龙息火球落地云 **5 秒销毁**（原版 120 秒）；龙裔 `damage_sensor` 免疫 `magic`，BOSS 不再被自己的云伤到、幼龙也不会被擦伤反击；`knockback_roar` 只作用于玩家；四只实体已移除 `hurt_by_target`
 - **首杀成就（按玩家各算）**：`customAchievements/dragonkin_first_kill.json` + `achievementServer.py`；每个玩家第一次击杀龙蛇弹「龙裔猎人」成就，发 龙血结晶 ×3 + 龙鳞 ×8，ExtraData 防重复
 - 技能：BOSS 震地怒吼（**只击退玩家** 4 格、伤 10）+ 召唤 2 只幼龙；龙祭司召唤 1 只幼龙 + 火球；龙卫震地怒吼（只打玩家）+ 贴身范围伤害；幼龙扑咬
 - 音效：`sound_effects` 短名 + 动画时间轴播放（复用原版音效事件）
 - 掉落：每只都有保底池 + 稀有池（`random_chance_with_looting` 受抢夺加成）：BOSS 35% 龙血结晶、龙卫 12% 龙血结晶、祭司 5% 龙心
 - 40 配方（18 常规 + 3 条反向拆解 + 14 条重铸 + 5 条觉醒升级）；创造栏单页平铺 + 工具/盔甲两组（含觉醒件）
-- 脚本 `DrasneaScripts`：`[fycq-probe]` 只读探针（已实机验证加载成功）+ `[fycq-guard]` 创造/旁观玩家不被追逐
+- 脚本 `DrasneaScripts`：9 个服务端 System（探针、仇恨守卫、BOSS 阶段、龙巢修复、祭坛召唤、成就结算、龙息清理、套装效果、龙息斩）+ 2 个客户端 System（探针、技能按钮 HUD `dragonskillhud`）
 
 ## 5. 待办
 
-- **实机验收**：按 `docs/验收清单.md` 跑（三阶段、召唤上限、龙巢修复/首召/常规召唤、4 个成就、斧伤手感、龙息云 5 秒消失且不自伤/误伤、怒吼只打玩家、幼龙不反击、自然刷怪群系/权重、幼龙飞行（会移动不是原地打转）、**龙魂掉落/觉醒升级/套装效果/龙息斩**）
+- **实机验收**：按 `docs/验收清单.md` 跑（三阶段、召唤上限、龙巢修复/首召/常规召唤、4 个成就、斧伤手感、龙息云 5 秒消失且不自伤/误伤、怒吼只打玩家、幼龙不反击、自然刷怪群系/权重、幼龙飞行（会移动不是原地打转）、**龙魂掉落/觉醒升级/套装效果**、**技能按钮 HUD：手持剑出现 / 拖动并重进世界后位置仍在 / 点击施放 / 冷却数字 / 右键兜底不挡容器**）
 - **数值平衡**：自然刷怪权重（6/3/1）、龙鳞获取量、首召 8 鳞、1 心 + 4 鳞、5 个龙魂的觉醒成本、套装抗火+恢复、龙息斩 8/12 伤害与 12 秒冷却，等实机手感
 - **模型剩余共面**：翅膀已修；头部小骨 `bone100–118`、`head/head`、`bone55/bone2` 仍余 107 处可能闪烁，实机看到再修
 - **上架准备**：pack_icon 目前是旧图；商店封面/宣传图/简介/版本号待作者定
