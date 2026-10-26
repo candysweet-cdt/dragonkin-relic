@@ -497,6 +497,33 @@ def check_anim_overlay(data):
     print('动画叠加: 已检查 idle 动 root 的实体')
 
 
+def check_repair_paths(data):
+    """每件有耐久的龙裔装备，都必须能修：要么有 repairable，要么有重铸配方。"""
+    recipes = set()
+    for path, d in data.items():
+        if os.sep + 'netease_recipes' + os.sep in path:
+            body = d.get('minecraft:recipe_shaped') or d.get('minecraft:recipe_shapeless') or {}
+            recipes.add((body.get('description') or {}).get('identifier', ''))
+    n = 0
+    for path, d in data.items():
+        if os.sep + 'netease_items_beh' + os.sep not in path:
+            continue
+        item = d['minecraft:item']
+        ident = item['description']['identifier']
+        comps = item['components']
+        if 'minecraft:max_damage' not in comps:
+            continue
+        n += 1
+        stem = ident.split(':', 1)[1]
+        has_repairable = 'minecraft:repairable' in comps
+        has_rebuild = ('fycq:repair_' + stem) in recipes
+        if not has_repairable and not has_rebuild:
+            bad(f'{ident} 有耐久但既没 minecraft:repairable 也没重铸配方（坏了没法修）')
+        if not has_repairable:
+            bad(f'{ident} 缺 minecraft:repairable（铁砧修复靠它，重铸只是兜底）')
+    print(f'修复路径: {n} 件有耐久装备已核对（repairable + 重铸）')
+
+
 def check_summon_cap(data):
     """本包禁止 JSON 的 behavior.summon_entity：它没有数量上限，多只 BOSS/祭司会堆爆刷怪量。
     召唤统一走脚本 bossPhase.py（全场幼龙 ≤ 8）。"""
@@ -714,6 +741,7 @@ def main():
     check_skills(data)
     check_anim_overlay(data)
     check_aggression(data)
+    check_repair_paths(data)
     check_summon_cap(data)
     check_entity_events(data)
     check_id_registry(data)

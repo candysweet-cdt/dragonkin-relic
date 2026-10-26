@@ -863,6 +863,6 @@
   }
  ],
  "schema": 3,
- "scoped_to": "模组 dragonkin-relic",
- "server_time": 1793035567
+ "scoped_to": "模组 dragonkin-relic（按 mods.pack_dir 命中本包）",
+ "server_time": 1793035724
 }

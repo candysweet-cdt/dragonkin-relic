@@ -22,6 +22,9 @@ MATERIALS = {
 }
 
 # 工具/武器：netease:weapon 的 type 选项是 sword / shovel / pickaxe / hatchet / hoe
+S_SCALE = fid('dragon_scale')
+S_FANG = fid('dragon_fang')
+
 TOOL_SPEED = 10
 TOOL_DURABILITY = 2341
 
@@ -111,14 +114,14 @@ def shaped(ident, pattern, key, count=1):
     }
 
 
-def shapeless(ident, ingredients, count=1):
+def shapeless(ident, ingredients, count=1, result=None):
     return {
         'format_version': '1.12',
         'minecraft:recipe_shapeless': {
             'description': {'identifier': f'fycq:{ident}'},
             'tags': ['crafting_table'],
             'ingredients': [{'item': i} for i in ingredients],
-            'result': [{'item': fid(ident), 'count': count}],
+            'result': [{'item': result or fid(ident), 'count': count}],
         },
     }
 
@@ -145,6 +148,9 @@ def main():
             'minecraft:max_stack_size': 1,
             'minecraft:max_damage': dura,
             'minecraft:hand_equipped': True,
+            # 铁砧修复材料（探针：网易文档未列该组件，若引擎不认则靠重铸配方兜底）
+            'minecraft:repairable': {'repair_items': [
+                {'items': [S_SCALE, S_FANG], 'repair_amount': 0.25}]},
             'netease:weapon': {
                 'type': wtype,
                 'level': 3,
@@ -161,6 +167,8 @@ def main():
         comps = {
             'minecraft:max_stack_size': 1,
             'minecraft:max_damage': dura,
+            'minecraft:repairable': {'repair_items': [
+                {'items': [S_SCALE, S_FANG], 'repair_amount': 0.25}]},
             'netease:armor': {
                 'defense': defense,
                 'enchantment': 15,
@@ -258,6 +266,10 @@ def main():
         'dragon_blood_dew': shapeless('dragon_blood_dew',
                                       [fid('dragon_blood_crystal'), 'minecraft:glass_bottle'], 1),
     }
+    # 重铸（铁砧修复若不生效时的保底）：同一件 + 2 龙鳞 → 全新一件
+    for stem in list(TOOLS) + list(ARMORS):
+        recipes['repair_' + stem] = shapeless('repair_' + stem, [fid(stem), S_SCALE, S_SCALE],
+                                                1, result=fid(stem))
     for ident, body in recipes.items():
         dump(os.path.join(BP, 'netease_recipes', ident + '.json'), body)
 
