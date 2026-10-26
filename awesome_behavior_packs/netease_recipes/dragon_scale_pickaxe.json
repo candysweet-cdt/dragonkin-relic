@@ -8,13 +8,16 @@
             "crafting_table"
         ],
         "pattern": [
-            "SSS",
+            "SFS",
             " T ",
             " T "
         ],
         "key": {
             "S": {
                 "item": "fycq:dragon_scale"
+            },
+            "F": {
+                "item": "fycq:dragon_fang"
             },
             "T": {
                 "item": "minecraft:stick"

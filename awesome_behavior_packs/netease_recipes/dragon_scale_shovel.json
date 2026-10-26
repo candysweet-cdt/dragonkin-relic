@@ -9,12 +9,15 @@
         ],
         "pattern": [
             "S",
-            "T",
+            "F",
             "T"
         ],
         "key": {
             "S": {
                 "item": "fycq:dragon_scale"
+            },
+            "F": {
+                "item": "fycq:dragon_fang"
             },
             "T": {
                 "item": "minecraft:stick"

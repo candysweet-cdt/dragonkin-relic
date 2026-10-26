@@ -205,11 +205,16 @@ def main():
     # 配方
     S, F, T = fid('dragon_scale'), fid('dragon_fang'), 'minecraft:stick'
     recipes = {
+        # 牙=刃材、鳞=结构材：剑是纯刃（2 牙），工具头是「鳞 + 牙」
         'dragon_fang_sword': shaped('dragon_fang_sword', ['F', 'F', 'T'], {'F': F, 'T': T}),
-        'dragon_scale_pickaxe': shaped('dragon_scale_pickaxe', ['SSS', ' T ', ' T '], {'S': S, 'T': T}),
-        'dragon_scale_axe': shaped('dragon_scale_axe', ['SS ', 'ST ', ' T '], {'S': S, 'T': T}),
-        'dragon_scale_shovel': shaped('dragon_scale_shovel', ['S', 'T', 'T'], {'S': S, 'T': T}),
-        'dragon_scale_hoe': shaped('dragon_scale_hoe', ['SS', ' T', ' T'], {'S': S, 'T': T}),
+        'dragon_scale_pickaxe': shaped('dragon_scale_pickaxe', ['SFS', ' T ', ' T '],
+                                       {'S': S, 'F': F, 'T': T}),
+        'dragon_scale_axe': shaped('dragon_scale_axe', ['SF ', 'ST ', ' T '],
+                                   {'S': S, 'F': F, 'T': T}),
+        'dragon_scale_shovel': shaped('dragon_scale_shovel', ['S', 'F', 'T'],
+                                      {'S': S, 'F': F, 'T': T}),
+        'dragon_scale_hoe': shaped('dragon_scale_hoe', ['SF', ' T', ' T'],
+                                   {'S': S, 'F': F, 'T': T}),
         'dragon_scale_helmet': shaped('dragon_scale_helmet', ['SSS', 'S S'], {'S': S}),
         'dragon_scale_chestplate': shaped('dragon_scale_chestplate', ['S S', 'SSS', 'SSS'], {'S': S}),
         'dragon_scale_leggings': shaped('dragon_scale_leggings', ['SSS', 'S S', 'S S'], {'S': S}),
@@ -230,8 +235,8 @@ def main():
                     'name': fid('dragon_scale'),
                     'weight': 1,
                     'functions': [
-                        {'function': 'set_count', 'count': {'min': 4, 'max': 8}},
-                        {'function': 'looting_enchant', 'count': {'min': 0, 'max': 3}},
+                        {'function': 'set_count', 'count': {'min': 6, 'max': 10}},
+                        {'function': 'looting_enchant', 'count': {'min': 0, 'max': 4}},
                     ],
                 }],
             },
