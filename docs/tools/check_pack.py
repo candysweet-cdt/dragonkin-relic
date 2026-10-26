@@ -534,6 +534,47 @@ def check_aggression(data):
     print(f'仇恨与友伤: {sum(1 for p in data if os.sep + "entities" + os.sep in p)} 个实体检查完毕')
 
 
+def check_id_registry(data):
+    """离线对账：包内每个标识符都要在 docs/tools/id_registry.json 的 dragonkin-relic 名下。"""
+    path = os.path.join(ROOT, 'docs', 'tools', 'id_registry.json')
+    if not os.path.isfile(path):
+        bad('缺 docs/tools/id_registry.json（跑 idreg mirror --pack 生成）')
+        return
+    snap = json.load(open(path, encoding='utf-8'))
+    have = {(e['type'], e['key']) for e in snap.get('entries', [])
+            if e.get('mod') == 'dragonkin-relic'}
+    need = set()
+    for sub, type_ in (('netease_blocks', 'block'), ('netease_items_beh', 'item')):
+        d = os.path.join(BP, sub)
+        if not os.path.isdir(d):
+            continue
+        for f in os.listdir(d):
+            if not f.endswith('.json'):
+                continue
+            key = f[:-5]
+            if type_ == 'item' and key.startswith('zz_') and key.endswith('_egg'):
+                need.add(('spawn_egg', key))
+            else:
+                need.add((type_, key))
+    ent = os.path.join(BP, 'entities')
+    if os.path.isdir(ent):
+        for f in os.listdir(ent):
+            if f.endswith('.json'):
+                need.add(('entity', f[:-5]))
+    tab = os.path.join(BP, 'netease_tab')
+    if os.path.isdir(tab):
+        for f in os.listdir(tab):
+            if f.endswith('.json'):
+                d = json.load(open(os.path.join(tab, f), encoding='utf-8'))
+                for c in d.get('category', []):
+                    need.add(('tab', c.get('name', '')))
+    for t, k in sorted(need - have):
+        bad(f'{t} {k} 未在 ID 注册表登记（跑 idreg batch --action claim 补登记）')
+    for t, k in sorted(have - need):
+        bad(f'注册表登记了 {t} {k}，但包里扫不到（文件被删或改名没退登记）')
+    print(f'ID 注册对账: 包内 {len(need)} 条 / 镜像 {len(have)} 条')
+
+
 def check_scripts():
     """脚本护栏：RegisterSystem 的模块路径必须能落到真实的 文件.类；包内不许留 __pycache__/.pyc。"""
     import re
@@ -638,6 +679,7 @@ def main():
     check_skills(data)
     check_anim_overlay(data)
     check_aggression(data)
+    check_id_registry(data)
     check_scripts()
     check_manifests(data)
     print()

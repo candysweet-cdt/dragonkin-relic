@@ -56,7 +56,7 @@ BLOCKS = ['dragon_scale_block', 'dragon_scale_bricks', 'dragon_scale_pillar',
           'dragon_bone_block', 'dragon_crystal_block', 'dragon_crystal_lamp', 'dragon_nest']
 
 # 不入组的件：与「每组首件」一起按 identifier 混排（官方《13-自定义物品分页》第三条规则）
-UNGROUPED = MATERIALS + BLOCKS + ['zz_drasnea_egg', 'zz_dragon_whelp_egg',
+UNGROUPED = MATERIALS + BLOCKS + ['dragon_blood_dew', 'zz_drasnea_egg', 'zz_dragon_whelp_egg',
                'zz_dragon_priest_egg', 'zz_dragon_guard_egg']
 
 

@@ -43,6 +43,11 @@ ARMORS = {
 
 
 # 刷怪蛋：官方规范要求 custom_item_type=egg + netease:egg；zz_ 前缀让它在分页内排最后
+# 消耗品：龙血凝露（龙血结晶 + 玻璃瓶），饮用回血 + 抗性
+CONSUMABLES = {
+    'dragon_blood_dew': '龙血凝露',
+}
+
 EGG_NAMES = {
     'zz_drasnea_egg': '龙蛇刷怪蛋',
     'zz_dragon_whelp_egg': '幼龙刷怪蛋',
@@ -76,7 +81,10 @@ def item_beh(ident, components, custom_type=None):
     return {'format_version': '1.10', 'minecraft:item': {'description': desc, 'components': components}}
 
 
-def item_res(ident):
+def item_res(ident, extra=None):
+    comps = {'minecraft:icon': fid(ident)}
+    if extra:
+        comps.update(extra)
     return {
         'format_version': '1.10',
         'minecraft:item': {
@@ -85,7 +93,7 @@ def item_res(ident):
                 'category': CATEGORY,
                 'register_to_create_menu': True,
             },
-            'components': {'minecraft:icon': fid(ident)},
+            'components': comps,
         },
     }
 
@@ -189,10 +197,31 @@ def main():
         dump(os.path.join(BP, 'netease_items_beh', ident + '.json'), item_beh(ident, comps, 'egg'))
         names[ident] = EGG_NAMES[ident]
 
+    # 消耗品（可饮用）
+    for ident, cn in CONSUMABLES.items():
+        comps = {
+            'minecraft:max_stack_size': 1,
+            'minecraft:use_duration': 32,
+            'minecraft:food': {
+                'nutrition': 0,
+                'saturation_modifier': 'poor',
+                'using_converts_to': 'minecraft:glass_bottle',
+                'effects': [
+                    {'name': 'regeneration', 'chance': 1.0, 'duration': 10, 'amplifier': 1},
+                    {'name': 'absorption', 'chance': 1.0, 'duration': 60, 'amplifier': 0},
+                    {'name': 'fire_resistance', 'chance': 1.0, 'duration': 20, 'amplifier': 0},
+                ],
+            },
+            'netease:customtips': {'value': '§7饮下：回复生命并获得抗性'},
+        }
+        dump(os.path.join(BP, 'netease_items_beh', ident + '.json'), item_beh(ident, comps))
+        names[ident] = cn
+
     # 资源包物品定义
-    all_ids = list(MATERIALS) + list(TOOLS) + list(ARMORS) + list(EGGS)
+    all_ids = list(MATERIALS) + list(TOOLS) + list(ARMORS) + list(EGGS) + list(CONSUMABLES)
     for ident in all_ids:
-        dump(os.path.join(RP, 'netease_items_res', ident + '.json'), item_res(ident))
+        extra = {'minecraft:use_animation': 'drink'} if ident in CONSUMABLES else None
+        dump(os.path.join(RP, 'netease_items_res', ident + '.json'), item_res(ident, extra))
 
     # 图集
     dump(os.path.join(RP, 'textures', 'item_texture.json'), {
@@ -200,7 +229,7 @@ def main():
         'texture_name': 'atlas.items',
         'texture_data': {
             fid(ident): {'textures': f'textures/items/{ident}'}
-            for ident in list(MATERIALS) + list(TOOLS) + list(ARMORS) + list(EGGS)
+            for ident in all_ids
         },
     })
 
@@ -225,6 +254,8 @@ def main():
         'dragon_scale_boots': shaped('dragon_scale_boots', ['S S', 'S S'], {'S': S}),
         'dragon_blood_crystal': shapeless('dragon_blood_crystal',
                                           [fid('dragon_heart'), S, S], 3),
+        'dragon_blood_dew': shapeless('dragon_blood_dew',
+                                      [fid('dragon_blood_crystal'), 'minecraft:glass_bottle'], 1),
     }
     for ident, body in recipes.items():
         dump(os.path.join(BP, 'netease_recipes', ident + '.json'), body)

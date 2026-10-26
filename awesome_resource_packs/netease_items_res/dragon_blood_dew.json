@@ -1,0 +1,14 @@
+{
+    "format_version": "1.10",
+    "minecraft:item": {
+        "description": {
+            "identifier": "fycq:dragon_blood_dew",
+            "category": "drasnea",
+            "register_to_create_menu": true
+        },
+        "components": {
+            "minecraft:icon": "fycq:dragon_blood_dew",
+            "minecraft:use_animation": "drink"
+        }
+    }
+}

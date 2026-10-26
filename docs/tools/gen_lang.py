@@ -28,6 +28,7 @@ ITEMS = {
     'dragon_scale_chestplate': '龙鳞胸甲',
     'dragon_scale_leggings': '龙鳞护腿',
     'dragon_scale_boots': '龙鳞靴',
+    'dragon_blood_dew': '龙血凝露',
     'zz_drasnea_egg': '龙蛇刷怪蛋',
     'zz_dragon_whelp_egg': '幼龙刷怪蛋',
     'zz_dragon_priest_egg': '龙祭司刷怪蛋',

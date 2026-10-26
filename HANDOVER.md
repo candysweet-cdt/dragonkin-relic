@@ -107,10 +107,16 @@
     BOSS 直接**取消受击态**（原版 BOSS 也没有受击动画），改用渲染控制器 `is_hurt_color: {r:1, g:0.25, b:0.25, a:0.55}` 红闪（`format_version` 需 1.10.0，参考 DeathAnimation 包）；同时删掉不再使用的 `animation.drasnea.hurt`、受击标记组与事件，客户端 `animations` 里的 `hurt` 短名也要一起去掉（否则 `check_entities` 会报未定义）。
     守卫：`check_anim_overlay` —— 只要 idle 动了 root，其它状态若不叠加 idle 且自身没 root 关键帧就报错（负测验证过）。
 
+17. **ID 注册表接入（2026-10-27）**：本包原先在注册表里**没有模组条目**，因此不能注册任何新 ID。已通过 `/api/mods` 补上 `dragonkin-relic`（namespace `fycq`，pack_dir `Project/Dragonkin Relic`），并 `batch --action claim` 补齐存量 30 条（13 物品 / 7 方块 / 4 实体 / 4 蛋 / 1 分页 / 1 消耗品），`check --mod dragonkin-relic` 零欠账。
+    同批修了两个共享客户端 bug（`.agents/tools/idreg/idreg.py`，不在本包仓库）：
+    ① `SCAN` 写死 `behavior_pack/`，`awesome_behavior_packs/` 的包会被**空扫**——扫描不到任何键，`check` 永远报"无错账"。已加 `pack_dir()` 兼容三种包目录命名。
+    ② `_meta_args()` 里引用了未定义的 `type_`，`claim`/`reserve` 带 `--mod` 且不填 `--namespace` 时直接 NameError。已改成 `getattr(a, "type", "")`。
+    守卫：`check_pack.py` 的 `check_id_registry` 读 `docs/tools/id_registry.json`，离线断言「包内每个 ID 都登记、注册表每条都在包里」（双向）。
+
 ## 4. 当前内容
 
 - BOSS `fycq:drasnea`：500 血、29 组件、4 段动画（idle/move/attack/death）、原版 BOSS 血条、火球三连 + 冲撞、专属掉落、不自然刷怪（`spawn_rules` 已删，靠刷怪蛋/`/summon`）
-- 14 物品：4 材料 + 龙牙剑 + 镐斧锹锄 + 龙鳞四件套，外加 1 张显式刷怪蛋 `fycq:zz_drasnea_egg`（`custom_item_type: egg` + `netease:egg`，官方规范见《1-自定义物品/4-自定义生物蛋》，支持右键生成/刷怪笼/发射器；`zz_` 前缀让它排在分页末尾）
+- 18 物品：4 材料 + 龙牙剑 + 镐斧锹锄 + 龙鳞四件套 + 龙血凝露（饮用回血/抗性，返空瓶）+ 4 张刷怪蛋，外加 1 张显式刷怪蛋 `fycq:zz_drasnea_egg`（`custom_item_type: egg` + `netease:egg`，官方规范见《1-自定义物品/4-自定义生物蛋》，支持右键生成/刷怪笼/发射器；`zz_` 前缀让它排在分页末尾）
 - 7 方块：龙鳞块 / 龙鳞砖 / 龙鳞柱 / 龙骨块 / 龙晶块 / 龙晶灯 / 龙巢
 - 3 生物（波 3）：`dragon_whelp` 幼龙（30 血近战，掉龙鳞）、`dragon_priest` 龙祭司（60 血火球远程，掉龙鳞+龙血结晶）、`dragon_guard` 龙卫（120 血近战精英，掉龙牙+龙鳞）；各带几何体、64×128 贴图、idle/move/death 三段动画、控制器、渲染控制器、掉落表、`netease:egg` 刷怪蛋与原版音效绑定
 - 每只生物 5 态动画：`idle / move / attack / hurt / death`（攻击态由延迟攻击驱动，受击态由受击标记驱动）

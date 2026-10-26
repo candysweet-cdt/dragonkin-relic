@@ -52,6 +52,9 @@
         },
         "fycq:zz_dragon_guard_egg": {
             "textures": "textures/items/zz_dragon_guard_egg"
+        },
+        "fycq:dragon_blood_dew": {
+            "textures": "textures/items/dragon_blood_dew"
         }
     }
 }
