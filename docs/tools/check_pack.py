@@ -634,7 +634,7 @@ def check_spawn_rules(data):
 
 
 def check_whelp_flight(data):
-    """幼龙真飞：hover 导航 + 无重力 + can_fly；不能还留着走路/扑咬组件。"""
+    """幼龙真飞：fly 导航 + random_fly + 无重力；hover 那套只会原地打转，走路/扑咬也不能留。"""
     target = None
     for path, d in data.items():
         if os.sep + 'entities' + os.sep not in path:
@@ -646,17 +646,19 @@ def check_whelp_flight(data):
         bad('找不到 fycq:dragon_whelp')
         return
     comps = target.get('components') or {}
-    for key in ('minecraft:navigation.hover', 'minecraft:movement.hover',
-                'minecraft:can_fly', 'minecraft:behavior.random_hover'):
+    for key in ('minecraft:navigation.fly', 'minecraft:movement.fly',
+                'minecraft:can_fly', 'minecraft:behavior.random_fly'):
         if key not in comps:
             bad(f'幼龙缺 {key}（不会真飞）')
     if (comps.get('minecraft:physics') or {}).get('has_gravity') is not False:
         bad('幼龙的 physics.has_gravity 不是 false')
     for key in ('minecraft:navigation.walk', 'minecraft:movement.basic',
-                'minecraft:behavior.leap_at_target', 'minecraft:behavior.random_stroll'):
+                'minecraft:behavior.leap_at_target', 'minecraft:behavior.random_stroll',
+                'minecraft:navigation.hover', 'minecraft:movement.hover',
+                'minecraft:behavior.random_hover'):
         if key in comps:
-            bad(f'幼龙还留着 {key}（会和 hover 导航打架）')
-    print('幼龙飞行: hover 导航已核对')
+            bad(f'幼龙还留着 {key}（hover 会原地悬停打转 / 走路导航会和 fly 打架）')
+    print('幼龙飞行: fly 导航已核对')
 
 
 def check_combat_scripts():

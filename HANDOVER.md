@@ -140,7 +140,7 @@
 
 22. **自然刷怪 + 幼龙飞行 + 成就树 + 首召闭环（2026-10-27）**：
     - `spawn_rules` 放 `awesome_behavior_packs/spawn_rules/<stem>.json`，条件用 `spawns_on_surface` + `brightness_filter` + `difficulty_filter` + `weight` + `herd` + `biome_filter`；BOSS 不写规则。三只小怪加 `minecraft:despawn` 防越积越多。
-    - 幼龙真飞照蜜蜂/悦灵：`navigation.hover` + `movement.hover` + `can_fly` + `behavior.random_hover` + `physics.has_gravity:false`；**删掉** `navigation.walk` / `movement.basic` / `random_stroll` / `leap_at_target`，否则两套导航打架。
+    - 幼龙真飞：先用蜜蜂/悦灵那套 `navigation.hover` + `random_hover`，**实机只会原地悬停打转**（作者反馈）；改成鹦鹉式 `navigation.fly` + `movement.fly` + `behavior.random_fly`（xz 15 / y 4）+ `physics.has_gravity:false`，并删掉 `navigation.walk` / `movement.basic` / `random_stroll` / `leap_at_target`。
     - 自定义成就树：子节点 `parent_node` 指 `fycq_dragonkin_first_kill`；10 杀幼龙用 `goal_details.default_kill` 自动记；首召在 `altarSummon` 成功后 `SetNodeFinish`；四件套由 `achievementServer` 每 5 秒扫背包+盔甲后 `SetNodeFinish`。
     - **首召闭环**：首召 8 龙鳞（世界标记 `fycq_drasnea_ever_summoned`），之后 1 龙心 + 4 龙鳞；祭司 5% 龙心是提前再召的捷径。
     守卫：`check_spawn_rules` / `check_whelp_flight`；`check_achievements` 增加父节点存在性与「无 goal_details 的节点必须有脚本完成」。
@@ -158,7 +158,7 @@
 - BOSS `fycq:drasnea`：500 血、29 组件、4 段动画（idle/move/attack/death）、原版 BOSS 血条、火球三连 + 冲撞、专属掉落、不自然刷怪（`spawn_rules` 已删，靠刷怪蛋/`/summon`）
 - 24 物品：5 材料（含**龙魂**）+ 龙牙剑 + 镐斧锹锄 + 龙鳞四件套 + **龙牙剑·觉醒 + 觉醒四件甲** + 龙血凝露（饮用回血/抗性，返空瓶）+ 4 张刷怪蛋，外加 1 张显式刷怪蛋 `fycq:zz_drasnea_egg`（`custom_item_type: egg` + `netease:egg`，官方规范见《1-自定义物品/4-自定义生物蛋》，支持右键生成/刷怪笼/发射器；`zz_` 前缀让它排在分页末尾）
 - 7 方块：龙鳞块 / 龙鳞砖 / 龙鳞柱 / 龙骨块 / 龙晶块 / 龙晶灯 / 龙巢
-- 3 生物（波 3）：`dragon_whelp` 幼龙（30 血，**hover 悬浮飞行**近战）、`dragon_priest` 龙祭司（60 血火球远程）、`dragon_guard` 龙卫（120 血近战精英）；各带几何体、64×128 贴图、动画、控制器、渲染控制器、掉落表、`netease:egg` 刷怪蛋与原版音效绑定
+- 3 生物（波 3）：`dragon_whelp` 幼龙（30 血，**飞行近战**，fly 导航 + random_fly）、`dragon_priest` 龙祭司（60 血火球远程）、`dragon_guard` 龙卫（120 血近战精英）；各带几何体、64×128 贴图、动画、控制器、渲染控制器、掉落表、`netease:egg` 刷怪蛋与原版音效绑定
 - **自然刷怪**：三只都有 `spawn_rules`（夜晚、亮度 0–7，群山/台地/台地类群系，权重 6/3/1，队伍 1–2/1/1），带 `minecraft:despawn` 按距离消失；BOSS **不自然刷**
 - 三只小怪 5 态动画：`idle / move / attack / hurt / death`（攻击态由延迟攻击驱动，受击态由受击标记驱动）；BOSS 4 段（受击用 `is_hurt_color` 红闪）
 - **龙蛇三阶段**（脚本 `bossPhase.py`，阈值 66% / 33%）：phase2 移速 0.36 / 伤害 16 / 震地 CD 8 / **龙息火球 + 冲锋** / 血条「龙蛇·血怒」；phase3 移速 0.42 / 伤害 22 / 震地 CD 6 / **贴身灼烧 area_attack** / 血条「龙蛇·狂怒」
@@ -179,7 +179,7 @@
 
 ## 5. 待办
 
-- **实机验收**：按 `docs/验收清单.md` 跑（三阶段、召唤上限、龙巢修复/首召/常规召唤、4 个成就、斧伤手感、龙息云 5 秒消失且不自伤/误伤、怒吼只打玩家、幼龙不反击、自然刷怪群系/权重、幼龙 hover 飞行、**龙魂掉落/觉醒升级/套装效果/龙息斩**）
+- **实机验收**：按 `docs/验收清单.md` 跑（三阶段、召唤上限、龙巢修复/首召/常规召唤、4 个成就、斧伤手感、龙息云 5 秒消失且不自伤/误伤、怒吼只打玩家、幼龙不反击、自然刷怪群系/权重、幼龙飞行（会移动不是原地打转）、**龙魂掉落/觉醒升级/套装效果/龙息斩**）
 - **数值平衡**：自然刷怪权重（6/3/1）、龙鳞获取量、首召 8 鳞、1 心 + 4 鳞、5 个龙魂的觉醒成本、套装抗火+恢复、龙息斩 8/12 伤害与 12 秒冷却，等实机手感
 - **模型剩余共面**：翅膀已修；头部小骨 `bone100–118`、`head/head`、`bone55/bone2` 仍余 107 处可能闪烁，实机看到再修
 - **上架准备**：pack_icon 目前是旧图；商店封面/宣传图/简介/版本号待作者定

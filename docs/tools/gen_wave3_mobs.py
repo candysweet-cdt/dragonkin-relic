@@ -439,20 +439,20 @@ def build_beh(stem, spec):
         'minecraft:despawn': {'despawn_from_distance': {}},
     }
     if b.get('fly'):
-        # 幼龙真飞：照蜜蜂/悦灵用 hover 导航 + 无重力，关掉走路导航与扑咬
+        # 幼龙真飞：照鹦鹉用 fly 导航 + random_fly。
+        # ⚠ 蜜蜂那套 hover + random_hover 实测只会原地悬停打转，不会前进。
         comps['minecraft:physics'] = {'has_gravity': False, 'has_collision': True}
         for key in ('minecraft:navigation.walk', 'minecraft:movement.basic',
                     'minecraft:behavior.random_stroll'):
             comps.pop(key, None)
-        comps['minecraft:navigation.hover'] = {
-            'can_path_over_water': True, 'can_sink': False, 'can_pass_doors': False,
-            'can_path_from_air': True, 'avoid_water': True,
-            'avoid_damage_blocks': True, 'avoid_sun': False}
-        comps['minecraft:movement.hover'] = {}
+        comps['minecraft:navigation.fly'] = {'can_path_over_water': True,
+                                             'can_path_from_air': True}
+        comps['minecraft:movement.fly'] = {}
         comps['minecraft:can_fly'] = {}
-        comps['minecraft:behavior.random_hover'] = {
-            'priority': 7, 'xz_dist': 8, 'y_dist': 8, 'y_offset': -1,
-            'interval': 1, 'hover_height': [1, 4]}
+        comps['minecraft:behavior.random_fly'] = {
+            'priority': 7, 'xz_dist': 15, 'y_dist': 4, 'y_offset': 0,
+            'speed_multiplier': 1.0, 'can_land_on_trees': True,
+            'avoid_damage_blocks': True}
     if b.get('ranged'):
         comps['minecraft:shooter'] = {'def': 'minecraft:fireball'}
         comps['minecraft:behavior.ranged_attack'] = {
