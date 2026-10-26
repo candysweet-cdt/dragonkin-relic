@@ -14,8 +14,8 @@
                 "defense": 3,
                 "enchantment": 15,
                 "armor_slot": 0,
-                "toughness": 2,
-                "knockback_resistance": 0
+                "toughness": 3,
+                "knockback_resistance": 0.1
             }
         }
     }

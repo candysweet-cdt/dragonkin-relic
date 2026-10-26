@@ -22,12 +22,15 @@ MATERIALS = {
 }
 
 # 工具/武器：netease:weapon 的 type 选项是 sword / shovel / pickaxe / hatchet / hoe
+TOOL_SPEED = 10
+TOOL_DURABILITY = 2341
+
 TOOLS = {
-    'dragon_fang_sword': ('龙牙剑', 'sword', 8, 1561, 15),
-    'dragon_scale_pickaxe': ('龙鳞镐', 'pickaxe', 5, 1561, 10),
-    'dragon_scale_axe': ('龙鳞斧', 'hatchet', 9, 1561, 10),
-    'dragon_scale_shovel': ('龙鳞锹', 'shovel', 5, 1561, 10),
-    'dragon_scale_hoe': ('龙鳞锄', 'hoe', 1, 1561, 10),
+    'dragon_fang_sword': ('龙牙剑', 'sword', 10, TOOL_DURABILITY, 18),
+    'dragon_scale_pickaxe': ('龙鳞镐', 'pickaxe', 7, TOOL_DURABILITY, 12),
+    'dragon_scale_axe': ('龙鳞斧', 'hatchet', 11, TOOL_DURABILITY, 12),
+    'dragon_scale_shovel': ('龙鳞锹', 'shovel', 7, TOOL_DURABILITY, 12),
+    'dragon_scale_hoe': ('龙鳞锄', 'hoe', 3, TOOL_DURABILITY, 12),
 }
 
 # 盔甲：armor_slot 0头 1胸 2腿 3靴；defense 取下界与钻石同档
@@ -133,7 +136,7 @@ def main():
             'netease:weapon': {
                 'type': wtype,
                 'level': 3,
-                'speed': 8,
+                'speed': TOOL_SPEED,
                 'attack_damage': dmg,
                 'enchantment': ench,
             },
@@ -150,8 +153,8 @@ def main():
                 'defense': defense,
                 'enchantment': 15,
                 'armor_slot': slot,
-                'toughness': 2,
-                'knockback_resistance': 0,
+                'toughness': 3,
+                'knockback_resistance': 0.1,
             },
         }
         dump(os.path.join(BP, 'netease_items_beh', ident + '.json'), item_beh(ident, comps, 'armor'))
@@ -263,6 +266,15 @@ def main():
                     'functions': [{'function': 'set_count', 'count': {'min': 1, 'max': 1}}],
                 }],
                 'conditions': [{'condition': 'killed_by_player'}],
+            },
+            {
+                'conditions': [{'condition': 'killed_by_player'},
+                               {'condition': 'random_chance_with_looting', 'chance': 0.35,
+                                'looting_multiplier': 0.02}],
+                'rolls': 1,
+                'entries': [{'type': 'item', 'name': fid('dragon_blood_crystal'), 'weight': 1,
+                             'functions': [{'function': 'set_count',
+                                            'count': {'min': 1, 'max': 2}}]}],
             },
         ],
     })

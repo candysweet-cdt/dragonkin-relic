@@ -9,14 +9,14 @@
         },
         "components": {
             "minecraft:max_stack_size": 1,
-            "minecraft:max_damage": 1561,
+            "minecraft:max_damage": 2341,
             "minecraft:hand_equipped": true,
             "netease:weapon": {
                 "type": "shovel",
                 "level": 3,
-                "speed": 8,
-                "attack_damage": 5,
-                "enchantment": 10
+                "speed": 10,
+                "attack_damage": 7,
+                "enchantment": 12
             }
         }
     }
