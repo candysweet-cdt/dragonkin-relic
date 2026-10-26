@@ -28,6 +28,7 @@ class AggroGuardServer(ServerSystem):
         self.mobs = {}
         self.tick = 0
         self.lastLog = {}
+        self.lastAllyLog = {}
         self.ListenForEvent(engineNs, engineSys, 'AddEntityServerEvent', self, self.OnAddEntity)
         self.ListenForEvent(engineNs, engineSys, 'MobDieEvent', self, self.OnDie)
         self.ListenForEvent(engineNs, engineSys, 'OnScriptTickServer', self, self.OnTick)
@@ -53,6 +54,15 @@ class AggroGuardServer(ServerSystem):
                 action = compFactory.CreateAction(entityId)
                 target = action.GetAttackTarget() if action else None
                 if not target:
+                    continue
+                # 兜底 2：仇恨目标是本包另一个生物（同族）→ 立刻放弃，防内讧。
+                # JSON 侧的 damage_sensor family 免伤只管伤害，管不住弹射物归属不确定的情况。
+                if target in self.mobs:
+                    action.SetAttackTarget(None)
+                    if self.tick - self.lastAllyLog.get(entityId, -LOG_COOLDOWN) >= LOG_COOLDOWN:
+                        self.lastAllyLog[entityId] = self.tick
+                        log('drop ally target %s -> %s'
+                            % (self.mobs[entityId], self.mobs[target]))
                     continue
                 typeComp = compFactory.CreateEngineType(target)
                 if not typeComp or typeComp.GetEngineTypeStr() != 'minecraft:player':

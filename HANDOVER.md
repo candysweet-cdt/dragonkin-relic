@@ -89,7 +89,9 @@
     另：`studio.json` 的 `"CodeEnable": false` **不拦脚本加载**（该工程一直是 false，但引擎照样尝试 ImportModMain）。
 
 14. **三只生物「无脑攻击 / 内讧 / 创造模式也打」的根因与修法**（2026-10-27 作者实机反馈）：
-    - **内讧**：技能会伤到同族（祭司火球、龙卫震地），被打的怪走 `behavior.hurt_by_target` 反击，形成连锁。修法：所有龙裔在 `damage_sensor` 的 **第一条**加 `{on_damage: {filters: {test: is_family, subject: other, value: dragonkin}, deals_damage: false}}` —— 顺序必须在受击事件触发之前，否则先掉血再免疫，白搭。
+    - **内讧**：技能会伤到同族（祭司火球、龙卫震地），被打的怪走 `behavior.hurt_by_target` 反击，形成连锁。修法：所有龙裔在 `damage_sensor` 的 **第一条**加 `{on_damage: {filters: {test: is_family, subject: other, value: dragonkin}, deals_damage: false}}` —— 顺序必须在受击事件触发之前。
+      ⚠ 2026-10-27 二修：**过滤是按「攻击者」的 family 判定的**，而 BOSS 的 `type_family` 当时漏了 `dragonkin`（只有 drasnea/monster/mob/boss/fycq），所以 BOSS 误伤幼龙时幼龙那边判不中 → 照样反打。BOSS 已补 `dragonkin`。
+      再加一道脚本兜底：`aggroGuard.py` 每 5 tick 检查，**仇恨目标是本包另一个生物就 `SetAttackTarget(None)`**（弹射物伤害归属不一定算到施法者头上，JSON 层堵不严）。守卫：`check_aggression` 断言每个 fycq 实体的 family 必含 `dragonkin`。
     - **无脑攻击**：我原来写的是 `must_see: false` + `within_radius: 24`，等于隔墙全图仇恨且永不脱战。改成参考包 `guchengyuanling` 的原版派写法：`must_see: true` + 每类 `max_dist`（幼龙 12 / 龙卫 16 / 祭司 20 / BOSS 20）。
     - **创造模式也打**：官方文档与参考模组全库**没有** `is_creative` 这类过滤器测试，JSON 无解。只能脚本兜底：`aggroGuard.py` 每 5 tick 检查本包生物的 `GetAttackTarget()`，若目标是创造/旁观玩家就 `SetAttackTarget(None)`（`GameType.Creative=1 / Spectator=6`）。表现上是「盯着你但不追不打」，不是隐身。
     - 守卫：`check_pack.py` 的 `check_aggression` 断言「必须 `must_see: true`」「目标类型必须有 ≤32 的 `max_dist`」「`damage_sensor` 第一条必须是 dragonkin 免伤」（三类违规都做过负测）。

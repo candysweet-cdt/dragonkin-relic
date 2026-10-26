@@ -507,6 +507,10 @@ def check_aggression(data):
         if not ident.startswith('fycq:'):
             continue
         comps = ent.get('components') or {}
+        fam = (comps.get('minecraft:type_family') or {}).get('family') or []
+        if 'dragonkin' not in fam:
+            bad(f'{ident} 的 type_family 缺 dragonkin —— 免伤过滤按攻击者家族判定，'
+                '缺了就会互相误伤并触发内讧（BOSS 曾漏过）')
         nt = comps.get('minecraft:behavior.nearest_attackable_target')
         if nt:
             if nt.get('must_see') is not True:
