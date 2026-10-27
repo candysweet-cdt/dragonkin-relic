@@ -8,24 +8,31 @@
   body { background: #0e1424; font-family: "Microsoft YaHei", "PingFang SC", sans-serif; }
   .poster { width: 1000px; margin: 0 auto; background: #0e1424; color: #e8eefc; }
   .it { image-rendering: pixelated; display: block; }
+  .shot { display: block; border: 1px solid #2b4166; border-radius: 6px; }
+  .cap { font-size: 15px; color: #8fa1c2; text-align: center; margin-top: 8px; }
 
-  .hero { padding: 44px 46px 40px; background: #101a30; border-bottom: 3px solid #1f7d6d; }
+  .hero { display: flex; align-items: center; gap: 26px; padding: 40px 46px;
+          background: #101a30; border-bottom: 3px solid #1f7d6d; }
+  .hero .txt { flex: 1; }
   .kicker { font-size: 19px; letter-spacing: 6px; color: #7fd8c4; }
-  .title { font-size: 66px; font-weight: 800; letter-spacing: 4px; margin: 4px 0; color: #fff; }
-  .subtitle { font-size: 22px; color: #cfd9ef; }
+  .title { font-size: 64px; font-weight: 800; letter-spacing: 4px; margin: 4px 0 8px; color: #fff; }
+  .subtitle { font-size: 21px; color: #cfd9ef; line-height: 1.6; }
+  .hero img { width: 292px; height: 292px; object-fit: cover; object-position: 46% 40%;
+              border: 1px solid #2b4166; border-radius: 8px; }
 
-  .sec { padding: 32px 46px 28px; }
+  .sec { padding: 30px 46px 28px; }
   .sec.alt { background: #121c33; }
-  h2 { font-size: 29px; letter-spacing: 2px; margin-bottom: 18px; color: #fff; }
+  h2 { font-size: 29px; letter-spacing: 2px; margin-bottom: 16px; color: #fff; }
   h2::before { content: "■"; color: #1f9d84; margin-right: 12px; font-size: 23px; }
 
-  .stats { display: flex; gap: 14px; }
+  .stats { display: flex; gap: 14px; margin-bottom: 20px; }
   .stat { flex: 1; background: #16233d; border: 1px solid #2b4166; border-radius: 6px;
           padding: 16px 8px; text-align: center; }
   .stat b { display: block; font-size: 38px; color: #7fd8c4; line-height: 1.15; }
   .stat span { font-size: 16px; color: #b9c9e8; }
 
-  .lead { font-size: 18px; color: #c3d0e8; line-height: 1.7; margin-bottom: 14px; }
+  .mid { display: block; margin: 0 auto; }
+  .lead { font-size: 18px; color: #c3d0e8; line-height: 1.75; margin-bottom: 12px; }
   .lead b { color: #fff; }
 
   .grp { margin: 22px 0 8px; font-size: 20px; color: #fff; }
@@ -42,12 +49,16 @@
   .lines div { font-size: 18px; color: #c3d0e8; line-height: 2; }
   .lines b { color: #7fd8c4; font-weight: 600; margin-right: 8px; }
 
+  .pair { display: flex; gap: 20px; justify-content: center; margin-top: 18px; }
+  .pair figure { text-align: center; }
+  .pair img { height: 240px; width: auto; }
+
   .recipes { display: flex; flex-wrap: wrap; gap: 16px; }
   .rec { width: 444px; background: #16233d; border: 1px solid #2b4166; border-radius: 8px; padding: 12px; }
   .rec img { width: 100%; }
   .rec p { font-size: 16px; color: #c3d0e8; margin-top: 6px; text-align: center; }
 
-  .foot { background: #101a30; border-top: 3px solid #1f7d6d; padding: 28px 46px 32px; text-align: center; }
+  .foot { background: #101a30; border-top: 3px solid #1f7d6d; padding: 26px 46px 30px; text-align: center; }
   .foot .studio { font-size: 27px; font-weight: 800; color: #fff; letter-spacing: 3px; }
   .foot .line { font-size: 17px; color: #b3c1dc; margin-top: 9px; }
   .foot .src { font-size: 15px; color: #7b8cab; margin-top: 6px; }
@@ -57,9 +68,12 @@
 <div class="poster">
 
   <div class="hero">
-    <div class="kicker">封印 &amp; 传 奇</div>
-    <div class="title">龙裔遗骸</div>
-    <div class="subtitle">龙蛇 BOSS · 龙裔三生物 · 龙鳞装备与龙祭坛</div>
+    <div class="txt">
+      <div class="kicker">封印 &amp; 传 奇</div>
+      <div class="title">龙裔遗骸</div>
+      <div class="subtitle">龙蛇 BOSS · 龙裔三生物<br>龙鳞装备与龙祭坛</div>
+    </div>
+    <img class="shot" src="素材/boss_hero.png">
   </div>
 
   <div class="sec">
@@ -71,6 +85,8 @@
       <div class="stat"><b>40</b><span>条配方</span></div>
       <div class="stat"><b>4</b><span>个成就</span></div>
     </div>
+    <img class="shot mid" src="素材/creative_tab.png" style="width: 640px;">
+    <div class="cap">创造栏「龙裔遗骸」分页</div>
   </div>
 
   <div class="sec alt">
@@ -129,6 +145,10 @@
       <div class="cell"><div class="box"><img class="it" src="../../awesome_resource_packs/textures/items/dragon_scale_leggings_awakened.png"></div><p>护腿·觉醒</p></div>
       <div class="cell"><div class="box"><img class="it" src="../../awesome_resource_packs/textures/items/dragon_scale_boots_awakened.png"></div><p>靴子·觉醒</p></div>
     </div>
+    <div class="pair">
+      <figure><img class="shot" src="素材/armor_base.png"><div class="cap">龙鳞四件套</div></figure>
+      <figure><img class="shot" src="素材/armor_awakened.png"><div class="cap">龙魂觉醒四件套</div></figure>
+    </div>
     <div class="grp">龙祭坛方块<em>龙鳞块 / 龙鳞砖 / 龙鳞柱 / 龙骨块 / 龙晶块 / 龙晶灯 / 龙巢</em></div>
     <div class="row">
       <div class="cell"><div class="box"><img class="it" src="../../awesome_resource_packs/textures/blocks/dragon_scale_block.png"></div><p>龙鳞块</p></div>
@@ -154,6 +174,8 @@
 
   <div class="sec">
     <h2>玩法</h2>
+    <img class="shot" src="素材/boss_scene.png" style="width: 100%;">
+    <div class="cap">手持龙牙剑·觉醒，右下为技能按钮</div>
     <div class="lines">
       <div><b>龙息斩</b>手持龙牙剑时屏幕出现技能按钮，点击向前方喷一道龙息，12 秒一次</div>
       <div><b>龙鳞套装</b>四件穿齐（原版与觉醒混搭也算）：抗火 + 持续回血</div>
@@ -165,12 +187,14 @@
 
   <div class="sec alt">
     <h2>成就</h2>
-    <div class="row">
-      <div class="cell"><div class="box"><img class="it" src="../../awesome_resource_packs/textures/items/dragon_heart.png"></div><p>龙裔猎人<br>首次击败龙蛇</p></div>
-      <div class="cell"><div class="box"><img class="it" src="../../awesome_resource_packs/textures/blocks/dragon_nest.png"></div><p>龙巢初醒<br>首次召唤龙蛇</p></div>
-      <div class="cell"><div class="box"><img class="it" src="../../awesome_resource_packs/textures/items/zz_dragon_whelp_egg.png"></div><p>幼龙克星<br>击杀 10 只幼龙</p></div>
-      <div class="cell"><div class="box"><img class="it" src="../../awesome_resource_packs/textures/items/dragon_scale_chestplate.png"></div><p>龙鳞全装<br>穿齐四件套</p></div>
+    <div class="lines">
+      <div><b>龙裔猎人</b>首次击败龙蛇，奖励龙血结晶 ×3 + 龙鳞 ×8</div>
+      <div><b>龙巢初醒</b>首次用龙巢召唤出龙蛇</div>
+      <div><b>幼龙克星</b>累计击杀 10 只幼龙</div>
+      <div><b>龙鳞全装</b>集齐并穿上龙鳞四件套</div>
     </div>
+    <img class="shot mid" src="素材/ach_page.png" style="width: 700px; margin-top: 18px;">
+    <div class="cap">游戏内成就页</div>
   </div>
 
   <div class="foot">
