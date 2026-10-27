@@ -9,6 +9,10 @@ work.mcscfg
 # 生成器产出的预览图（本地自检用，不进仓库）
 docs/tools/preview/
 
+# 海报与配方图（脚本产出的交付图，本地留档，不进仓库）
+docs/宣传图/*.png
+docs/宣传图/配方/
+
 # 系统垃圾
 Thumbs.db
 .DS_Store

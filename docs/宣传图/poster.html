@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>封印&传奇：龙裔遗骸 — 模组介绍</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #0e1424; font-family: "Microsoft YaHei", "PingFang SC", sans-serif; }
+  .poster { width: 1000px; margin: 0 auto; background: #0e1424; color: #e8eefc; }
+  .it { image-rendering: pixelated; display: block; }
+
+  /* 头图 */
+  .hero { position: relative; padding: 46px 46px 46px; overflow: hidden;
+          background: #101a30; border-bottom: 3px solid #1f7d6d; }
+  .hero .scales { position: absolute; right: -30px; top: -30px; width: 300px; opacity: .22; }
+  .kicker { font-size: 20px; letter-spacing: 6px; color: #7fd8c4; }
+  .title { font-size: 68px; font-weight: 800; letter-spacing: 4px; margin: 6px 0 4px; color: #fff; }
+  .subtitle { font-size: 24px; color: #cfd9ef; letter-spacing: 1px; }
+  .tagrow { margin-top: 22px; max-width: 600px; }
+  .tag { display: inline-block; padding: 7px 15px; margin: 0 8px 8px 0; font-size: 17px;
+         background: #16233d; border: 1px solid #2b4166; border-radius: 4px; color: #b9c9e8; }
+  .tag.hot { border-color: #1f7d6d; color: #7fd8c4; background: #102a2b; }
+  .hero .loot { position: absolute; right: 46px; top: 52px; display: grid;
+                grid-template-columns: repeat(2, 108px); gap: 12px; }
+  .hero .loot div { width: 108px; height: 108px; background: #16233d; border: 1px solid #2b4166;
+                    border-radius: 8px; display: flex; align-items: center; justify-content: center; }
+  .hero .loot img { width: 88px; height: 88px; object-fit: contain; }
+
+  /* 通用区块 */
+  .sec { padding: 34px 46px 30px; }
+  .sec.alt { background: #121c33; }
+  h2 { font-size: 30px; letter-spacing: 2px; margin-bottom: 6px; color: #fff; }
+  h2::before { content: "■"; color: #1f9d84; margin-right: 12px; font-size: 24px; }
+  .lead { font-size: 18px; color: #93a4c4; margin-bottom: 20px; }
+
+  /* 数字卡 */
+  .stats { display: flex; gap: 14px; }
+  .stat { flex: 1; background: #16233d; border: 1px solid #2b4166; border-radius: 6px;
+          padding: 18px 10px; text-align: center; }
+  .stat b { display: block; font-size: 40px; color: #7fd8c4; line-height: 1.1; }
+  .stat span { font-size: 17px; color: #b9c9e8; }
+
+  /* 图标行 */
+  .row { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 16px; }
+  .cell { width: 92px; text-align: center; }
+  .cell .box { width: 76px; height: 76px; margin: 0 auto; background: #16233d;
+               border: 1px solid #2b4166; border-radius: 6px;
+               display: flex; align-items: center; justify-content: center; }
+  .cell img { width: 62px; height: 62px; object-fit: contain; }
+  .cell p { font-size: 14px; color: #a9bad8; margin-top: 6px; line-height: 1.3; }
+  .rowlabel { width: 100%; font-size: 17px; color: #7fd8c4; margin: 4px 0 8px; letter-spacing: 1px; }
+
+  /* 卡片组 */
+  .cards { display: flex; gap: 16px; }
+  .card { flex: 1; background: #16233d; border: 1px solid #2b4166; border-radius: 8px; padding: 18px; }
+  .card h3 { font-size: 22px; color: #fff; margin-bottom: 4px; }
+  .card .sub { font-size: 15px; color: #7fd8c4; margin-bottom: 12px; }
+  .card ul { list-style: none; }
+  .card li { font-size: 16px; color: #c3d0e8; padding: 5px 0 5px 18px; position: relative; line-height: 1.45; }
+  .card li::before { content: "◆"; position: absolute; left: 0; color: #1f9d84; font-size: 11px; top: 10px; }
+  .hp { height: 12px; border-radius: 6px; background: #0c1322; margin: 10px 0 14px; overflow: hidden; }
+  .hp i { display: block; height: 100%; background: linear-gradient(90deg,#c8452f,#e9a13a); }
+  .card.p2 .hp i { width: 55%; background: linear-gradient(90deg,#b8342c,#e0663a); }
+  .card.p3 .hp i { width: 28%; background: linear-gradient(90deg,#8d1f24,#d4372f); }
+  .card.p1 .hp i { width: 85%; }
+
+  /* 配方图 */
+  .recipes { display: flex; flex-wrap: wrap; gap: 18px; }
+  .rec { width: 440px; background: #16233d; border: 1px solid #2b4166; border-radius: 8px; padding: 14px; }
+  .rec img { width: 100%; }
+  .rec p { font-size: 16px; color: #c3d0e8; margin-top: 8px; text-align: center; }
+
+  /* 玩法条 */
+  .plays { display: flex; flex-wrap: wrap; gap: 16px; }
+  .play { width: 440px; display: flex; align-items: center; gap: 16px;
+          background: #16233d; border: 1px solid #2b4166; border-radius: 8px; padding: 16px; }
+  .play .ic { width: 84px; height: 84px; flex: none; background: #0c1322; border-radius: 6px;
+              display: flex; align-items: center; justify-content: center; }
+  .play .ic img { width: 70px; height: 70px; object-fit: contain; }
+  .play h4 { font-size: 20px; color: #fff; margin-bottom: 5px; }
+  .play p { font-size: 16px; color: #b3c1dc; line-height: 1.5; }
+
+  /* 成就 */
+  .ach { display: flex; gap: 14px; }
+  .ach .a { flex: 1; background: #16233d; border: 1px solid #2b4166; border-radius: 8px;
+            padding: 16px 12px; text-align: center; }
+  .ach .a img { width: 62px; height: 62px; object-fit: contain; margin: 0 auto 10px; }
+  .ach .a h4 { font-size: 19px; color: #f0c674; margin-bottom: 6px; }
+  .ach .a p { font-size: 15px; color: #a9bad8; line-height: 1.45; }
+
+  .note { font-size: 16px; color: #93a4c4; background: #101a30; border: 1px solid #2b4166;
+          border-radius: 6px; padding: 14px 18px; margin-top: 18px; line-height: 1.6; }
+  .note b { color: #7fd8c4; }
+
+  /* 页脚 */
+  .foot { background: #101a30; border-top: 3px solid #1f7d6d; padding: 30px 46px 34px; text-align: center; }
+  .foot .studio { font-size: 28px; font-weight: 800; color: #fff; letter-spacing: 3px; }
+  .foot .line { font-size: 17px; color: #b3c1dc; margin-top: 10px; }
+  .foot .src { font-size: 15px; color: #7b8cab; margin-top: 6px; letter-spacing: 1px; }
+</style>
+</head>
+<body>
+<div class="poster">
+
+  <div class="hero">
+    <img class="scales it" src="../../awesome_resource_packs/textures/blocks/dragon_scale_bricks.png">
+    <div class="loot">
+      <div><img class="it" src="../../awesome_resource_packs/textures/items/dragon_heart.png"></div>
+      <div><img class="it" src="../../awesome_resource_packs/textures/items/dragon_soul.png"></div>
+      <div><img class="it" src="../../awesome_resource_packs/textures/items/dragon_fang_sword_awakened.png"></div>
+      <div><img class="it" src="../../awesome_resource_packs/textures/items/zz_drasnea_egg.png"></div>
+    </div>
+    <div class="kicker">封印 &amp; 传 奇</div>
+    <div class="title">龙裔遗骸</div>
+    <div class="subtitle">沉睡的龙蛇苏醒之后，群山之间多了鳞、牙、骨与魂</div>
+    <div class="tagrow">
+      <span class="tag hot">龙蛇 BOSS · 三阶段</span>
+      <span class="tag">龙裔三生物</span>
+      <span class="tag">龙鳞装备 · 觉醒</span>
+      <span class="tag">龙祭坛多方块</span>
+      <span class="tag">4 个成就</span>
+    </div>
+  </div>
+
+  <div class="sec">
+    <h2>这一版带来了什么</h2>
+    <div class="lead">一条会喷息、会召幼龙的巨型龙蛇，和围绕它展开的一整套采集、锻造、召唤与成就。</div>
+    <div class="stats">
+      <div class="stat"><b>4</b><span>种龙裔生物</span></div>
+      <div class="stat"><b>24</b><span>种新物品</span></div>
+      <div class="stat"><b>7</b><span>种龙祭坛方块</span></div>
+      <div class="stat"><b>40</b><span>条合成配方</span></div>
+      <div class="stat"><b>4</b><span>个新成就</span></div>
+    </div>
+  </div>
+
+  <div class="sec alt">
+    <h2>龙蛇 · 三个阶段</h2>
+    <div class="lead">血量降到一定程度会换形态，越残暴越难缠——顶部的首领血条会改名字。</div>
+    <div class="cards">
+      <div class="card p1">
+        <h3>龙蛇</h3><div class="sub">第一阶段 · 满血 500</div>
+        <div class="hp"><i></i></div>
+        <ul>
+          <li>三连火球轰炸</li>
+          <li>震地怒吼：击退并造成伤害</li>
+          <li>召唤 2 只幼龙助战</li>
+        </ul>
+      </div>
+      <div class="card p2">
+        <h3>龙蛇 · 血怒</h3><div class="sub">第二阶段 · 血量 66% 以下</div>
+        <div class="hp"><i></i></div>
+        <ul>
+          <li>移动更快，撞击伤害更高</li>
+          <li>火球升级为<b>龙息</b>，落地成雾</li>
+          <li>冲锋突进 + 一次召 3 只幼龙</li>
+        </ul>
+      </div>
+      <div class="card p3">
+        <h3>龙蛇 · 狂怒</h3><div class="sub">第三阶段 · 血量 33% 以下</div>
+        <div class="hp"><i></i></div>
+        <ul>
+          <li>贴身灼烧：靠近就会被烧</li>
+          <li>伤害 22、震地冷却更短</li>
+          <li>击杀必掉<b>龙魂</b>（觉醒材料）</li>
+        </ul>
+      </div>
+    </div>
+    <div class="note"><b>不会误伤自己人：</b>龙息、怒吼、灼烧都只冲玩家来——幼龙不会被龙蛇打伤而反水，龙蛇也不会被自己的龙息熏到。野外碰到的幼龙、祭司、龙卫也不会互相内讧。</div>
+  </div>
+
+  <div class="sec">
+    <h2>龙裔一族</h2>
+    <div class="lead">夜晚的群山、雪坡、台地会自然出现它们；也可以直接用刷怪蛋召唤。</div>
+    <div class="row">
+      <div class="rowlabel">刷怪蛋</div>
+      <div class="cell"><div class="box"><img class="it" src="../../awesome_resource_packs/textures/items/zz_drasnea_egg.png"></div><p>龙蛇<br>（仅蛋/指令）</p></div>
+      <div class="cell"><div class="box"><img class="it" src="../../awesome_resource_packs/textures/items/zz_dragon_whelp_egg.png"></div><p>幼龙</p></div>
+      <div class="cell"><div class="box"><img class="it" src="../../awesome_resource_packs/textures/items/zz_dragon_priest_egg.png"></div><p>龙祭司</p></div>
+      <div class="cell"><div class="box"><img class="it" src="../../awesome_resource_packs/textures/items/zz_dragon_guard_egg.png"></div><p>龙卫</p></div>
+    </div>
+    <div class="cards">
+      <div class="card">
+        <h3>幼龙</h3><div class="sub">会飞的近战</div>
+        <ul><li>真的在空中飞、会追人</li><li>死亡掉龙鳞，是刷鳞的主要来源</li><li>龙蛇与祭司都会召唤它</li></ul>
+      </div>
+      <div class="card">
+        <h3>龙祭司</h3><div class="sub">远程火球</div>
+        <ul><li>隔着距离放火球</li><li>会召唤 1 只幼龙</li><li>5% 掉<b>龙心</b>，可提前再召龙蛇</li></ul>
+      </div>
+      <div class="card">
+        <h3>龙卫</h3><div class="sub">重装精英</div>
+        <ul><li>120 血、抗打、贴身范围伤害</li><li>震地怒吼只击退玩家</li><li>12% 掉龙血结晶</li></ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec alt">
+    <h2>从龙鳞到觉醒</h2>
+    <div class="lead">龙蛇和它的随从留下鳞、牙、心、结晶与魂，一路做到一整套装备。</div>
+    <div class="row">
+      <div class="rowlabel">材料</div>
+      <div class="cell"><div class="box"><img class="it" src="../../awesome_resource_packs/textures/items/dragon_scale.png"></div><p>龙鳞</p></div>
+      <div class="cell"><div class="box"><img class="it" src="../../awesome_resource_packs/textures/items/dragon_fang.png"></div><p>龙牙</p></div>
+      <div class="cell"><div class="box"><img class="it" src="../../awesome_resource_packs/textures/items/dragon_heart.png"></div><p>龙心</p></div>
+      <div class="cell"><div class="box"><img class="it" src="../../awesome_resource_packs/textures/items/dragon_blood_crystal.png"></div><p>龙血结晶</p></div>
+      <div class="cell"><div class="box"><img class="it" src="../../awesome_resource_packs/textures/items/dragon_soul.png"></div><p>龙魂</p></div>
+      <div class="cell"><div class="box"><img class="it" src="../../awesome_resource_packs/textures/items/dragon_blood_dew.png"></div><p>龙血凝露</p></div>
+    </div>
+    <div class="row">
+      <div class="rowlabel">工具与武器</div>
+      <div class="cell"><div class="box"><img class="it" src="../../awesome_resource_packs/textures/items/dragon_fang_sword.png"></div><p>龙牙剑</p></div>
+      <div class="cell"><div class="box"><img class="it" src="../../awesome_resource_packs/textures/items/dragon_scale_axe.png"></div><p>龙鳞斧</p></div>
+      <div class="cell"><div class="box"><img class="it" src="../../awesome_resource_packs/textures/items/dragon_scale_pickaxe.png"></div><p>龙鳞镐</p></div>
+      <div class="cell"><div class="box"><img class="it" src="../../awesome_resource_packs/textures/items/dragon_scale_shovel.png"></div><p>龙鳞锹</p></div>
+      <div class="cell"><div class="box"><img class="it" src="../../awesome_resource_packs/textures/items/dragon_scale_hoe.png"></div><p>龙鳞锄</p></div>
+    </div>
+    <div class="row">
+      <div class="rowlabel">龙鳞四件套</div>
+      <div class="cell"><div class="box"><img class="it" src="../../awesome_resource_packs/textures/items/dragon_scale_helmet.png"></div><p>头盔</p></div>
+      <div class="cell"><div class="box"><img class="it" src="../../awesome_resource_packs/textures/items/dragon_scale_chestplate.png"></div><p>胸甲</p></div>
+      <div class="cell"><div class="box"><img class="it" src="../../awesome_resource_packs/textures/items/dragon_scale_leggings.png"></div><p>护腿</p></div>
+      <div class="cell"><div class="box"><img class="it" src="../../awesome_resource_packs/textures/items/dragon_scale_boots.png"></div><p>靴子</p></div>
+    </div>
+    <div class="row">
+      <div class="rowlabel">龙魂觉醒（更强一档，外观带金纹）</div>
+      <div class="cell"><div class="box"><img class="it" src="../../awesome_resource_packs/textures/items/dragon_fang_sword_awakened.png"></div><p>龙牙剑·觉醒</p></div>
+      <div class="cell"><div class="box"><img class="it" src="../../awesome_resource_packs/textures/items/dragon_scale_helmet_awakened.png"></div><p>头盔·觉醒</p></div>
+      <div class="cell"><div class="box"><img class="it" src="../../awesome_resource_packs/textures/items/dragon_scale_chestplate_awakened.png"></div><p>胸甲·觉醒</p></div>
+      <div class="cell"><div class="box"><img class="it" src="../../awesome_resource_packs/textures/items/dragon_scale_leggings_awakened.png"></div><p>护腿·觉醒</p></div>
+      <div class="cell"><div class="box"><img class="it" src="../../awesome_resource_packs/textures/items/dragon_scale_boots_awakened.png"></div><p>靴子·觉醒</p></div>
+    </div>
+    <div class="row">
+      <div class="rowlabel">龙祭坛方块</div>
+      <div class="cell"><div class="box"><img class="it" src="../../awesome_resource_packs/textures/blocks/dragon_scale_block.png"></div><p>龙鳞块</p></div>
+      <div class="cell"><div class="box"><img class="it" src="../../awesome_resource_packs/textures/blocks/dragon_scale_bricks.png"></div><p>龙鳞砖</p></div>
+      <div class="cell"><div class="box"><img class="it" src="../../awesome_resource_packs/textures/blocks/dragon_bone_block.png"></div><p>龙骨块</p></div>
+      <div class="cell"><div class="box"><img class="it" src="../../awesome_resource_packs/textures/blocks/dragon_crystal_block.png"></div><p>龙晶块</p></div>
+      <div class="cell"><div class="box"><img class="it" src="../../awesome_resource_packs/textures/blocks/dragon_crystal_lamp.png"></div><p>龙晶灯</p></div>
+      <div class="cell"><div class="box"><img class="it" src="../../awesome_resource_packs/textures/blocks/dragon_nest.png"></div><p>龙巢</p></div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <h2>怎么拿到它们</h2>
+    <div class="lead">全部走工作台合成，材料只用龙裔掉落 + 原版物资。</div>
+    <div class="recipes">
+      <div class="rec"><img class="it" src="配方/dragon_fang_sword.png"><p>龙牙 ×2 + 木棍 → 龙牙剑</p></div>
+      <div class="rec"><img class="it" src="配方/dragon_scale_chestplate.png"><p>龙鳞 ×8 → 龙鳞胸甲</p></div>
+      <div class="rec"><img class="it" src="配方/upgrade_dragon_fang_sword.png"><p>龙牙剑 + 龙魂 + 龙鳞 ×4 → 觉醒</p></div>
+      <div class="rec"><img class="it" src="配方/dragon_nest.png"><p>龙鳞 ×2 + 木棍 ×2 → 龙巢</p></div>
+      <div class="rec"><img class="it" src="配方/dragon_scale_block.png"><p>龙鳞 ×9 → 龙鳞块（可拆回）</p></div>
+      <div class="rec"><img class="it" src="配方/dragon_crystal_lamp.png"><p>龙晶块 + 金锭 ×4 → 龙晶灯</p></div>
+    </div>
+  </div>
+
+  <div class="sec alt">
+    <h2>玩法</h2>
+    <div class="lead">四件装备穿齐、拿着龙牙剑、找到龙巢，各有一件事可做。</div>
+    <div class="plays">
+      <div class="play">
+        <div class="ic"><img class="it" src="../../awesome_resource_packs/textures/ui/dragon_skill_btn.png"></div>
+        <div><h4>龙息斩</h4><p>手持龙牙剑时屏幕会出现一个<b>可拖动的技能按钮</b>，点一下向前方喷出一道龙息；手机版触屏、平板都能用，鼠标右键同样可以。12 秒一次。</p></div>
+      </div>
+      <div class="play">
+        <div class="ic"><img class="it" src="../../awesome_resource_packs/textures/items/dragon_scale_chestplate.png"></div>
+        <div><h4>龙鳞套装</h4><p>四件穿齐（原版与觉醒混搭也算）：<b>不怕火</b> + <b>持续回血</b>，状态栏只亮一次不闪屏。</p></div>
+      </div>
+      <div class="play">
+        <div class="ic"><img class="it" src="../../awesome_resource_packs/textures/blocks/dragon_nest.png"></div>
+        <div><h4>龙巢召唤</h4><p>把<b>龙鳞拿在主手</b>、右键龙巢，第一次只需 8 龙鳞就能唤出龙蛇；之后再召唤需要 1 龙心 + 4 龙鳞。附近已有龙蛇、头顶没空间都会拒绝且不扣材料。</p></div>
+      </div>
+      <div class="play">
+        <div class="ic"><img class="it" src="../../awesome_resource_packs/textures/items/dragon_scale.png"></div>
+        <div><h4>龙巢修复</h4><p>拿着磨损的龙裔装备<b>右键龙巢</b>，1 个龙鳞修回四分之一耐久，附魔全部保留；也可以用「装备 + 2 龙鳞」重铸成全新的一件。</p></div>
+      </div>
+    </div>
+    <div class="note"><b>关于铁砧：</b>龙裔工具在铁砧上只认钻石，盔甲铁砧修不了——这是原版规则，所以本模组给了上面的龙巢修复与重铸两条路。</div>
+  </div>
+
+  <div class="sec">
+    <h2>成就</h2>
+    <div class="lead">每个玩家各算一次，达成时弹窗提示。</div>
+    <div class="ach">
+      <div class="a"><img class="it" src="../../awesome_resource_packs/textures/items/dragon_heart.png"><h4>龙裔猎人</h4><p>首次击败龙蛇<br>奖励龙血结晶 ×3 + 龙鳞 ×8</p></div>
+      <div class="a"><img class="it" src="../../awesome_resource_packs/textures/blocks/dragon_nest.png"><h4>龙巢初醒</h4><p>第一次用龙巢<br>把龙蛇召唤出来</p></div>
+      <div class="a"><img class="it" src="../../awesome_resource_packs/textures/items/zz_dragon_whelp_egg.png"><h4>幼龙克星</h4><p>累计击杀<br>10 只幼龙</p></div>
+      <div class="a"><img class="it" src="../../awesome_resource_packs/textures/items/dragon_scale_chestplate.png"><h4>龙鳞全装</h4><p>集齐并穿上<br>龙鳞四件套</p></div>
+    </div>
+  </div>
+
+  <div class="foot">
+    <div class="studio">封印 &amp; 传奇工作室</div>
+    <div class="line">模组作者：OraSkyC　｜　模型作者：player、OraSkyC</div>
+    <div class="line">封印&amp;传奇工作室 × CandySweet 联合开发</div>
+    <div class="src">开源仓库：candysweet-cdt/dragonkin-relic　·　适配基岩版 / 网易我的世界</div>
+  </div>
+
+</div>
+</body>
+</html>
