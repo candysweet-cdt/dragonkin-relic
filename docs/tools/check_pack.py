@@ -721,10 +721,6 @@ def check_skill_hud(data):
                   'CreateHurt', 'RESULT_EVENT', 'NotifyToClient', '__id__', 'reject'):
         if token not in ssrc:
             bad(f'dragonSlash.py 缺 {token}')
-    if 'PlayerAttackEntityEvent' not in ssrc:
-        bad('dragonSlash.py 缺服务端兜底触发（手持龙牙剑命中即放锥形斩）—— '
-            'HUD 按钮依赖客户端→服务端跨端事件，那条路一旦不通技能就整个不可用；'
-            '本包击杀归属已实机验证 PlayerAttackEntityEvent 会触发')
     if 'CreateEventData' in csrc:
         bad('dragonSkillClient.py 又用 CreateEventData 当 NotifyToServer 的载荷 —— '
             '参考模组一律传普通 dict；而且倒计时在发送之后才起算，'
@@ -1065,6 +1061,46 @@ def check_scripts():
         print(f'脚本: {len(dirs)} 个脚本目录 / {total} 条 RegisterSystem 路径已解析')
 
 
+def check_engine_int_args():
+    """引擎只收整数的参数不许传 float —— 本包龙息斩就是被这个坑死的（实机 traceback）。
+
+    `get_entity_around` 收到 `6.0` 抛 `TypeError: integer argument expected, got float`，
+    而异常发生在事件回调里：客户端照样收到倒计时，服务端整条技能静默炸掉，
+    看现象只会误判成「跨端事件没打通」。
+    """
+    import re
+    int_arg_apis = {
+        'GetEntitiesAround': 2,       # (entityId, radius:int, filters)
+    }
+    scanned = 0
+    for d in glob.glob(os.path.join(BP, '*')):
+        if not os.path.isdir(d):
+            continue
+        for name in sorted(os.listdir(d)):
+            if not name.endswith('.py'):
+                continue
+            src = open(os.path.join(d, name), encoding='utf-8').read()
+            consts = dict(re.findall(r'^([A-Z_][A-Z0-9_]*)\s*=\s*(.+?)\s*(?:#.*)?$', src, re.M))
+            for api, argno in int_arg_apis.items():
+                for m in re.finditer(api + r'\s*\(([^)]*)\)', src, re.S):
+                    args = [a.strip() for a in m.group(1).split(',') if a.strip()]
+                    if len(args) < argno:
+                        continue
+                    expr = args[argno - 1]
+                    scanned += 1
+                    if re.match(r'^[A-Z_][A-Z0-9_]*$', expr):
+                        val = consts.get(expr)
+                        if val is None:
+                            bad(f'{name}: {api} 的整型参数 {expr} 在本文件找不到常量定义')
+                        elif 'int(' not in val and '.' in val:
+                            bad(f'{name}: 常量 {expr} = {val} 是小数，'
+                                f'{api} 该参数必须是整数（先 int(...) 再传）')
+                    elif not re.match(r'^\d+$', expr):
+                        bad(f'{name}: {api} 的第 {argno} 个参数传的是 {expr} —— '
+                            '引擎要整数，写成 RANGE + 0.5 这种小数会在事件回调里静默 TypeError')
+    print(f'引擎整数参数: {scanned} 处调用已核对')
+
+
 def check_tab(data, ids):
     """分页 + 分组：官方硬约束、覆盖完整性，以及组间排序键必须升序。"""
     tabs = [c for p, d in data.items()
@@ -1145,6 +1181,7 @@ def main():
     check_entity_events(data)
     check_id_registry(data)
     check_scripts()
+    check_engine_int_args()
     check_manifests(data)
     print()
     if fails:

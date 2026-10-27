@@ -31,6 +31,7 @@ SWORDS = {
     'fycq:dragon_fang_sword_awakened': 12,
 }
 RANGE = 5.5
+SCAN_RADIUS = int(RANGE + 0.5)   # 引擎的 get_entity_around 只收整数半径
 HALF_ANGLE = 65.0
 COOLDOWN = 12.0
 SOUND = '/playsound mob.enderdragon.growl @s ~ ~ ~ 1 1.25'
@@ -110,7 +111,6 @@ class DragonSlashServer(ServerSystem):
             playerId, item, via, candidates, hits))
 
     def Swing(self, playerId, damage):
-        itemComp = compFactory.CreateItem(playerId)
         rot = compFactory.CreateRot(playerId).GetRot()
         dx, _, dz = serverApi.GetDirFromRot(rot)
         length = math.sqrt(dx * dx + dz * dz)
@@ -119,8 +119,10 @@ class DragonSlashServer(ServerSystem):
         else:
             dx, dz = dx / length, dz / length
         foot = compFactory.CreatePos(playerId).GetFootPos()
+        # get_entity_around 的半径必须是整数（传 6.0 会 TypeError: integer argument
+        # expected, got float，整条技能在事件回调里静默炸掉）
         ids = compFactory.CreateGame(playerId).GetEntitiesAround(
-            playerId, RANGE + 0.5,
+            playerId, SCAN_RADIUS,
             {'any_of': {'test': 'is_family', 'subject': 'other',
                         'operator': 'not', 'value': 'player'}}) or []
         cause = serverApi.GetMinecraftEnum().ActorDamageCause.EntityAttack
