@@ -388,6 +388,7 @@ def _meta_args(a):
 
 def cmd_write(a, action):
     body = {"type": a.type, "key": a.key, "holder": a.holder or "",
+            "actor": getattr(a, "actor", "") or "",
             "note": getattr(a, "note", "") or ""}
     body.update(_meta_args(a))
     if a.cmd == "release":
@@ -604,6 +605,7 @@ def build():
         p.add_argument("--tags", default="")
         p.add_argument("--note", default="")
         p.add_argument("--holder", default="")
+        p.add_argument("--actor", default="", help="谁发起（进审计；release 不填就 400）")
         p.add_argument("--days", type=int, default=0)
         p.add_argument("--reason", default="")
         p.set_defaults(fn=fn, action=name)
