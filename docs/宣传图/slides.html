@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>龙裔遗骸 — 商店图</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { background: #0e1424; }
+  body { font-family: "Microsoft YaHei", "PingFang SC", sans-serif; overflow: hidden; }
+  .slide { display: none; position: relative; color: #eef3ff; background: #0e1424; overflow: hidden; }
+  body[data-s="icon"] #s-icon, body[data-s="iter"] #s-iter,
+  body[data-s="a"] #s-a, body[data-s="b"] #s-b, body[data-s="c"] #s-c { display: block; }
+  img { position: absolute; }
+  .px { image-rendering: pixelated; }
+  .band { position: absolute; left: 0; right: 0; bottom: 0;
+          background: linear-gradient(180deg, rgba(10,15,28,0) 0%, rgba(10,15,28,.86) 42%, #0a0f1c 100%); }
+  .title { font-weight: 800; letter-spacing: 4px; color: #fff; }
+  .sub { color: #9fd8c6; letter-spacing: 2px; }
+  .tag { display: inline-block; padding: 6px 14px; margin-right: 8px; font-size: 17px;
+         background: rgba(20,32,54,.86); border: 1px solid #2f4a72; border-radius: 4px; color: #c8d6ef; }
+  .tag.hot { border-color: #1f9d84; color: #8fe6cd; }
+  .kicker { position: absolute; font-size: 17px; letter-spacing: 7px; color: #7fd8c4; }
+
+  /* 组件 ICON 1000×1000 */
+  #s-icon { width: 1000px; height: 1000px; }
+  #s-icon .bg { width: 1000px; height: 1000px; object-fit: cover; object-position: 50% 44%; }
+  #s-icon .band { height: 330px; }
+  #s-icon .t { position: absolute; left: 0; right: 0; bottom: 96px; text-align: center;
+               font-size: 108px; font-weight: 800; letter-spacing: 12px; color: #fff;
+               text-shadow: 0 6px 0 rgba(8,12,22,.75); }
+  #s-icon .k { position: absolute; left: 0; right: 0; bottom: 52px; text-align: center;
+               font-size: 27px; letter-spacing: 10px; color: #8fe6cd; }
+
+  /* 迭代 ICON 992×558 */
+  #s-iter { width: 992px; height: 558px; }
+  #s-iter .shot { left: 466px; top: 118px; width: 486px; height: 305px; object-fit: contain;
+                  background: #0a0f1c; border: 1px solid #2f4a72; border-radius: 8px; }
+  #s-iter .k { left: 46px; top: 74px; }
+  #s-iter .t { position: absolute; left: 46px; top: 104px; font-size: 62px; }
+  #s-iter .d { position: absolute; left: 46px; top: 196px; width: 372px; font-size: 21px;
+               line-height: 1.95; color: #c8d6ef; }
+  #s-iter .d b { color: #8fe6cd; font-weight: 600; }
+  #s-iter .tags { position: absolute; left: 46px; bottom: 46px; }
+
+  /* 轮播 1：龙蛇实战 992×558 */
+  #s-a { width: 992px; height: 558px; }
+  #s-a .bg { width: 992px; height: 558px; object-fit: cover; object-position: 42% 50%; }
+  #s-a .band { height: 210px; }
+  #s-a .k { left: 40px; top: 330px; }
+  #s-a .t { position: absolute; left: 40px; top: 358px; font-size: 56px; }
+  #s-a .d { position: absolute; left: 40px; top: 448px; font-size: 22px; color: #c8d6ef; }
+
+  /* 轮播 2：两套穿戴 992×558 */
+  #s-b { width: 992px; height: 558px;
+         background: radial-gradient(120% 90% at 50% 0%, #17263f 0%, #0e1424 62%); }
+  #s-b .k { left: 0; right: 0; top: 44px; text-align: center; }
+  #s-b .t { position: absolute; left: 0; right: 0; top: 72px; text-align: center; font-size: 48px; }
+  #s-b figure { position: absolute; top: 156px; width: 300px; text-align: center; }
+  #s-b figure.l { left: 132px; } #s-b figure.r { left: 560px; }
+  #s-b img { position: static; height: 300px; width: auto; border: 1px solid #2f4a72; border-radius: 8px; }
+  #s-b figcaption { margin-top: 14px; font-size: 22px; color: #c8d6ef; }
+  #s-b .arrow { position: absolute; left: 466px; top: 286px; font-size: 40px; color: #1f9d84; }
+
+  /* 轮播 3：创造栏内容 992×558 */
+  #s-c { width: 992px; height: 558px;
+         background: radial-gradient(120% 90% at 50% 0%, #17263f 0%, #0e1424 62%); }
+  #s-c .shot { left: 246px; top: 128px; width: 500px; height: 371px; object-fit: contain;
+               background: #0a0f1c; border: 1px solid #2f4a72; border-radius: 8px; }
+  #s-c .k { left: 0; right: 0; top: 34px; text-align: center; }
+  #s-c .t { position: absolute; left: 0; right: 0; top: 60px; text-align: center; font-size: 40px; }
+  #s-c .n { position: absolute; bottom: 26px; left: 0; right: 0; text-align: center;
+            font-size: 21px; color: #c8d6ef; }
+  #s-c .n b { color: #8fe6cd; font-size: 26px; margin: 0 6px 0 4px; }
+</style>
+</head>
+<body data-s="icon">
+
+  <div class="slide" id="s-icon">
+    <img class="bg px" src="素材/hi/boss_dragon.png">
+    <div class="band"></div>
+    <div class="t">龙裔遗骸</div>
+    <div class="k">封印 &amp; 传奇</div>
+  </div>
+
+  <div class="slide" id="s-iter">
+    <img class="shot px" src="素材/hi/ach_page.png">
+    <div class="k kicker">封印 &amp; 传奇</div>
+    <div class="t title">龙裔遗骸</div>
+    <div class="d">
+      <b>4</b> 个成就：龙裔猎人 / 龙巢初醒<br>
+      幼龙克星 / 龙鳞全装<br>
+      <b>3</b> 阶段龙蛇，越残血越难缠
+    </div>
+    <div class="tags">
+      <span class="tag hot">成就系统</span><span class="tag">龙蛇 BOSS</span>
+    </div>
+  </div>
+
+  <div class="slide" id="s-a">
+    <img class="bg px" src="素材/hi/boss_full.png">
+    <div class="band"></div>
+    <div class="k kicker">封印 &amp; 传奇 · 龙裔遗骸</div>
+    <div class="t title">龙蛇</div>
+    <div class="d">500 血三阶段首领 · 龙息 / 冲锋 / 召唤幼龙 · 手持龙牙剑可释放龙息斩</div>
+  </div>
+
+  <div class="slide" id="s-b">
+    <div class="k kicker">封印 &amp; 传奇 · 龙裔遗骸</div>
+    <div class="t title">龙鳞装备</div>
+    <figure class="l"><img class="px" src="素材/hi/armor_base.png"><figcaption>龙鳞四件套</figcaption></figure>
+    <div class="arrow">→</div>
+    <figure class="r"><img class="px" src="素材/hi/armor_awakened.png"><figcaption>龙魂觉醒四件套</figcaption></figure>
+  </div>
+
+  <div class="slide" id="s-c">
+    <div class="k kicker">封印 &amp; 传奇 · 龙裔遗骸</div>
+    <div class="t title">创造栏「龙裔遗骸」</div>
+    <img class="shot px" src="素材/hi/creative_tab.png">
+    <div class="n"><b>4</b>种生物<b>24</b>种物品<b>7</b>种方块<b>40</b>条配方</div>
+  </div>
+
+<script>
+  var q = new URLSearchParams(location.search).get('s');
+  if (q) document.body.setAttribute('data-s', q);
+</script>
+</body>
+</html>
