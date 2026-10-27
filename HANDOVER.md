@@ -186,6 +186,16 @@
     - 守卫：新增 `check_engine_int_args()` —— 解析各脚本里 `GetEntitiesAround` 的第 2 个参数，字面量必须纯整数；写成 `RANGE + 0.5`、常量值带小数、或常量根本没定义，三种都 FAIL（另加"常量名拼错"负测，共四条）。离线 mock 的 `GetEntitiesAround` 也改成**半径不是 int 就抛 TypeError**，回归测试会直接复现实机故障。
     - 顺带合并：并行会话在 live 的 `dragonSlash.py` 上加了**服务端本地兜底**（`PlayerAttackEntityEvent` 命中时直接放锥形斩，`via='on-hit'` 不弹提示，与跨端上报共用同一份 12 秒冷却），本次已收回工作区一起提交，不再两边分叉。
 
+27. **龙息斩特效 = 客户端世界粒子（2026-10-27，抄星轨已实机验证的生产路线）**：
+    - `CreateEngineParticle` 与粒子销毁 `DestroyEntity` **都是客户端接口**（`mod.client.system.clientSystem.ClientSystem`），服务端建不了世界粒子。所以特效全在 `dragonSkillClient.py`：施放时本地立刻摆喷射点（不等服务端往返，手感才跟手），命中溅射用服务端回执带的 `positions`（最多 4 个点）。
+    - 官方口径三条硬规矩：**path 要带 `.json` 后缀**（`effects/xxx.json`）；**创建后必须 `CreateParticleControl(pid).Play()` 才播**；**粒子是实体，不销毁会越堆越多** —— 本包用 `CreateGame(LEVEL_ID).AddTimer(1.2, RecycleFx, pid)` 定时回收 + 同屏 `FX_MAX = 16` 上限（超上限先回收最老的）。建粒子抛异常或返回 None 都不许冒泡（否则又会演成"技能没反应"）。
+    - **方块实体粒子 `CreateParticleEffectForBlockEntity` 在星轨实机判死**（白烟根本不出现），别走。
+    - `RP/effects/*.json` 用**网易 `particleeffect` 格式**（根键小写、字段值全是字符串），写成原版 `particle_effect` 会断言 `Particle effect has not 'particleeffect' component`；`material` 用引擎自带 `materials/particles.material`（**包里不用放 materials 目录**）；`texture.name` 直接指 `textures/particle/<png>`，不需要注册进任何 texture json。
+    - **世界粒子的发射方向是 JSON 写死的**（`direction` 是向量盒，不认玩家朝向）→ "朝向前方的锥形"靠**沿朝向摆多个发射点**：取玩家朝向横向单位向量，在 0.6/1.6/2.7/3.8 格、脚底 +1.35 高处各摆一口 puff。
+    - 一次性特效的参数纪律：`enableloop: false`、`scaled: false`（true 会按相机距离放大，近看糊一大团）、`relative: true`、`timetolive.max ≤ 1.5s`、单点 `numparticles ≤ 60`（四个点会叠加）。
+    - 贴图手绘 32×32 RGBA（`docs/tools/draw_breath_particle.py`）：puff 用**连续颜色 + 连续 alpha `(1-t)^1.7`**、白热核心只留 `t < 0.14`。第一版按四层硬分色画，出来是"肥皂泡 + 白斑"（叠加混合会把硬边放大），而且**不要在透明底上叠第二个圆**（会糊成一颗明显白斑）。配色沿用技能按钮的 `BREATH` 青绿，HUD 与世界特效同源。
+    守卫：`check_skill_fx`（根键 particleeffect / 贴图 png 存在 / enableloop+scaled+relative / material 路径 / numparticles 与 timetolive 区间 / 客户端必须有 CreateEngineParticle+CreateParticleControl+Play+DestroyEntity+AddTimer / 服务端回执必须带 positions —— 八条负测全部 FAIL 得出来）。
+
 ## 4. 当前内容
 
 - BOSS `fycq:drasnea`：500 血、29 组件、4 段动画（idle/move/attack/death）、原版 BOSS 血条、火球三连 + 冲撞、专属掉落、不自然刷怪（`spawn_rules` 已删，靠刷怪蛋/`/summon`）
@@ -201,7 +211,7 @@
 - **成就 4 节点**（同一页，根 `fycq_dragonkin_first_kill`）：首杀「龙裔猎人」、首召「龙巢初醒」、击杀 10 幼龙「幼龙克星」、集齐四件套「龙鳞全装」（原版/觉醒混搭均可）；首杀发 3 结晶 + 8 鳞，其余只弹成就
 - **龙魂觉醒**：龙蛇玩家击杀保底 1 龙魂；龙牙剑 + 龙魂 + 4 鳞 → 觉醒剑（13 伤害/2800 耐久），每件甲 + 龙魂 + 2 鳞 → 觉醒甲（+1 防、+2 韧性、+10% 耐久）；觉醒件同样可龙巢修复/重铸
 - **套装效果**（`dragonSetBonus.py`）：四件龙鳞甲（原版/觉醒混搭）→ 抗火 I + 生命恢复 I；一次给 10 秒，**只有剩余不足 4 秒才续**（反复 AddEffect 会让状态图标/粒子闪），脱一件后最多 10 秒自然结束
-- **龙息斩**（`dragonSlash.py` 服务端 + `dragonSkillClient.py` 客户端）：手持龙牙剑/觉醒剑时屏幕出现**直径 44 的可拖动技能按钮**（位置持久化，点一下施放、拖动不误放），鼠标右键/触屏交互键作为兜底且**不取消事件**（不挡右键容器）；前方 5.5 格 ±65° 锥形，普通剑 8 / 觉醒剑 12 伤害 + 击退，12 秒冷却（服务端权威，客户端倒计时会被服务端回执同步）；命中数/未命中/需持剑都会回显到按钮上；除了玩家以外什么都打（含幼龙/祭司/龙卫）
+- **龙息斩**（`dragonSlash.py` 服务端 + `dragonSkillClient.py` 客户端）：手持龙牙剑/觉醒剑时屏幕出现**直径 44 的可拖动技能按钮**（位置持久化，点一下施放、拖动不误放），鼠标右键/触屏交互键作为兜底且**不取消事件**（不挡右键容器）；服务端本地兜底 = 手持剑**命中**任何生物也放一次（`via=on-hit`，共用冷却）；前方 5.5 格 ±65° 锥形，普通剑 8 / 觉醒剑 12 伤害 + 击退，12 秒冷却（服务端权威，客户端倒计时会被服务端回执同步）；命中数/未命中/需持剑回显到按钮上；除了玩家以外什么都打（含幼龙/祭司/龙卫）；**特效**：施放沿朝向摆 4 口青绿龙息 puff（客户端世界粒子，建完必 Play、1.2 秒定时回收、同屏上限 16），命中按回执坐标溅六芒爆点
 - **龙息与友伤**：phase2/3 龙息火球落地云 **5 秒销毁**（原版 120 秒）；龙裔 `damage_sensor` 免疫 `magic`，BOSS 不再被自己的云伤到、幼龙也不会被擦伤反击；`knockback_roar` 只作用于玩家；四只实体已移除 `hurt_by_target`
 - **首杀成就（按玩家各算）**：`customAchievements/dragonkin_first_kill.json` + `achievementServer.py`；每个玩家第一次击杀龙蛇弹「龙裔猎人」成就，发 龙血结晶 ×3 + 龙鳞 ×8，ExtraData 防重复
 - 技能：BOSS 震地怒吼（**只击退玩家** 4 格、伤 10）+ 召唤 2 只幼龙；龙祭司召唤 1 只幼龙 + 火球；龙卫震地怒吼（只打玩家）+ 贴身范围伤害；幼龙扑咬

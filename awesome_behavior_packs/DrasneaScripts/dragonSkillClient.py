@@ -33,6 +33,13 @@ LABEL_PATH = BTN_PATH + '/button_label'
 DRAG_SLOP = 6.0
 REFRESH_EVERY = 20         # tick，兜底刷新可见性（进世界/换存档时事件可能不补发）
 FLASH_TICKS = 30           # 服务端回执在按钮上停留的 tick 数
+# 世界粒子的发射方向是 JSON 里写死的，所以「锥形」靠沿朝向摆点做出来
+BREATH_FX = 'effects/fycq_dragon_breath.json'
+HIT_FX = 'effects/fycq_dragon_breath_hit.json'
+FX_STEPS = (0.6, 1.6, 2.7, 3.8)
+FX_HEIGHT = 1.35           # 喷息高度（玩家脚底往上）
+FX_LIFE = 1.2              # 秒，到点回收，不留垃圾粒子实体
+FX_MAX = 16
 
 _node = [None]
 _system = [None]
@@ -146,6 +153,7 @@ class DragonSkillClient(ClientSystem):
         self.lastSent = 0.0
         self.flashText = ''
         self.flashUntil = 0.0
+        self.fxIds = []
         engineNs = clientApi.GetEngineNamespace()
         engineSys = clientApi.GetEngineSystemName()
         self.ListenForEvent(engineNs, engineSys, 'UiInitFinished', self, self.OnUiInit)
@@ -198,12 +206,68 @@ class DragonSkillClient(ClientSystem):
             return
         if state == 'hit':
             self.flashText = '%d' % args.get('hits', 0)
+            self.SpawnHitFx(args.get('positions'))
         elif state == 'no_sword':
             self.flashText = u'剑'
         else:
             self.flashText = '0'
         self.flashUntil = time.time() + FLASH_TICKS / 20.0
         print('[fycq-skill] server ack %s' % args)
+
+    # ---- 特效：世界粒子（客户端建，创建后必须 Play 才播） ----
+    def SpawnFx(self, path, pos):
+        try:
+            pid = self.CreateEngineParticle(path, (float(pos[0]), float(pos[1]), float(pos[2])))
+        except Exception as e:
+            print('[fycq-fx] CreateEngineParticle 异常 %r' % (e,))
+            return
+        if not pid:
+            print('[fycq-fx] 建粒子失败 %s' % path)
+            return
+        try:
+            control = compFactory.CreateParticleControl(pid)
+            if control is not None:
+                control.Play()
+        except Exception as e:
+            print('[fycq-fx] Play 异常 %r' % (e,))
+        while len(self.fxIds) >= FX_MAX:
+            self.RecycleFx(self.fxIds[0])
+        self.fxIds.append(pid)
+        try:
+            compFactory.CreateGame(LEVEL_ID).AddTimer(FX_LIFE, self.RecycleFx, pid)
+        except Exception as e:
+            print('[fycq-fx] 回收定时器异常 %r' % (e,))
+
+    def RecycleFx(self, pid):
+        if pid in self.fxIds:
+            self.fxIds.remove(pid)
+        try:
+            self.DestroyEntity(pid)
+        except Exception as e:
+            print('[fycq-fx] DestroyEntity 异常 %r' % (e,))
+
+    def SpawnCastFx(self):
+        """沿玩家朝向摆 4 个喷息点，做出「一口龙息扫出去」的锥形。"""
+        playerId = clientApi.GetLocalPlayerId()
+        pos = compFactory.CreatePos(playerId).GetPos()
+        if not pos:
+            return
+        dx, _, dz = clientApi.GetDirFromRot(compFactory.CreateRot(playerId).GetRot())
+        length = (dx * dx + dz * dz) ** 0.5
+        if length < 0.01:
+            dx, dz = 0.0, 1.0
+        else:
+            dx, dz = dx / length, dz / length
+        for step in FX_STEPS:
+            self.SpawnFx(BREATH_FX, (pos[0] + dx * step, pos[1] + FX_HEIGHT,
+                                     pos[2] + dz * step))
+
+    def SpawnHitFx(self, positions):
+        for pos in (positions or [])[:4]:
+            try:
+                self.SpawnFx(HIT_FX, (pos[0], pos[1] + 1.1, pos[2]))
+            except (TypeError, IndexError):
+                continue
 
     def refresh(self):
         node = _node[0]
@@ -229,6 +293,7 @@ class DragonSkillClient(ClientSystem):
         self.lastSent = now
         self.cdUntil = now + COOLDOWN
         self.flashUntil = 0.0
+        self.SpawnCastFx()
         print('[fycq-skill] sent cast')
 
     def tip(self, message):

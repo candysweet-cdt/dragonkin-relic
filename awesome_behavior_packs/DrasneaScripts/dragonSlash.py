@@ -34,6 +34,7 @@ RANGE = 5.5
 SCAN_RADIUS = int(RANGE + 0.5)   # 引擎的 get_entity_around 只收整数半径
 HALF_ANGLE = 65.0
 COOLDOWN = 12.0
+FX_POINTS_MAX = 4          # 回执里最多带几个命中点（客户端在这些位置溅一发命中特效）
 SOUND = '/playsound mob.enderdragon.growl @s ~ ~ ~ 1 1.25'
 
 
@@ -102,8 +103,9 @@ class DragonSlashServer(ServerSystem):
                 self.Reply(playerId, {'state': 'no_sword'}, notify)
             return
         self.last[playerId] = now
-        hits, candidates = self.Swing(playerId, SWORDS[item])
-        self.Reply(playerId, {'state': 'hit' if hits else 'miss', 'hits': hits}, notify)
+        hits, candidates, points = self.Swing(playerId, SWORDS[item])
+        self.Reply(playerId, {'state': 'hit' if hits else 'miss', 'hits': hits,
+                              'positions': points}, notify)
         command = compFactory.CreateCommand(LEVEL_ID)
         if command and hits:
             command.SetCommand(SOUND, playerId)
@@ -127,6 +129,7 @@ class DragonSlashServer(ServerSystem):
                         'operator': 'not', 'value': 'player'}}) or []
         cause = serverApi.GetMinecraftEnum().ActorDamageCause.EntityAttack
         hits = 0
+        points = []
         for eid in ids:
             if eid == playerId:
                 continue
@@ -144,7 +147,9 @@ class DragonSlashServer(ServerSystem):
                 continue
             hurt.Hurt(damage, cause, playerId, None, True)
             hits += 1
-        return hits, len(ids)
+            if len(points) < FX_POINTS_MAX:
+                points.append([float(epos[0]), float(epos[1]), float(epos[2])])
+        return hits, len(ids), points
 
     def Reply(self, playerId, payload, notify=True):
         data = dict(payload)

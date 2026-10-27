@@ -1061,6 +1061,59 @@ def check_scripts():
         print(f'脚本: {len(dirs)} 个脚本目录 / {total} 条 RegisterSystem 路径已解析')
 
 
+def check_skill_fx():
+    """龙息斩特效：网易 particleeffect 格式、贴图存在、一次性播放、客户端建完必 Play 并回收。"""
+    client = os.path.join(BP, 'DrasneaScripts', 'dragonSkillClient.py')
+    server = os.path.join(BP, 'DrasneaScripts', 'dragonSlash.py')
+    if not os.path.isfile(client):
+        bad('缺 DrasneaScripts/dragonSkillClient.py')
+        return
+    csrc = open(client, encoding='utf-8').read()
+    ssrc = open(server, encoding='utf-8').read()
+    paths = re.findall(r"^([A-Z_]*FX[A-Z_]*)\s*=\s*'([^']+\.json)'", csrc, re.M)
+    if not paths:
+        bad('dragonSkillClient.py 里没有 effects/*.json 的特效常量（特效没接）')
+    for const, rel in paths:
+        fp = os.path.join(RP, rel.replace('/', os.sep))
+        if not os.path.isfile(fp):
+            bad(f'{const} 指向 {rel}，但资源包里没这个文件')
+            continue
+        eff = load(fp).get('particleeffect')
+        if eff is None:
+            bad(f'{rel} 根键不是 particleeffect —— 网易特效用 particleeffect，'
+                '写成原版 particle_effect 会断言 Particle effect has not ...')
+            continue
+        tex = (eff.get('texture') or {}).get('name')
+        if not tex or not os.path.isfile(os.path.join(RP, tex.replace('/', os.sep) + '.png')):
+            bad(f'{rel} 的 texture.name={tex} 在资源包里找不到 png')
+        if (eff.get('enableloop') or {}).get('enable') != 'false':
+            bad(f'{rel} enableloop 必须是 false —— 一次性技能特效循环播放会糊屏')
+        if (eff.get('scaled') or {}).get('enable') != 'false':
+            bad(f'{rel} scaled 必须是 false（true 会按相机距离放大，近看巨大一团）')
+        if (eff.get('relative') or {}).get('enable') != 'true':
+            bad(f'{rel} relative 必须是 true（世界粒子按创建点相对发射）')
+        if (eff.get('material') or {}).get('name') != 'materials/particles.material':
+            bad(f'{rel} 的 material 应为引擎自带的 materials/particles.material')
+        try:
+            num = int(float((eff.get('numparticles') or {}).get('value', '0')))
+            ttl = float((eff.get('timetolive') or {}).get('max', '0'))
+        except ValueError:
+            bad(f'{rel} 的 numparticles/timetolive 不是数字')
+            continue
+        if not 0 < num <= 60:
+            bad(f'{rel} numparticles={num}（一次施放会摆 4 个点，总量要 ≤60）')
+        if not 0 < ttl <= 1.5:
+            bad(f'{rel} timetolive.max={ttl} 过长（一次性特效要 ≤1.5 秒，否则拖尾脏）')
+    for token in ('CreateEngineParticle', 'CreateParticleControl', '.Play()',
+                  'DestroyEntity', 'AddTimer'):
+        if token not in csrc:
+            bad(f'dragonSkillClient.py 特效缺 {token}'
+                '（官方口径：创建后必须 Play；粒子实体不销毁会越堆越多）')
+    if 'positions' not in ssrc:
+        bad('dragonSlash.py 的回执没带 positions —— 命中点溅射特效没有坐标来源')
+    print(f'龙息斩特效: {len(paths)} 个 particleeffect + 客户端建播收已核对')
+
+
 def check_engine_int_args():
     """引擎只收整数的参数不许传 float —— 本包龙息斩就是被这个坑死的（实机 traceback）。
 
@@ -1174,6 +1227,7 @@ def main():
     check_whelp_flight(data)
     check_combat_scripts()
     check_skill_hud(data)
+    check_skill_fx()
     check_breath()
     check_altar_summon()
     check_achievements(data)
