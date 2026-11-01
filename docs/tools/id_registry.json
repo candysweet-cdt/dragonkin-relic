@@ -6,30 +6,34 @@
    "food": 1,
    "hud": 1,
    "material": 5,
+   "node": 4,
    "other": 8,
    "plain": 7,
    "tab": 1,
    "tool": 6
   },
   "by_mod": {
-   "dragonkin-relic": 37
+   "dragonkin-relic": 41
   },
   "by_namespace": {
    "-": 1,
-   "fycq": 36
+   "fycq": 40
   },
   "by_tab": {
-   "-": 2,
+   "-": 6,
    "drasnea": 35
   },
   "by_tag": {},
   "by_theme": {
    "-": 2,
-   "dragon": 35
+   "dragon": 39
   },
   "status": {}
  },
  "counts": {
+  "achievement": {
+   "used": 4
+  },
   "block": {
    "used": 7
   },
@@ -50,6 +54,74 @@
   }
  },
  "entries": [
+  {
+   "created_at": 1793504605,
+   "full_key": "fycq:fycq_dragonkin_first_kill",
+   "holder": "",
+   "key": "fycq_dragonkin_first_kill",
+   "kind": "node",
+   "mod": "dragonkin-relic",
+   "namespace": "fycq",
+   "note": "龙裔猎人：首次击败龙蛇。奖励：龙血结晶 ×3、龙鳞 ×8",
+   "reserved_until": null,
+   "status": "used",
+   "tab": "",
+   "tags": [],
+   "theme": "dragon",
+   "type": "achievement",
+   "updated_at": 1793504605
+  },
+  {
+   "created_at": 1793504605,
+   "full_key": "fycq:fycq_dragonkin_first_summon",
+   "holder": "",
+   "key": "fycq_dragonkin_first_summon",
+   "kind": "node",
+   "mod": "dragonkin-relic",
+   "namespace": "fycq",
+   "note": "龙巢初醒：首次用龙巢召唤龙蛇（首召消耗 8 龙鳞）",
+   "reserved_until": null,
+   "status": "used",
+   "tab": "",
+   "tags": [],
+   "theme": "dragon",
+   "type": "achievement",
+   "updated_at": 1793504605
+  },
+  {
+   "created_at": 1793504605,
+   "full_key": "fycq:fycq_dragonkin_full_set",
+   "holder": "",
+   "key": "fycq_dragonkin_full_set",
+   "kind": "node",
+   "mod": "dragonkin-relic",
+   "namespace": "fycq",
+   "note": "龙鳞全装：同时拥有/穿戴龙鳞四件套（原版或觉醒混搭）",
+   "reserved_until": null,
+   "status": "used",
+   "tab": "",
+   "tags": [],
+   "theme": "dragon",
+   "type": "achievement",
+   "updated_at": 1793504605
+  },
+  {
+   "created_at": 1793504605,
+   "full_key": "fycq:fycq_dragonkin_whelp_slayer",
+   "holder": "",
+   "key": "fycq_dragonkin_whelp_slayer",
+   "kind": "node",
+   "mod": "dragonkin-relic",
+   "namespace": "fycq",
+   "note": "幼龙克星：击杀 10 只幼龙",
+   "reserved_until": null,
+   "status": "used",
+   "tab": "",
+   "tags": [],
+   "theme": "dragon",
+   "type": "achievement",
+   "updated_at": 1793504605
+  },
   {
    "created_at": 1793034894,
    "full_key": "fycq:dragon_bone_block",
@@ -689,16 +761,21 @@
    "egg": "刷怪蛋",
    "face": "面键",
    "food": "食物",
+   "gas": "气体",
    "hud": "HUD",
    "lang": "语言键",
+   "liquid": "液体",
    "machine": "机器(方块实体)",
    "material": "原料(锭/粉/块)",
    "model": "自研模型方块",
    "multiblock": "多方块部件",
+   "node": "成就子节点",
    "other": "其他",
+   "page": "成就根/分页",
    "pattern": "样板",
    "pipe": "管线/线缆",
    "plain": "纯方块",
+   "plasma": "等离子体",
    "product": "产物",
    "projectile": "弹射物",
    "screen": "全屏界面",
@@ -708,6 +785,10 @@
    "tool": "工具"
   },
   "kinds": {
+   "achievement": [
+    "page",
+    "node"
+   ],
    "block": [
     "plain",
     "model",
@@ -726,6 +807,12 @@
    ],
    "face_key": [
     "face"
+   ],
+   "fluid": [
+    "liquid",
+    "gas",
+    "plasma",
+    "other"
    ],
    "item": [
     "material",
@@ -752,6 +839,11 @@
    ]
   },
   "required_fields": {
+   "achievement": [
+    "mod",
+    "namespace",
+    "kind"
+   ],
    "block": [
     "mod",
     "namespace",
@@ -767,6 +859,12 @@
    ],
    "face_key": [
     "mod",
+    "kind"
+   ],
+   "fluid": [
+    "mod",
+    "namespace",
+    "theme",
     "kind"
    ],
    "item": [
@@ -817,9 +915,11 @@
    "steam": "蒸汽件"
   },
   "types": {
+   "achievement": "成就节点",
    "block": "方块",
    "entity": "实体",
    "face_key": "面键",
+   "fluid": "流体",
    "item": "物品",
    "lang_key": "语言键",
    "spawn_egg": "刷怪蛋",
@@ -884,11 +984,11 @@
    "updated_at": 1793017466
   }
  ],
- "schema": 3,
+ "schema": 6,
  "scoped": {
   "mod": "dragonkin-relic",
   "namespace": ""
  },
  "scoped_to": "模组 dragonkin-relic",
- "server_time": 1793040881
+ "server_time": 1793506327
 }

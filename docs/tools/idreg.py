@@ -37,11 +37,16 @@
                                                  （behavior_pack / behavior_packs /
                                                  awesome_behavior_packs / behavior_pack_xxx
                                                  四种工程目录名都认）
+                                                 另报三类滞后（默认不阻断，除非
+                                                 --strict-unregistered / --strict-reserved）：
+                                                 reserved 已实占（待 claim）、同键多行
+                                                 （namespace 分裂）、镜像落后于服务端
 
     退出码：0 成功；1 用法/参数错；2 服务不可达或未鉴权；3 对账发现「注册表声称有、
     包里却没有」的错账（这是唯一必须停下来问人的方向）。
 """
 import argparse
+import ast
 import json
 import os
 import re
@@ -63,8 +68,8 @@ SCAN = {
                   lambda k: k.startswith("zz_") and k.endswith("_egg")),
     "entity": ("behavior_pack/entities", None),
 }
-# 这两类不在「目录里一个文件一个键」的模式里，单独扫
-SCAN_SPECIAL = ("tab", "ui_screen")
+# 这三类不在「目录里一个文件一个键」的模式里，单独扫
+SCAN_SPECIAL = ("tab", "ui_screen", "achievement", "fluid")
 UI_EXCLUDE = {"_ui_defs", "neteasecommonui"}
 # 创造分页/主题的真源（各包自己的文件，注册表不抄）
 TAB_SOURCES = ("docs/tools/creative_tabs.json",)
@@ -185,12 +190,95 @@ def scan_ui_screens(pack):
                if n.lower() not in UI_EXCLUDE and re.match(r"^[a-z0-9]+$", n))
 
 
+def scan_fluids(pack):
+    """扫描包内流体注册调用，返回内部短 ID 集合（AST，不扫注释/docstring）。
+
+    流体没有「一个 ID 一个 json」的目录，只能从注册代码取：
+    - `fluidRegistry.py` 里的 `register("ns:water", ..., internal="water")` 取 internal；
+    - 其它模块里的 `fluid.register_fluid("ns:brine", ...)` 取冒号后的主体。
+    `register_fluid` 若参数不是字面量则跳过（运行期才知道的 ID 无法对账）。
+    """
+    root = pack_subdir(pack, "behavior_pack")
+    if not root:
+        return None
+    out = set()
+    found = False
+    for base, dirs, files in os.walk(root):
+        dirs[:] = [d for d in dirs if d not in ("__pycache__", ".git")]
+        for name in files:
+            if not name.endswith(".py"):
+                continue
+            path = os.path.join(base, name)
+            try:
+                text = open(path, encoding="utf-8").read()
+            except OSError:
+                continue
+            is_registry = name == "fluidRegistry.py"
+            if not is_registry and "register_fluid(" not in text:
+                continue
+            found = True
+            try:
+                tree = ast.parse(text)
+            except SyntaxError:
+                continue
+            for node in ast.walk(tree):
+                if not isinstance(node, ast.Call):
+                    continue
+                func = node.func
+                fname = func.attr if isinstance(func, ast.Attribute) else (
+                    func.id if isinstance(func, ast.Name) else "")
+                if fname == "register_fluid":
+                    pass
+                elif fname == "register" and is_registry:
+                    pass
+                else:
+                    continue
+                if not node.args or not isinstance(node.args[0], ast.Constant) \
+                        or not isinstance(node.args[0].value, str):
+                    continue
+                value = node.args[0].value
+                if ":" not in value:
+                    continue
+                body = value.split(":", 1)[1]
+                internal = None
+                for kw in node.keywords or []:
+                    if kw.arg == "internal" and isinstance(kw.value, ast.Constant) \
+                            and isinstance(kw.value.value, str):
+                        internal = kw.value.value
+                out.add(internal or body)
+    return out or (None if not found else set())
+
+def scan_achievements(pack):
+    """customAchievements/*.json 的 node_ID。键取 json 里的 node_ID 而不是文件名 ——
+    引擎按 node_ID 存进度，文件名只是「便于对账」的约定；两者不一致属包内守卫的活。"""
+    root = pack_subdir(pack, "behavior_pack/customAchievements")
+    if not root:
+        return set()
+    out = set()
+    for name in sorted(os.listdir(root)):
+        if not name.endswith(".json"):
+            continue
+        try:
+            d = json.load(open(os.path.join(root, name), encoding="utf-8"))
+        except (OSError, ValueError):
+            continue
+        if isinstance(d, dict):
+            nid = (d.get("node_ID") or "").strip()
+            if nid:
+                out.add(nid)
+    return out
+
+
 def scan_pack(pack, type_):
     """返回包里真实占用的键集合（不含命名空间）；没有扫描源的类返回 None（跳过）。"""
     if type_ == "tab":
         return scan_tab_names(pack) or None
     if type_ == "ui_screen":
         return scan_ui_screens(pack) or None
+    if type_ == "achievement":
+        return scan_achievements(pack) or None
+    if type_ == "fluid":
+        return scan_fluids(pack)
     if type_ not in SCAN:
         return None
     rel, keep = SCAN[type_]
@@ -364,7 +452,11 @@ def mod_namespace(mod):
     return None
 
 
-NS_SPLIT = ("block", "item", "entity", "spawn_egg")
+NS_SPLIT = ("block", "item", "entity", "spawn_egg", "fluid")
+# 键不带 ns: 前缀、但登记行要挂命名空间的类型：node_ID 引擎侧没有命名空间位，台账唯一键
+# (type,namespace,key) 却要靠 namespace 分辨归属、拦跨包同名（成就系统规范 §10.3）。
+# 命名空间照旧从 --mod 自动带出 —— 与「键带前缀才拆」是两件事，别把 achievement 塞进 NS_SPLIT。
+NS_AUTOFILL = NS_SPLIT + ("achievement",)
 
 
 def _meta_args(a):
@@ -374,9 +466,10 @@ def _meta_args(a):
         if v:
             m[k] = v
     # 模组登记时就带了命名空间，别再让调用方填一遍（填错反而是错账）。
-    # 但只有「键本身带命名空间」的四类才填：face_key / ui_screen / tab / lang_key 的键
-    # 不属于任何包命名空间，填了会让「客户端写的」和「裸调 API 写的」两种形态并存。
-    if m.get("mod") and not m.get("namespace") and getattr(a, "type", "") in NS_SPLIT:
+    # 适用 NS_AUTOFILL：键带 ns: 前缀的四类，加上键不带前缀但行挂命名空间的 achievement；
+    # face_key / ui_screen / tab / lang_key 的键不属于任何包命名空间，填了会让
+    # 「客户端写的」和「裸调 API 写的」两种形态并存。
+    if m.get("mod") and not m.get("namespace") and getattr(a, "type", "") in NS_AUTOFILL:
         ns = mod_namespace(m["mod"])
         if ns is None:
             raise Down("模组 %s 未登记；先 POST /api/mods 或网页登记，再注册 ID" % m["mod"])
@@ -386,11 +479,36 @@ def _meta_args(a):
     return m
 
 
+def _resolve_namespace(type_, key, mod, given=""):
+    """claim/release 没给 namespace 时，按服务端已有记录回推。
+
+    `claim` 是「没有就新建」（claim-new），所以拿错 namespace 不会报错、只会**分裂出第二行**
+    （2026-11-01 审查实测：reserved 行 namespace 为空，claim 时自动填成 cadttech ⇒ 老行还挂在
+    reserved、新行另起一条 used）。这里先查已有行：唯一命中就沿用它原本的 namespace，
+    多义就交给服务端报错（宁可失败，不要悄悄分裂）。
+    """
+    if given:
+        return given
+    try:
+        code, r = call("/api/ids?type=%s&q=%s&page=1&size=50" % (
+            urllib.parse.quote(type_ or ""), urllib.parse.quote(key or "")))
+    except Down:
+        return given
+    if code != 200 or not isinstance(r, dict):
+        return given
+    ns = sorted(set((x.get("namespace") or "") for x in r.get("ids", [])
+                    if x.get("type") == type_ and x.get("key") == key
+                    and (not mod or x.get("mod") == mod)))
+    return ns[0] if len(ns) == 1 else given
+
+
 def cmd_write(a, action):
     body = {"type": a.type, "key": a.key, "holder": a.holder or "",
             "actor": getattr(a, "actor", "") or "",
             "note": getattr(a, "note", "") or ""}
     body.update(_meta_args(a))
+    if a.cmd in ("claim", "release") and not body.get("namespace"):
+        body["namespace"] = _resolve_namespace(a.type, a.key, body.get("mod", ""))
     if a.cmd == "release":
         body.pop("namespace", None) if not body.get("namespace") else None
     if action == "reserve" and a.days:
@@ -523,16 +641,28 @@ def cmd_check(a):
     entries, scope = scope_entries(snap, a.pack, a.mod)
     print("作用域：%s（%d/%d 条）" % (scope, len(entries), before))
     tabs, themes = tab_source_keys(a.pack)
-    bad_claim, missing, bad_enum = [], [], []
+    # 每个类型只扫一次（旧实现对每条记录都 listdir 一遍，2000 条 ⇒ 2000 次全目录扫描）
+    real_cache = {}
+
+    def real_of(type_):
+        if type_ not in real_cache:
+            real_cache[type_] = scan_pack(a.pack, type_)
+        return real_cache[type_]
+
+    bad_claim, missing, bad_enum, reserved_live = [], [], [], []
     for e in entries:
-        real = scan_pack(a.pack, e["type"])
+        real = real_of(e["type"])
         if real is None:
             continue
         if e["key"] not in real:
             bad_claim.append(e)                      # 注册表说有、包里没有 ⇒ 错账
+        elif e["status"] == "reserved":
+            # reserved 但文件已经落进包里 ⇒ 台账状态滞后（check 过去把它当正常，
+            # 2026-11-01 审查时星轨 456 条全中这一类，占该包在册量 21.6%）
+            reserved_live.append(e)
     universe = sorted(set(SCAN) | set(SCAN_SPECIAL))
     for t in (a.types or universe):
-        real = scan_pack(a.pack, t)
+        real = real_of(t)
         if real is None:
             continue
         reg = set(e["key"] for e in entries if e["type"] == t)
@@ -542,6 +672,16 @@ def cmd_check(a):
             bad_enum.append((e["full_key"], "tab", e["tab"]))
         if themes and e.get("theme") and e["theme"] not in themes:
             bad_enum.append((e["full_key"], "theme", e["theme"]))
+    # 同 (类型, 模组, 键) 多行 —— namespace 口径不一致就会分裂成两行，
+    # 靠 full_key 查重抓不到（服务端按 namespace 解析还会报歧义、删不掉）。
+    by_key = {}
+    dups = []
+    for e in entries:
+        k = (e["type"], e["mod"], e["key"])
+        if k in by_key:
+            dups.append((k, [by_key[k], e]))
+        else:
+            by_key[k] = e
 
     print("镜像 %s（schema v%s，%d 条）" % (mirror, snap.get("schema"), len(entries)))
     if bad_claim:
@@ -554,19 +694,69 @@ def cmd_check(a):
         print("🔴 tab/theme 不在本包真源里：")
         for k, field, val in bad_enum:
             print("   %s  %s=%s" % (k, field, val))
+    if dups:
+        print("🟡 同键多行（namespace 口径分裂，服务端解析会报歧义）：")
+        for k, group in dups:
+            print("   %s/%s/%s → %s" % (k[0], k[1], k[2],
+                                         ", ".join("%r(%s/%s)" % (g.get("namespace") or "",
+                                                                  g["status"], g["full_key"])
+                                                   for g in group)))
+    if reserved_live:
+        print("🟡 reserved 已在包内实占（待 claim）%d 条：按类型 %s（前 5：%s）" % (
+            len(reserved_live),
+            ", ".join("%s %d" % (t, sum(1 for e in reserved_live if e["type"] == t))
+                      for t in sorted(set(e["type"] for e in reserved_live))),
+            ", ".join(e["full_key"] for e in reserved_live[:5])))
     total_missing = 0
     for t, keys in missing:
         total_missing += len(keys)
         print("⚪ %s：包内 %d 个未登记（前 5：%s）"
               % (t, len(keys), ", ".join(keys[:5])))
+    # 镜像新鲜度（best-effort：服务不可达就跳过，离线也要能跑 pre-commit）
+    stale = _freshness(snap, a.pack, a.mod)
+    if stale:
+        print("🟡 镜像落后于服务端：%s ⇒ 重新跑 mirror" % stale)
     if not bad_claim and not bad_enum:
-        print("✅ 无错账；未登记 %d 个待补%s" % (
-            total_missing,
+        print("✅ 无错账；未登记 %d 个待补、待 claim %d 条、同键多行 %d 组%s" % (
+            total_missing, len(reserved_live), len(dups),
             "（--strict-unregistered 已开：非零即退出码 3）" if a.strict_unregistered
-            else "（不阻断，除非 --strict-unregistered）"))
+            else "（不阻断，除非 --strict-unregistered / --strict-reserved）"))
     if a.strict_unregistered and total_missing:
         return 3
+    if getattr(a, "strict_reserved", False) and reserved_live:
+        return 3
     return 3 if (bad_claim or bad_enum) else 0
+
+
+def _freshness(snap, pack, mod=""):
+    """本地镜像 vs 服务端：镜像时间戳过期 + 本模组 reserved 行数不一致 ⇒ 报出来。
+
+    只发两个极小的读请求（/api/health、/api/ids?size=1），不拉整份快照；
+    服务不可达返回 None（离线场景不能因此失败）。
+    """
+    try:
+        code, h = call("/api/health")
+        if code != 200:
+            return None
+        now = int(h.get("ts", 0))
+        mt = int(snap.get("server_time", 0))
+        notes = []
+        if mt and now - mt > 3 * 86400:
+            notes.append("快照是 %.1f 天前的" % ((now - mt) / 86400.0))
+        code2, r = call("/api/ids?mod=%s&status=reserved&page=1&size=1"
+                        % urllib.parse.quote(resolve_pack_mod(pack, mod) or mod or ""))
+        if code2 == 200 and r.get("ok"):
+            srv = int(r.get("total", -1))
+            local = len([e for e in snap.get("entries", [])
+                         if e.get("status") == "reserved"
+                         and (not mod or e.get("mod") == mod)])
+            if srv >= 0 and srv != local:
+                notes.append("服务端 reserved %d 条 ≠ 镜像 %d 条" % (srv, local))
+        return "；".join(notes) or None
+    except Down:
+        return None
+    except Exception:
+        return None
 
 
 # ---------------- 入口 ----------------
@@ -643,9 +833,13 @@ def build():
     p = sub.add_parser("check")
     p.add_argument("--pack", required=True)
     p.add_argument("--mod", default="")
-    p.add_argument("--types", default="", help="逗号分隔，默认扫 block/item/entity")
+    p.add_argument("--types", default="",
+                   help="逗号分隔，默认扫全部可扫类型（block/item/entity/spawn_egg/"
+                        "tab/ui_screen/achievement/fluid）")
     p.add_argument("--strict-unregistered", dest="strict_unregistered",
                    action="store_true")
+    p.add_argument("--strict-reserved", dest="strict_reserved", action="store_true",
+                   help="reserved 已在包内实占（待 claim）也算失败，退出码 3")
     p.set_defaults(fn=cmd_check)
     return ap
 
